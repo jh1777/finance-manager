@@ -1,6 +1,6 @@
 <div class="nav-bar">
     <span *ngFor="let item of items; let id = index;" (click)="select(id)" class="nav-item" [ngClass]="[isActiveLink(item) ? 'active' : '', id == selected ? 'selected' : '', item.align == 'right' ? 'right' : '']">
         <img *ngIf="item.icon" class="nav-item-icon" [src]="item.icon" />
-        <span [ngClass]="item.label ? 'nav-item-text' : ''">{{ item.label ? item.label : '' }}</span>
+        <span [ngClass]="item.label && item.icon ? 'nav-item-text' : ''">{{ item.label ? item.label : '' }}</span>
     </span>
 </div>

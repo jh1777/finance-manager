@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ActionNavigationItem, INavigationItem, LinkNavigationItem, TextNavigationItem } from './components/navigation-bar/navigation-bar.component';
+import { INavigationItem, LinkNavigationItem, TextNavigationItem } from './ui/navigation-bar/navigation-bar.component';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +20,7 @@ export class AppComponent {
     //textItem.icon = "../../assets/icons/wallet-line.svg";
 
     let item2 = new LinkNavigationItem('Gehaltsliste');
-    item2.icon = "../../assets/icons/table-line.svg";
+    item2.icon = "../../assets/icons/wallet-line.svg";
     item2.link = "/salary";
 
 
