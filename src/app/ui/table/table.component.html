@@ -5,7 +5,7 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let row of rows; let i = index">
+        <tr *ngFor="let row of rows; let i = index" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
             <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}</td>
 
 <!--             <td>

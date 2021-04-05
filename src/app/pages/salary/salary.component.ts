@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from 'src/app/services/api.service';
+import { Gehalt } from 'src/app/services/models/gehalt';
 import { ITableCell } from 'src/app/ui/models/ITableCell';
 import { TableRow } from 'src/app/ui/models/tableRow';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
+import { FillZero } from 'src/app/util/fillZero';
 
 @Component({
   selector: 'app-salary',
@@ -13,18 +16,75 @@ export class SalaryComponent implements OnInit {
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
 
-  constructor() { 
+  constructor(private api: ApiService) { 
 
-    this.createMockdata();
+    this.createHeader();
 
   }
 
   ngOnInit(): void {
+    this.api.getAllEntries<Gehalt>().subscribe(
+      result => {
+        let data = result.body;
+        // Sort by id
+        data.sort((n1, n2) => {
+          if (n1.id > n2.id) {
+            return -1;
+          }
+
+          if (n1.id < n2.id) {
+            return 1;
+          }
+
+          return 0;
+        });
+        // Map to generic table model
+        this.rows = this.mapToTableModel(data);
+      }
+    )
   }
 
-  private createMockdata() {
+  private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
+    let result = new Array<TableRow>();
+    data.forEach(entry => {
+      let row = new TableRow();
+      let cell = new TextTableCell(entry.id ? `${entry.id}` : "n/a");
+      row.cells.push(cell);
+      
+      cell = new TextTableCell(`${entry.Jahr}`);
+      row.cells.push(cell);
+
+      cell = new TextTableCell(FillZero(entry.Monat));
+      row.cells.push(cell);
+      
+      cell = new TextTableCell(`${entry.Brutto} €`);
+      row.cells.push(cell);
+      
+      cell = new TextTableCell(`${entry.Netto} €`);
+      row.cells.push(cell);
+            
+      cell = new TextTableCell(`${entry.AKP} €`);
+      row.cells.push(cell);
+            
+      cell = new TextTableCell(`${entry.Kantine} €`);
+      row.cells.push(cell);
+            
+      cell = new TextTableCell(`${entry.Wochenstunden}`);
+      row.cells.push(cell);
+
+      result.push(row);
+    })
+
+    return result;
+  }
+
+  private createHeader() {
     this.header.push({
       label: 'No.',
+      type: 'header'
+    });
+    this.header.push({
+      label: 'Jahr',
       type: 'header'
     });
     this.header.push({
@@ -35,19 +95,32 @@ export class SalaryComponent implements OnInit {
       label: 'Brutto',
       type: 'header'
     });
+    this.header.push({
+      label: 'Netto',
+      type: 'header'
+    });
+    this.header.push({
+      label: 'AKP',
+      type: 'header'
+    });
+    this.header.push({
+      label: 'Kantine',
+      type: 'header'
+    });
+    this.header.push({
+      label: 'Stunden/Woche',
+      type: 'header'
+    });
 
-    let row = new TableRow();
-    let cell = new TextTableCell();
-    cell.label = "1";
+/*     let row = new TableRow();
+    let cell = new TextTableCell("1");
     row.cells.push(cell);
-    cell = new TextTableCell();
-    cell.label = "2020/03";
+    cell = new TextTableCell("2020/03");
     row.cells.push(cell);
-    cell = new TextTableCell();
-    cell.label = "9898.22";
+    cell = new TextTableCell("9898.22");
     row.cells.push(cell);
     
-    this.rows.push(row);
+    this.rows.push(row); */
 
   }
 
