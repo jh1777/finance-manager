@@ -1,13 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-
+import { INavigationItem } from '../models/INavigationItem';
 
 @Component({
   selector: 'app-navigation-bar',
   templateUrl: './navigation-bar.component.html',
-  styleUrls: ['./navigation-bar.component.scss']
+  styleUrls: ['./navigation-bar.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class NavigationBarComponent implements OnInit {
+export class NavigationBarComponent {
 
   @Input()
   items: Array<INavigationItem> = [];
@@ -16,76 +17,17 @@ export class NavigationBarComponent implements OnInit {
   selected: number = null;
 
   @Output()
-  selection = new EventEmitter<INavigationItem>();
+  selectionEvent = new EventEmitter<INavigationItem>();
 
   constructor(private router: Router) { }
 
-  ngOnInit(): void {
-  }
-
-  public isActiveLink(item: INavigationItem): boolean {
-    return item instanceof ActionNavigationItem || item instanceof LinkNavigationItem;
-  }
-
-  private isActionItem(item: INavigationItem): boolean {
-    return item instanceof ActionNavigationItem;
-  }
-
-  private isLinkItem(item: INavigationItem): boolean {
-    return item instanceof LinkNavigationItem;
-  }
-
   public select(id: number) {
-    
-    // TODO: place this in calling component!!
     let item = this.items[id];
-    if (this.isActionItem(item) && (item as ActionNavigationItem).action != null) {
-      (item as ActionNavigationItem).action();
+
+    if (item.isActionItem && item.toActionItem().action != null) {
+      item.toActionItem().action();
     }
 
-    if (this.isLinkItem(item) && (item as LinkNavigationItem).link != null) {
-      this.router.navigate([(item as LinkNavigationItem).link]).then((succ: boolean) => {
-        if (succ) {
-          this.selected = id;
-        }
-      });
-    }
-
-    this.selection.emit(item);
-  }
-}
-
-export interface INavigationItem {
-  label: string;
-  icon?: string;
-  align: 'left' | 'right';
-}
-
-export class ActionNavigationItem implements INavigationItem{
-  label: string;
-  icon?: string;
-  align: 'left' | 'right' = 'left';
-  action?: () => void; 
-  constructor(label: string) {
-    this.label = label;
-  }
-}
-
-export class LinkNavigationItem implements INavigationItem{
-  label: string;
-  icon?: string;
-  link: string;
-  align: 'left' | 'right' = 'left';
-  constructor(label: string) {
-    this.label = label;
-  }
-}
-
-export class TextNavigationItem implements INavigationItem{
-  label: string;
-  icon?: string;
-  align: 'left' | 'right' = 'left';
-  constructor(label: string) {
-    this.label = label;
+    this.selectionEvent.emit(item);
   }
 }

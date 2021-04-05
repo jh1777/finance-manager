@@ -8,9 +8,16 @@
 html {
     font-family: 'Roboto';
     font-weight: 300;
-    background-color: #ebebeb;
+    background-color: #ebebeb;    
 }
 
 .page {
     padding: 1em;
+
+    .title {
+        font-size: 1.8em;
+        font-weight: 300;
+        color: black;
+    }
 }
+
