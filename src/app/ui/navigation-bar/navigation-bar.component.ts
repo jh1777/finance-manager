@@ -19,6 +19,9 @@ export class NavigationBarComponent {
   @Input()
   size: 'normal' | 'medium' | 'large' = 'normal';
 
+  @Input()
+  darkmode: boolean = true;
+
   @Output()
   selectionEvent = new EventEmitter<INavigationItem>();
 

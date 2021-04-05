@@ -1,7 +1,7 @@
 <table class="table">
     <thead>
         <tr>
-            <th scope="col" *ngFor="let item of header">{{ item.label }}</th>
+            <th style="background-color: white;" scope="col" *ngFor="let item of header">{{ item.label }}</th>
         </tr>
     </thead>
     <tbody>
@@ -16,7 +16,7 @@
         </tr>
         
     </tbody>
-    <tfoot>
+    <tfoot *ngIf="footer">
         <tr style="background-color: rgb(240, 243, 245);">
             <td [attr.colspan]="header.length">{{ footer }}</td>
         </tr>
