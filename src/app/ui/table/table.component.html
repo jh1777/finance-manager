@@ -1,1 +1,24 @@
-<p>table works!</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col" *ngFor="let item of header">{{ item.label }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let row of rows; let i = index">
+            <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}</td>
+
+<!--             <td>
+                <mat-icon style="cursor: pointer;" inline=true (click)="edit(a.id)">edit</mat-icon>
+                &nbsp;
+                <mat-icon style="cursor: pointer;" inline=true (click)="delete(a.id)" class="red">delete</mat-icon>
+            </td> -->
+        </tr>
+        
+    </tbody>
+    <tfoot>
+        <tr style="background-color: rgb(240, 243, 245);">
+            <td [attr.colspan]="header.length">{{ footer }}</td>
+        </tr>
+    </tfoot>
+</table>

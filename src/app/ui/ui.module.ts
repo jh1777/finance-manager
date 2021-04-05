@@ -4,6 +4,7 @@ import { NavigationBarComponent } from './navigation-bar/navigation-bar.componen
 import { TableComponent } from './table/table.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
+export { TableComponent } from './table/table.component';
 
 @NgModule({
     declarations: [
@@ -14,7 +15,8 @@ export { NavigationBarComponent } from './navigation-bar/navigation-bar.componen
     CommonModule
   ],
   exports: [
-    NavigationBarComponent
+    NavigationBarComponent,
+    TableComponent
   ]
 })
 export class UiModule { }
