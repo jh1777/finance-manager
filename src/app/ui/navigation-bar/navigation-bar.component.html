@@ -1,6 +1,6 @@
 <div class="nav-bar">
-    <span *ngFor="let item of items; let id = index;" (click)="select(id)" class="nav-item" [ngClass]="[item.isLinkItem || item.isActionItem ? 'active' : '', id == selected ? 'selected' : '', item.align == 'right' ? 'right' : '']">
-        <img *ngIf="item.icon" class="nav-item-icon" [src]="item.icon" />
-        <span [ngClass]="item.label && item.icon ? 'nav-item-text' : ''">{{ item.label ? item.label : '' }}</span>
+    <span *ngFor="let item of items; let id = index;" (click)="select(id)" class="nav-item" [ngClass]="[size == 'normal' ? 'normal' : size == 'medium' ? 'medium' : 'large', item.isLinkItem || item.isActionItem ? 'active' : '', id == selected ? 'selected' : '', item.align == 'right' ? 'right' : '']">
+        <img *ngIf="item.icon" class="nav-item-icon" [src]="item.icon" [ngClass]="size == 'normal' ? 'normal' : size == 'medium' ? 'medium' : 'large'"/>
+        <span class="nav-item-text" [ngClass]="[item.label && item.icon ? 'icon' : '']">{{ item.label ? item.label : '' }}</span>
     </span>
 </div>

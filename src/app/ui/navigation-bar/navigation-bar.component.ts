@@ -16,6 +16,9 @@ export class NavigationBarComponent {
   @Input()
   selected: number = null;
 
+  @Input()
+  size: 'normal' | 'medium' | 'large' = 'normal';
+
   @Output()
   selectionEvent = new EventEmitter<INavigationItem>();
 
