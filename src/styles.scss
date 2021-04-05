@@ -1,0 +1,23 @@
+/* You can add global styles to this file, and also import other style files */
+
+* { 
+    margin: 0; 
+    padding:0; 
+}
+
+html {
+    font-family: 'Roboto';
+    font-weight: 300;
+    background-color: #ebebeb;    
+}
+
+.page {
+    padding: 1em;
+
+    .title {
+        font-size: 1.8em;
+        font-weight: 300;
+        color: black;
+    }
+}
+
