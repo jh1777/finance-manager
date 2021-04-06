@@ -1,14 +1,17 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { ITableCell } from '../models/ITableCell';
 import { TableRow } from '../models/tableRow';
 import { TableRowAction } from '../models/tableRowAction';
+import { TableSize } from '../models/tableSize';
 
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss']
+  styleUrls: ['./table.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent implements OnInit {
+  public tableSizeEnum = TableSize;
 
   @Input()
   rows: Array<TableRow> = [];
@@ -19,8 +22,8 @@ export class TableComponent implements OnInit {
   @Input()
   footer: string;
 
-
-
+  @Input()
+  size: TableSize = TableSize.Small;
 
   constructor() { }
 

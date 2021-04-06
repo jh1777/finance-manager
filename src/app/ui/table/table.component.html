@@ -1,4 +1,4 @@
-<table class="table">
+<table class="table" [ngClass]="size == tableSizeEnum.Medium ? 'medium' : size == tableSizeEnum.Large ? 'large' : 'small'">
     <thead>
         <tr class="table-header">
             <th *ngFor="let item of header" scope="col" >{{ item.label }}</th>

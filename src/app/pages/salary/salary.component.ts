@@ -6,6 +6,7 @@ import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell } from 'src/app/ui/models/ITableCell';
 import { TableRow } from 'src/app/ui/models/tableRow';
 import { TableRowAction } from 'src/app/ui/models/tableRowAction';
+import { TableSize } from 'src/app/ui/models/tableSize';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
 import { FillZero } from 'src/app/util/fillZero';
 
@@ -15,10 +16,15 @@ import { FillZero } from 'src/app/util/fillZero';
   styleUrls: ['./salary.component.scss']
 })
 export class SalaryComponent implements OnInit {
+  public pageTitle = "Gehaltsliste";
+
+  public tableSizeEnum = TableSize;
 
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
 
+  public tableSize: TableSize = TableSize.Small;
+  
   constructor(
     private api: ApiService,
     private navigationService: NavigationService,
@@ -30,8 +36,11 @@ export class SalaryComponent implements OnInit {
 
   }
 
-  ngOnInit(): void {
+  public setSize(size: TableSize) {
+    this.tableSize = size;
+  }
 
+  ngOnInit(): void {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
@@ -51,7 +60,6 @@ export class SalaryComponent implements OnInit {
         this.rows = this.mapToTableModel(data);
       }
     );
-
   }
 
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {

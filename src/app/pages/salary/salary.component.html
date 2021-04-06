@@ -1,6 +1,13 @@
 <div class="page">
-    <div class="title">Salary</div>
+    <div class="title">{{ pageTitle }}</div>
 
     <br/>
-    <app-table [header]="header" [rows]="rows"></app-table>
+<!-- https://getbootstrap.com/docs/5.0/components/button-group/ -->
+    <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Table Size">
+        <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Small ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Small)">S</button>
+        <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Medium ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Medium)">M</button>
+        <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Large ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Large)">L</button>
+    </div>
+
+    <app-table [header]="header" [rows]="rows" [size]="tableSize"></app-table>
 </div>
