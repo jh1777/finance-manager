@@ -24,6 +24,7 @@ export class NavigationService {
 
     // 0
     let title = new TextNavigationItem("Finance Manager");
+    title.showBold = true;
     result.push(title);
 
     // 1
@@ -39,6 +40,12 @@ export class NavigationService {
     result.push(salary);
 
     // 3
+    let insurance = new LinkNavigationItem('Versicherungen');
+    insurance.icon = "../../assets/icons/shield-line.svg";
+    insurance.link = "/insurance";
+    result.push(insurance);
+
+    // 4
     let settings = new LinkNavigationItem('');
     settings.icon = "../../assets/icons/cog-line.svg";
     settings.link = "/settings";

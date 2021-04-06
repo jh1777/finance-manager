@@ -22,13 +22,13 @@
 
 .nav-item-icon {
     &.normal {
-        width: 1.2em;
-        height: 1.2em;
+        width: 1em;
+        height: 1em;
         
     }
     &.medium {
-        width: 1.4em;
-        height: 1.4em;
+        width: 1.1em;
+        height: 1.1em;
     }
     &.large {
         width: 1.5em;
@@ -49,7 +49,9 @@
     &.icon {
         margin-left: .4em;
         align-self: center;
-
+    }
+    &.bold {
+        font-weight: 600;
     }
 }
 
@@ -57,7 +59,7 @@
     color: #454645;
     padding-left: 1.3em; 
     padding-right: 1.3em;
-    font-weight: 400;
+    font-weight: 300;
     display: flex;
 
     &.normal {
@@ -92,7 +94,7 @@
     &.active {
         cursor: pointer;
         &:hover {
-            font-weight: 600;
+            //font-weight: 600;
             border-bottom: 2px solid var(--darkmodeColor);
             &.dark {
                 border-bottom: 2px solid white;
@@ -101,7 +103,7 @@
     }
 
     &.selected {
-        font-weight: 600;
+        //font-weight: 600;
         border-bottom: 2px solid var(--darkmodeColor);
         &.dark {
             border-bottom: 2px solid white;

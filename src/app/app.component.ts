@@ -25,15 +25,7 @@ export class AppComponent {
 
   public selectItem(item: INavigationItem) {
     if (item.isLinkItem && item.toLinkItem().link != null) {
-      this.router.navigate([item.toLinkItem().link])
-      /*
-                      .then((success: boolean) => {
-        if (success) {
-          this.navigationService.activeMenu.next(this.items.indexOf(item));
-          //this.selectedTab = this.items.indexOf(item);
-        }
-      });
-      */
+      this.router.navigate([item.toLinkItem().link]);
     }
 
     console.log(item);

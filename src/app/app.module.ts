@@ -8,6 +8,11 @@ import { SalaryComponent } from './pages/salary/salary.component';
 import { UiModule } from './ui/ui.module';
 import { HttpClientModule } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
+import localeDe from '@angular/common/locales/de'; 
+
+registerLocaleData(localeDe);
+
 
 @NgModule({
   declarations: [
@@ -23,8 +28,17 @@ import { CurrencyPipe } from '@angular/common';
   ],
   providers: [
     CurrencyPipe,
-    {provide: DEFAULT_CURRENCY_CODE, useValue: 'EUR'}
+    {
+      provide: LOCALE_ID,
+      useValue: 'de' // 'de-DE' for Germany, 'fr-FR' for France ...
+    },
+    {
+      provide: DEFAULT_CURRENCY_CODE, 
+      useValue: 'EUR'
+    }
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+
+export class AppModule { 
+}

@@ -6,6 +6,7 @@ export class TextNavigationItem implements INavigationItem{
     align: 'left' | 'right' = 'left';
     isLinkItem: boolean = false;
     isActionItem: boolean = false;
+    showBold: boolean = false;
     constructor(label: string) {
       this.label = label;
     }

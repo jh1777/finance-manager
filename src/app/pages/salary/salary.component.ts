@@ -69,13 +69,13 @@ export class SalaryComponent implements OnInit {
       cell = new TextTableCell(`${this.currencyPipe.transform(entry.Brutto)}`);
       row.cells.push(cell);
       
-      cell = new TextTableCell(`${entry.Netto} €`);
+      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Netto)}`);
       row.cells.push(cell);
             
-      cell = new TextTableCell(`${entry.AKP} €`);
+      cell = new TextTableCell(`${this.currencyPipe.transform(entry.AKP)}`);
       row.cells.push(cell);
             
-      cell = new TextTableCell(`${entry.Kantine} €`);
+      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Kantine)}`);
       row.cells.push(cell);
             
       cell = new TextTableCell(`${entry.Wochenstunden}`);
