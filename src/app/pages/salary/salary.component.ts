@@ -1,6 +1,8 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
+import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell } from 'src/app/ui/models/ITableCell';
 import { TableRow } from 'src/app/ui/models/tableRow';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
@@ -16,13 +18,19 @@ export class SalaryComponent implements OnInit {
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
 
-  constructor(private api: ApiService) { 
+  constructor(
+    private api: ApiService,
+    private navigationService: NavigationService,
+    private currencyPipe: CurrencyPipe
+    ) { 
 
     this.createHeader();
+    this.navigationService.activeMenu.next(2);
 
   }
 
   ngOnInit(): void {
+
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
@@ -41,7 +49,8 @@ export class SalaryComponent implements OnInit {
         // Map to generic table model
         this.rows = this.mapToTableModel(data);
       }
-    )
+    );
+
   }
 
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
@@ -57,7 +66,7 @@ export class SalaryComponent implements OnInit {
       cell = new TextTableCell(FillZero(entry.Monat));
       row.cells.push(cell);
       
-      cell = new TextTableCell(`${entry.Brutto} €`);
+      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Brutto)}`);
       row.cells.push(cell);
       
       cell = new TextTableCell(`${entry.Netto} €`);
