@@ -5,6 +5,7 @@ import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell } from 'src/app/ui/models/ITableCell';
 import { TableRow } from 'src/app/ui/models/tableRow';
+import { TableRowAction } from 'src/app/ui/models/tableRowAction';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
 import { FillZero } from 'src/app/util/fillZero';
 
@@ -57,6 +58,22 @@ export class SalaryComponent implements OnInit {
     let result = new Array<TableRow>();
     data.forEach(entry => {
       let row = new TableRow();
+      let action = new TableRowAction();
+      action.tooltip = "Delete";
+      action.icon = "../../assets/icons/trash-line.svg";
+      action.action = (id: number) => {
+        console.log(`delete row number ${id}`);
+      };
+      row.actions.push(action);
+
+      let action2 = new TableRowAction();
+      action2.tooltip = "Log";
+      action2.icon = "../../assets/icons/info-standard-line.svg";
+      action2.action = (id: number) => {
+        console.log(entry);
+      };
+      row.actions.push(action2);
+
       let cell = new TextTableCell(entry.id ? `${entry.id}` : "n/a");
       row.cells.push(cell);
       

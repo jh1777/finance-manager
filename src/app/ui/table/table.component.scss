@@ -1,5 +1,24 @@
-.even-row {
-    background-color: #f9f9f9;
+
+.action-icon {
+    height: 1em;
+    width:  1em;
+    cursor: pointer;
+    margin-right: .7em;
+}
+
+.table-header {
+    background-color: white;
+}
+
+.table-row {
+
+    &.even-row {
+        background-color: #f9f9f9;
+    }
+
+    &:hover {
+        background-color: white;
+    }
 }
 
 .table {

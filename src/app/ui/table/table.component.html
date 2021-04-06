@@ -1,20 +1,17 @@
 <table class="table">
     <thead>
-        <tr>
-            <th style="background-color: white;" scope="col" *ngFor="let item of header">{{ item.label }}</th>
+        <tr class="table-header">
+            <th *ngFor="let item of header" scope="col" >{{ item.label }}</th>
+            <th *ngIf="hasActions()">Actions</th>
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let row of rows; let i = index" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
+        <tr *ngFor="let row of rows; let i = index" class="table-row" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
             <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}</td>
-
-<!--             <td>
-                <mat-icon style="cursor: pointer;" inline=true (click)="edit(a.id)">edit</mat-icon>
-                &nbsp;
-                <mat-icon style="cursor: pointer;" inline=true (click)="delete(a.id)" class="red">delete</mat-icon>
-            </td> -->
+            <td *ngIf="hasActions()" >
+                <img *ngFor="let action of row.actions" class="action-icon" [src]="action.icon" (click)="callback(i, action)" />
+            </td>
         </tr>
-        
     </tbody>
     <tfoot *ngIf="footer">
         <tr style="background-color: rgb(240, 243, 245);">

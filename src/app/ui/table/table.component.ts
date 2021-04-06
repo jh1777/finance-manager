@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ITableCell } from '../models/ITableCell';
 import { TableRow } from '../models/tableRow';
+import { TableRowAction } from '../models/tableRowAction';
 
 @Component({
   selector: 'app-table',
@@ -26,5 +27,12 @@ export class TableComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  public hasActions(): boolean {
+    return this.rows.some(r => r.actions.length > 0);
+  }
+
+  public callback(id: number, $event: TableRowAction) {
+    $event.action(id);
+  }
 }
 
