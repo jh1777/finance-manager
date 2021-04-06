@@ -7,7 +7,8 @@ import { NavigationService } from 'src/app/services/navigation.service';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
-
+  public pageTitle: string = "Home";
+  
   constructor(private navigationService: NavigationService) { 
     this.navigationService.activeMenu.next(1);
 
