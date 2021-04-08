@@ -4,9 +4,9 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 ## ToDo
 
-- Table: add row action button support
 - Table: add row click support
-- Nav: Add service for get/set current page id
+- Modal: https://stackoverflow.com/questions/64392594/how-to-open-a-bootstrap-modal-window-from-other-component-in-angular-8
+- Try: Bootstrap Toast
 
 # BuiltIn Stuff
 

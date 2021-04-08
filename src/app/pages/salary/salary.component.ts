@@ -24,6 +24,7 @@ export class SalaryComponent implements OnInit {
   public header: Array<ITableCell> = [];
 
   public tableSize: TableSize = TableSize.Small;
+  public details: string;
   
   constructor(
     private api: ApiService,
@@ -41,6 +42,7 @@ export class SalaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Get Data from API
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
@@ -66,19 +68,22 @@ export class SalaryComponent implements OnInit {
     let result = new Array<TableRow>();
     data.forEach(entry => {
       let row = new TableRow();
+      /*       
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = "../../assets/icons/trash-line.svg";
       action.action = (id: number) => {
         console.log(`delete row number ${id}`);
       };
-      row.actions.push(action);
+      row.actions.push(action); 
+      */
 
       let action2 = new TableRowAction();
       action2.tooltip = "Log";
       action2.icon = "../../assets/icons/info-standard-line.svg";
       action2.action = (id: number) => {
         console.log(entry);
+        this.details = JSON.stringify(entry);
       };
       row.actions.push(action2);
 
@@ -145,17 +150,6 @@ export class SalaryComponent implements OnInit {
       label: 'Stunden/Woche',
       type: 'header'
     });
-
-/*     let row = new TableRow();
-    let cell = new TextTableCell("1");
-    row.cells.push(cell);
-    cell = new TextTableCell("2020/03");
-    row.cells.push(cell);
-    cell = new TextTableCell("9898.22");
-    row.cells.push(cell);
-    
-    this.rows.push(row); */
-
   }
 
 }
