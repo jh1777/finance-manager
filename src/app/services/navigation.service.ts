@@ -55,14 +55,6 @@ export class NavigationService {
     return result;
   }
 
-/*   public getMenuId(): number {
-    return this._activeMenuId;
-  }
-
-  public setMenuId(id: number) {
-    this._activeMenuId = id;
-  } */
-
   public getNavigationItems(): Array<INavigationItem> {
     return this._navItems;
   }

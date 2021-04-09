@@ -24,9 +24,9 @@ export class OverviewComponent implements OnInit {
   ngOnInit(): void {
   }
 
-  openModal(name: string) { 
+  openModal() { 
 
-    ModalComponent.prototype.componentName = name;
+    ModalComponent.prototype.componentName = "test";
     ModalComponent.prototype.title = "Details";
     this.bsModalRef = this.modalService.show(ModalComponent);
   }

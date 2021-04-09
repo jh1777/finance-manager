@@ -4,18 +4,21 @@ import { NavigationBarComponent } from './navigation-bar/navigation-bar.componen
 import { TableComponent } from './table/table.component';
 import { PageHeaderComponent } from './page-header/page-header.component';
 import { ModalComponent } from './modal/modal.component';
+import { ShowJsonComponent } from './modal/show-json/show-json.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 export { TableComponent } from './table/table.component';
 export { PageHeaderComponent } from './page-header/page-header.component';
 export { ModalComponent } from './modal/modal.component';
+export { ShowJsonComponent } from './modal/show-json/show-json.component';
 
 @NgModule({
     declarations: [
       NavigationBarComponent,
       TableComponent,
       PageHeaderComponent,
-      ModalComponent
+      ModalComponent,
+      ShowJsonComponent
     ],
   imports: [
     CommonModule
@@ -24,7 +27,8 @@ export { ModalComponent } from './modal/modal.component';
     NavigationBarComponent,
     TableComponent,
     PageHeaderComponent,
-    ModalComponent
+    ModalComponent,
+    ShowJsonComponent
   ]
 })
 export class UiModule { }
