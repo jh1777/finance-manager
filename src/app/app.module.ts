@@ -11,7 +11,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
-import { TestComponent } from './components/test/test.component'; 
+import { TestComponent } from './components/test/test.component';
+import { SalaryYearTileComponent } from './components/salary-year-tile/salary-year-tile.component'; 
 
 registerLocaleData(localeDe);
 
@@ -21,7 +22,8 @@ registerLocaleData(localeDe);
     AppComponent,
     OverviewComponent,
     SalaryComponent,
-    TestComponent
+    TestComponent,
+    SalaryYearTileComponent
   ],
   imports: [
     BrowserModule,

@@ -3,6 +3,10 @@
         <div class="left">{{ pageTitle }}</div>
     </app-page-header>
 
+    <div class="row row-cols-1 row-cols-md-5">
+        <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]"></app-salary-year-tile>
+    </div>
+    
     <button type="button" class="btn btn-primary"  (click)="openModal()">
         Launch demo modal
     </button>
