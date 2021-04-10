@@ -1,7 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { GehaltTransformator } from 'src/app/data/gehaltTransformator';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';

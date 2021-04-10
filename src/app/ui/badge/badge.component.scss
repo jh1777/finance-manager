@@ -1,0 +1,17 @@
+* { 
+    --badgeColor: #909090;
+    //--badgeBgColor: #f3f3f3;
+}
+
+
+.badge {
+    display: inline-flex;
+    font-size: small;
+    font-weight: 400;
+    color: var(--badgeColor);
+    border: 1px solid var(--badgeColor);
+    padding: .4em;
+    vertical-align: middle;
+    background-color: var(--badgeBgColor);
+    margin-right: .4em;
+}

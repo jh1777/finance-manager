@@ -2,7 +2,7 @@ import { Gehalt } from "../services/models/gehalt";
 import { Dictionary } from "../util/dictionary";
 import { getUnique } from "../util/uniqueFromArray";
 
-export class GehaltTransformator {
+export class GehaltTransformer {
 
     /**
      * Returns "Gehalt" lists grouped by "Jahr" as the key

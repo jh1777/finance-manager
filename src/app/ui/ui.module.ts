@@ -5,12 +5,14 @@ import { TableComponent } from './table/table.component';
 import { PageHeaderComponent } from './page-header/page-header.component';
 import { ModalComponent } from './modal/modal.component';
 import { ShowJsonComponent } from './modal/show-json/show-json.component';
+import { BadgeComponent } from './badge/badge.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 export { TableComponent } from './table/table.component';
 export { PageHeaderComponent } from './page-header/page-header.component';
 export { ModalComponent } from './modal/modal.component';
 export { ShowJsonComponent } from './modal/show-json/show-json.component';
+export { BadgeComponent } from './badge/badge.component';
 
 @NgModule({
     declarations: [
@@ -18,7 +20,8 @@ export { ShowJsonComponent } from './modal/show-json/show-json.component';
       TableComponent,
       PageHeaderComponent,
       ModalComponent,
-      ShowJsonComponent
+      ShowJsonComponent,
+      BadgeComponent
     ],
   imports: [
     CommonModule
@@ -28,7 +31,8 @@ export { ShowJsonComponent } from './modal/show-json/show-json.component';
     TableComponent,
     PageHeaderComponent,
     ModalComponent,
-    ShowJsonComponent
+    ShowJsonComponent,
+    BadgeComponent
   ]
 })
 export class UiModule { }

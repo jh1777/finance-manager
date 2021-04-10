@@ -3,8 +3,11 @@
         <div class="card text-black">
             <div class="card-header">{{ year }}</div>
             <div class="card-body">
-            <h5 class="card-title">{{ summarize("Brutto") | currency }}</h5>
-            <p class="card-text">Some content...</p>
+            <h5 class="card-title">
+                <app-badge label="Brutto"></app-badge>
+                {{ summarize("Brutto") | currency }}
+            </h5>
+            <p class="card-text"><a href="">Show Details</a></p>
             </div>
         </div>
     </div>

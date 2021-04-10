@@ -1,6 +1,6 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { GehaltTransformator } from 'src/app/data/gehaltTransformator';
+import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
@@ -15,10 +15,8 @@ import { getUnique } from 'src/app/util/uniqueFromArray';
 })
 export class OverviewComponent implements OnInit {
   public pageTitle: string = "Home";
-  //isPopupVisible: boolean = false;
   
   bsModalRef: BsModalRef;
-
 
   // Cards
   public data: Dictionary<Array<Gehalt>> = {};
@@ -43,7 +41,7 @@ export class OverviewComponent implements OnInit {
           if (n1 < n2) { return 1;  }
           return 0;
         });
-        this.data = GehaltTransformator.groupByJahr(data);
+        this.data = GehaltTransformer.groupByJahr(data);
       }
     );
   }
