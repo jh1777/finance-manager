@@ -4,8 +4,13 @@
             <div class="card-header">{{ year }}</div>
             <div class="card-body">
             <h5 class="card-title">
-                <app-badge label="Brutto"></app-badge>
-                {{ summarize("Brutto") | currency }}
+                <div class="kpi-header">BRUTTO</div>
+                {{ summarize("Brutto") | currency }} 
+                <app-badge *ngIf="percent" filled=true style="float: right;" [customClass]="percent > 0 ? 'green' : 'red'" [label]="percent/100 | percent: '1.2-2'"></app-badge>
+            </h5>
+            <h5 class="card-title">
+                <div class="kpi-header">NETTO</div>
+                {{ summarize("Netto") | currency }} 
             </h5>
             <p class="card-text"><a href="">Show Details</a></p>
             </div>

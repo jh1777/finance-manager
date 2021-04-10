@@ -14,6 +14,9 @@ export class SalaryYearTileComponent implements OnInit {
   @Input()
   data: Array<Gehalt> = [];
 
+  @Input()
+  percent: number;
+
   constructor() { }
 
   ngOnInit(): void {
@@ -23,5 +26,4 @@ export class SalaryYearTileComponent implements OnInit {
     let result =  this.data.reduce((p, c) => p + c[attibute], 0);
     return result;
   }
-
 }

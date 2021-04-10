@@ -14,4 +14,28 @@
     vertical-align: middle;
     background-color: var(--badgeBgColor);
     margin-right: .4em;
+
+    &.green {
+        color: green;
+        border: 1px solid green;
+    }
+
+    &.red {
+        color: red;
+        border: 1px solid red;
+    }
+
+    &.fill {
+        &.green {
+            background-color: green;
+            color: white;
+            border: 1px solid green;
+        }
+    
+        &.red {
+            background-color: red;
+            color: white;
+            border: 1px solid red;
+        }
+    }
 }

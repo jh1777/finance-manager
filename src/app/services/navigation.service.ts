@@ -34,13 +34,13 @@ export class NavigationService {
     result.push(home);
 
     // 2
-    let salary = new LinkNavigationItem('Gehalt');
+    let salary = new LinkNavigationItem('Salary');
     salary.icon = "../../assets/icons/wallet-line.svg";
     salary.link = "/salary";
     result.push(salary);
 
     // 3
-    let insurance = new LinkNavigationItem('Versicherungen');
+    let insurance = new LinkNavigationItem('Insurance');
     insurance.icon = "../../assets/icons/shield-line.svg";
     insurance.link = "/insurance";
     result.push(insurance);

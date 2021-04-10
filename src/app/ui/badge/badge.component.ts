@@ -10,6 +10,12 @@ export class BadgeComponent implements OnInit {
   @Input()
   label: string;
 
+  @Input()
+  customClass: string = '';
+
+  @Input()
+  filled: boolean = false;
+
   constructor() { }
 
   ngOnInit(): void {

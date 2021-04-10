@@ -1,13 +1,21 @@
 <div class="page">
     <app-page-header>
         <div class="left">{{ pageTitle }}</div>
+        <div class="right">
+            <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
+            <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Years">
+                <button type="button" class="btn" [ngClass]="!showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">Last 6 Years</button>
+                <button type="button" class="btn" [ngClass]="showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">All Years</button>
+            </div>
+        </div>
     </app-page-header>
 
-    <div class="row row-cols-1 row-cols-md-5">
-        <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]"></app-salary-year-tile>
+    <div class="row row-cols-1 row-cols-md-3">
+        <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]" [percent]="diffs[year]"></app-salary-year-tile>
     </div>
-    
+<!--     
     <button type="button" class="btn btn-primary"  (click)="openModal()">
         Launch demo modal
     </button>
+ -->
 </div>

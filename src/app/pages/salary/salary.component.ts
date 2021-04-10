@@ -18,14 +18,14 @@ import { FillZero } from 'src/app/util/fillZero';
   styleUrls: ['./salary.component.scss']
 })
 export class SalaryComponent implements OnInit {
-  public pageTitle = "Gehaltsliste";
+  public pageTitle = "Payments";
 
   public tableSizeEnum = TableSize;
 
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
 
-  public tableSize: TableSize = TableSize.Small;
+  public tableSize: TableSize = TableSize.Medium;
   public details: string;
 
   bsModalRef: BsModalRef;
