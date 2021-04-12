@@ -1,6 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
@@ -18,6 +19,7 @@ import { FillZero } from 'src/app/util/fillZero';
   styleUrls: ['./salary.component.scss']
 })
 export class SalaryComponent implements OnInit {
+  priv
   public pageTitle = "Payments";
 
   public tableSizeEnum = TableSize;
@@ -29,7 +31,11 @@ export class SalaryComponent implements OnInit {
   public details: string;
 
   bsModalRef: BsModalRef;
-  
+
+  public showAddEntry: boolean = false;
+  public addEntryLabel: string = "Add Entry";
+  public addEntryIcon: string = getIconWithName('plus-circle-line');
+
   constructor(
     private api: ApiService,
     private bsModalService: BsModalService,
@@ -85,7 +91,7 @@ export class SalaryComponent implements OnInit {
 
       let info = new TableRowAction();
       info.tooltip = "Log";
-      info.icon = "../../assets/icons/info-standard-line.svg";
+      info.icon = getIconWithName('info-standard-line');
       info.action = (id: number) => {
         this.details = JSON.stringify(entry, undefined, 2);
         this.openEntryDetailsModal(this.details);
@@ -161,7 +167,19 @@ export class SalaryComponent implements OnInit {
     ShowJsonComponent.prototype.content = content;
     ModalComponent.prototype.componentName = 'json';
     ModalComponent.prototype.title = "Details";
+    ModalComponent.prototype.closeBtnName = "Close";
     this.bsModalRef = this.bsModalService.show(ModalComponent);
+  }
+
+  public addEntry() {
+    this.showAddEntry = !this.showAddEntry;
+    if (this.showAddEntry) {
+      this.addEntryLabel = "Close Form";
+      this.addEntryIcon = '';
+    } else {
+      this.addEntryLabel = "Add Entry";
+      this.addEntryIcon = getIconWithName('plus-circle-line');
+    }
   }
 
 }

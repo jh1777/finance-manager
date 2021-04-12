@@ -1,6 +1,6 @@
 import { INavigationItem } from "./INavigationItem";
 
-export class LinkNavigationItem implements INavigationItem{
+export class LinkNavigationItem extends INavigationItem{
     label: string;
     icon?: string;
     link: string;
@@ -10,7 +10,9 @@ export class LinkNavigationItem implements INavigationItem{
       return this;
     }
     align: 'left' | 'right' = 'left';
-    constructor(label: string) {
-      this.label = label;
+    
+    constructor(init?: Partial<LinkNavigationItem>) {
+      super(init);
+      Object.assign(this, init);
     }
   }

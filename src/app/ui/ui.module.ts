@@ -6,6 +6,7 @@ import { PageHeaderComponent } from './page-header/page-header.component';
 import { ModalComponent } from './modal/modal.component';
 import { ShowJsonComponent } from './modal/show-json/show-json.component';
 import { BadgeComponent } from './badge/badge.component';
+import { MenuButtonComponent } from './menu-button/menu-button.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 export { TableComponent } from './table/table.component';
@@ -13,6 +14,7 @@ export { PageHeaderComponent } from './page-header/page-header.component';
 export { ModalComponent } from './modal/modal.component';
 export { ShowJsonComponent } from './modal/show-json/show-json.component';
 export { BadgeComponent } from './badge/badge.component';
+export { MenuButtonComponent } from './menu-button/menu-button.component';
 
 @NgModule({
     declarations: [
@@ -21,7 +23,8 @@ export { BadgeComponent } from './badge/badge.component';
       PageHeaderComponent,
       ModalComponent,
       ShowJsonComponent,
-      BadgeComponent
+      BadgeComponent,
+      MenuButtonComponent
     ],
   imports: [
     CommonModule
@@ -32,7 +35,8 @@ export { BadgeComponent } from './badge/badge.component';
     PageHeaderComponent,
     ModalComponent,
     ShowJsonComponent,
-    BadgeComponent
+    BadgeComponent,
+    MenuButtonComponent
   ]
 })
 export class UiModule { }

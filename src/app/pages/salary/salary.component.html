@@ -2,6 +2,7 @@
     <app-page-header>
         <div class="left">{{ pageTitle }}</div>
         <div class="right">
+            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=22 (clickEvent)="addEntry()"></app-menu-button>
             <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
             <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Table Size">
                 <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Small ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Small)">S</button>
@@ -11,9 +12,6 @@
         </div>
     </app-page-header>
     
+    <app-salary-add-entry *ngIf="showAddEntry"></app-salary-add-entry>
     <app-table [header]="header" [rows]="rows" [size]="tableSize"></app-table>
 </div>
-
-<app-modal title="Details">
-    {{ details }}
-</app-modal>

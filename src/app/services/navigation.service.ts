@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
+import { getIconWithName } from '../data/iconFactory';
 import { INavigationItem } from '../ui/models/INavigationItem';
 import { LinkNavigationItem } from '../ui/models/linkNavigationItem';
 import { TextNavigationItem } from '../ui/models/textNavigationItem';
@@ -23,33 +24,43 @@ export class NavigationService {
     let result = new Array<INavigationItem>();
 
     // 0
-    let title = new TextNavigationItem("Finance Manager");
-    title.showBold = true;
+    let title = new TextNavigationItem({
+      label: "Finance Manager",
+      showBold: true
+    });
     result.push(title);
 
     // 1
-    let home = new LinkNavigationItem('Home');
-    home.icon = "../../assets/icons/home-line.svg";
-    home.link = "/overview";
+    let home = new LinkNavigationItem({
+      label: 'Home',
+      icon: getIconWithName('home-line'),
+      link: "/overview"
+    });
     result.push(home);
 
     // 2
-    let salary = new LinkNavigationItem('Salary');
-    salary.icon = "../../assets/icons/wallet-line.svg";
-    salary.link = "/salary";
+    let salary = new LinkNavigationItem({
+      label: 'Salary',
+      icon: getIconWithName('wallet-line'),
+      link: "/salary"
+    });
     result.push(salary);
 
     // 3
-    let insurance = new LinkNavigationItem('Insurance');
-    insurance.icon = "../../assets/icons/shield-line.svg";
-    insurance.link = "/insurance";
+    let insurance = new LinkNavigationItem({
+      label: 'Insurance',
+      icon: getIconWithName('shield-line'),
+      link: "/insurance"
+    });
     result.push(insurance);
 
     // 4
-    let settings = new LinkNavigationItem('');
-    settings.icon = "../../assets/icons/cog-line.svg";
-    settings.link = "/settings";
-    settings.align = 'right';
+    let settings = new LinkNavigationItem({
+      label: '',
+      icon: getIconWithName('cog-line'),
+      link: "/settings",
+      align: 'right'
+    });
     result.push(settings);
 
     return result;

@@ -1,6 +1,5 @@
-import { Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, EventEmitter, Input, OnInit, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { TestComponent } from 'src/app/components/test/test.component';
 import { ModalService } from 'src/app/services/modal.service';
 
 @Component({
@@ -20,8 +19,10 @@ export class ModalComponent implements OnInit {
   @Input()
   content: string;
 
-  public closeBtnName: string = "Close";
+  @Input()
+  closeBtnName: string;
  
+
   private componentRef: ComponentRef<{}>;
 
   /*
