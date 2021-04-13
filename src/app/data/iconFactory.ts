@@ -17,6 +17,9 @@ export const getIconWithName = (name: string): string => {
             
         case 'cog-line':
             return '../assets/icons/cog-line.svg';
+
+        case 'times-circle-line':
+            return '../assets/icons/times-circle-line.svg';
         default:
             break;
     }

@@ -10,4 +10,8 @@ export class Gehalt {
   Kantine?: number;
   Arbeitgeber: string;
   Wochenstunden: number;
+
+  constructor(init?: Partial<Gehalt>) {
+    Object.assign(this, init);
+  }
 }

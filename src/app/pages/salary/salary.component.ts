@@ -1,4 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { getIconWithName } from 'src/app/data/iconFactory';
@@ -12,6 +13,8 @@ import { TableSize } from 'src/app/ui/models/tableSize';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
 import { ModalComponent, ShowJsonComponent } from 'src/app/ui/ui.module';
 import { FillZero } from 'src/app/util/fillZero';
+import { Observable, timer } from 'rxjs';
+import { timestamp } from 'rxjs/operators';
 
 @Component({
   selector: 'app-salary',
@@ -19,10 +22,10 @@ import { FillZero } from 'src/app/util/fillZero';
   styleUrls: ['./salary.component.scss']
 })
 export class SalaryComponent implements OnInit {
-  priv
   public pageTitle = "Payments";
 
   public tableSizeEnum = TableSize;
+  public hideToast: boolean = true;
 
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
@@ -33,8 +36,16 @@ export class SalaryComponent implements OnInit {
   bsModalRef: BsModalRef;
 
   public showAddEntry: boolean = false;
-  public addEntryLabel: string = "Add Entry";
+  public addEntryLabel: string = "Add Salary";
   public addEntryIcon: string = getIconWithName('plus-circle-line');
+  public createSalaryLastResult: string = '';
+
+  public newSalaryEntry = new Gehalt({
+    Arbeitgeber: 'Daimler Truck AG',
+    Wochenstunden: 35,
+    Jahr: new Date().getFullYear(),
+    Monat: new Date().getMonth()
+  });
 
   constructor(
     private api: ApiService,
@@ -171,15 +182,46 @@ export class SalaryComponent implements OnInit {
     this.bsModalRef = this.bsModalService.show(ModalComponent);
   }
 
-  public addEntry() {
+  public toggleNewEntryForm() {
     this.showAddEntry = !this.showAddEntry;
     if (this.showAddEntry) {
       this.addEntryLabel = "Close Form";
-      this.addEntryIcon = '';
+      this.addEntryIcon = getIconWithName('times-circle-line');
     } else {
-      this.addEntryLabel = "Add Entry";
+      this.addEntryLabel = "Add Salary";
       this.addEntryIcon = getIconWithName('plus-circle-line');
     }
   }
 
+  private createSalaryResultTimer() {
+    const salaryLastResultTimer = timer(10000);
+    salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');
+  }
+
+  public createSalary(item: Gehalt) {
+    console.log(item);
+    this.api.createEntry<Gehalt>(item).subscribe(
+        res => {
+          var response = <HttpResponse<Gehalt>>res;
+          this.createSalaryLastResult = `POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`;
+          this.createSalaryResultTimer();
+
+          if (res.ok) {
+            this.resetNewSalaryItem();
+            this.toggleNewEntryForm();
+          }
+        },
+        (err: HttpErrorResponse) => {
+          this.createSalaryLastResult = `Error creating the salary entry!: ${err}`;
+          this.createSalaryResultTimer();
+        }
+      );
+  }
+
+  private resetNewSalaryItem() {
+    this.newSalaryEntry.Brutto = null;
+    this.newSalaryEntry.Netto = null;
+    this.newSalaryEntry.Kantine = null;
+    this.newSalaryEntry.AKP = null;
+  }
 }

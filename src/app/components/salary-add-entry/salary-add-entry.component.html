@@ -1,68 +1,62 @@
-<!-- <form class="form-inline">
-    <label class="sr-only" for="inputJahr">Jahr</label>
-    <input type="number" class="form-control mb-2 mr-sm-2" id="inputJahr" value=2021>
-  
-    <label class="sr-only" for="inputMonat">Monat</label>
-    <input type="number" class="form-control mb-2 mr-sm-2" id="inputMonat" aria-label="Monat">
-  
-    <label class="sr-only" for="inputBrutto">Brutto</label>
-    <input type="number" class="form-control mb-2 mr-sm-2" id="inputBrutto" placeholder="1234.56">
-  
-    <label class="sr-only" for="inputNetto">Netto</label>
-    <input type="number" class="form-control mb-2 mr-sm-2" id="inputNetto" placeholder="1234.56">
-  
-    <label class="sr-only" for="inputAg">Arbeitgeber</label>
-    <input type="text" class="form-control mb-2 mr-sm-2" id="inputAg" value="Daimler Truck AG">
-
-    <label class="sr-only" for="inputStd">Wochenstunden</label>
-    <input type="number" class="form-control mb-2 mr-sm-2" id="inputStd" value=35>
-  
-    <button type="submit" class="btn btn-primary mb-2">Create</button>
-</form>
- -->
-
-<form>
+<form (ngSubmit)="submit()" #gehaltForm="ngForm">
     <div class="form-row">
+
       <div class="form-group col-md-3">
-        <label for="inputJahr">Jahr</label>
-        <input type="number" class="form-control" id="inputJahr" value=2021>
+        <label for="jahr"><strong>Jahr</strong></label>
+        <input type="number" class="form-control" id="jahr" required [(ngModel)]="model.Jahr" name="Jahr"
+            #jahr="ngModel">
+        <div [hidden]="jahr.valid || jahr.pristine" class="alert alert-danger">
+            Jahr is required number</div>
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputMonat">Monat</label>
-        <input type="number" class="form-control" id="inputMonat">
+        <label for="monat"><strong>Monat</strong></label>
+        <input type="number" class="form-control" id="monat" required [(ngModel)]="model.Monat" name="Monat" 
+            #monat="ngModel">
+        <div [hidden]="monat.valid || monat.pristine" class="alert alert-danger">
+            Monat is required number</div>
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputBrutto">Brutto</label>
-        <input type="number" class="form-control" id="inputBrutto" placeholder="1234.56">
+          <label for="brutto"><strong>Brutto</strong></label>
+          <input type="number" class="form-control" id="brutto" required [(ngModel)]="model.Brutto" name="Brutto"
+              #brutto="ngModel">
+          <div [hidden]="brutto.valid || brutto.pristine" class="alert alert-danger">
+              Brutto is required number</div>
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputNetto">Netto</label>
-        <input type="number" class="form-control" id="inputNetto" placeholder="1234.56">
+          <label for="netto"><strong>Netto</strong></label>
+          <input type="number" class="form-control" id="netto" required [(ngModel)]="model.Netto" name="Netto"
+              #netto="ngModel">
+          <div [hidden]="netto.valid || netto.pristine" class="alert alert-danger">
+              Netto is required number</div>
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputAkp">AKP</label>
-        <input type="number" class="form-control" id="inputAkp" placeholder="1234.56">
+          <label for="akp">AKP</label>
+          <input type="number" class="form-control" id="akp" [(ngModel)]="model.AKP" name="AKP" #akp="ngModel">
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputKantine">Kantine</label>
-        <input type="number" class="form-control" id="inputKantine" placeholder="1234.56">
+          <label for="kantine">Kantine</label>
+          <input type="number" class="form-control" id="kantine" [(ngModel)]="model.Kantine" name="Kantine"
+              #kantine="ngModel">
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputAg">Arbeitgeber</label>
-        <input type="text" class="form-control" id="inputAg" value="Daimler Truck AG">
+          <label for="arbeitgeber">Arbeitgeber</label>
+          <input type="string" class="form-control" id="kantine" [(ngModel)]="model.Arbeitgeber" name="Arbeitgeber"
+              #arbeitgeber="ngModel">
       </div>
 
       <div class="form-group col-md-3">
-        <label for="inputStd">Wochenstunden</label>
-        <input type="number" class="form-control" id="inputStd" value=35>
+          <label for="wochenstunden">Wochenstunden</label>
+          <input type="number" class="form-control" id="kantine" [(ngModel)]="model.Wochenstunden" name="Wochenstunden"
+              #wochenstunden="ngModel">
       </div>
+
     </div>
-    <button type="submit" class="btn btn-primary">Create</button>&nbsp;
+    <button type="submit" class="btn btn-primary" [disabled]="!gehaltForm.form.valid">Create</button>&nbsp;
 </form>
 <br/>

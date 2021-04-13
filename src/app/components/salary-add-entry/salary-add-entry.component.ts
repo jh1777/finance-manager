@@ -1,4 +1,5 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Gehalt } from 'src/app/services/models/gehalt';
 
 @Component({
   selector: 'app-salary-add-entry',
@@ -7,16 +8,18 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 })
 export class SalaryAddEntryComponent implements OnInit {
 
+  @Input()
+  model: Gehalt;
+
   @Output()
-  event = new EventEmitter<string>();
+  newEntry = new EventEmitter<Gehalt>();
 
   constructor() { }
 
   ngOnInit(): void {
   }
 
-  action() {
-    this.event.emit();
+  submit() {
+    this.newEntry.emit(this.model);
   }
-
 }
