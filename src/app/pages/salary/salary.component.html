@@ -3,7 +3,7 @@
         <div class="left">{{ pageTitle }}</div>
         <div class="right">
             <span class="status-text">{{ createSalaryLastResult }}</span>
-            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=22 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
+            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=18 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
             <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
             <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Table Size">
                 <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Small ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Small)">S</button>

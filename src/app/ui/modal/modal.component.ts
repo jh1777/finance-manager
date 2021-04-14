@@ -22,6 +22,8 @@ export class ModalComponent implements OnInit {
   @Input()
   closeBtnName: string;
  
+  @Input()
+  cancelBtnName: string;
 
   private componentRef: ComponentRef<{}>;
 
@@ -42,6 +44,13 @@ export class ModalComponent implements OnInit {
       const factory = this.componentFactoryResolver.resolveComponentFactory(component);
       this.componentRef = this.container.createComponent(factory);
     }
+  }
+
+  handleAction(emit: boolean) {
+    if (emit) {
+      this.modalService.modalEvent.next(this.title);
+    }
+    this.bsModalRef.hide();
   }
 
 }

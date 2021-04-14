@@ -48,14 +48,12 @@ export class ApiService {
       );
   }
 
-  deleteEntry<T>(id: number): Observable<HttpResponse<T>> {
-    var removeUrl = this.url + `/${id}`;
+  deleteEntry<T>(year: number, month: number): Observable<HttpResponse<T>> {
+    var removeUrl = `${this.url}/${year}/${month}`;
     var result = this.httpClient.delete<T>(removeUrl, { headers: this.httpOptions, observe: 'response' })
       .pipe(
         catchError(this.errorHandler)
       );
-
-    //this.messageService.logMessage(`DELETE ${this.service} Call URL: ${removeUrl}`, true);
 
     return result;
   }

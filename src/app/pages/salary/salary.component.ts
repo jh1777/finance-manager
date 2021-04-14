@@ -15,6 +15,7 @@ import { ModalComponent, ShowJsonComponent } from 'src/app/ui/ui.module';
 import { FillZero } from 'src/app/util/fillZero';
 import { Observable, timer } from 'rxjs';
 import { timestamp } from 'rxjs/operators';
+import { ModalService } from 'src/app/services/modal.service';
 
 @Component({
   selector: 'app-salary',
@@ -51,6 +52,7 @@ export class SalaryComponent implements OnInit {
     private api: ApiService,
     private bsModalService: BsModalService,
     private navigationService: NavigationService,
+    private modalService: ModalService,
     private currencyPipe: CurrencyPipe
     ) { 
 
@@ -64,6 +66,10 @@ export class SalaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.updateEntries();
+  }
+
+  private updateEntries() {
     // Get Data from API
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
@@ -90,16 +96,36 @@ export class SalaryComponent implements OnInit {
     let result = new Array<TableRow>();
     data.forEach(entry => {
       let row = new TableRow();
-      /*       
+           
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = "../../assets/icons/trash-line.svg";
       action.action = (id: number) => {
-        console.log(`delete row number ${id}`);
+        // Subscrie to Modal Confirm Event
+        this.modalService.modalEvent.subscribe({
+          next: (result) => {
+            if (result == 'Delete Salary Entry') {
+              // Call the API to delete the entry
+              this.api.deleteEntry<Gehalt>(entry.Jahr, entry.Monat).subscribe({
+                next: (res) => {
+                  this.showSalaryResultWithTimer(`Item ${entry.id}: ${entry.Jahr}/${entry.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+                  this.updateEntries();
+                },
+                error: (err) => {
+                  this.showSalaryResultWithTimer(`Item ${entry.id} Deletion Failed: ${err}`);
+                }
+              })
+            }
+          },
+          error: (err) => {
+            console.error("Error deleting salary entry!", err);
+          }
+        })
+        // Open Confrm Dialog
+        this.openDeleteEntryConfirmation(`Confirm Item ${entry.id}: ${entry.Jahr}/${entry.Monat} deletion`);
       };
       row.actions.push(action); 
-      */
-
+      
       let info = new TableRowAction();
       info.tooltip = "Log";
       info.icon = getIconWithName('info-standard-line');
@@ -182,6 +208,14 @@ export class SalaryComponent implements OnInit {
     this.bsModalRef = this.bsModalService.show(ModalComponent);
   }
 
+  private openDeleteEntryConfirmation(content: string) {
+    ModalComponent.prototype.content = content;
+    ModalComponent.prototype.title = "Delete Salary Entry";
+    ModalComponent.prototype.closeBtnName = "Delete";
+    ModalComponent.prototype.cancelBtnName = "Cancel";
+    this.bsModalRef = this.bsModalService.show(ModalComponent);
+  }
+
   public toggleNewEntryForm() {
     this.showAddEntry = !this.showAddEntry;
     if (this.showAddEntry) {
@@ -193,7 +227,8 @@ export class SalaryComponent implements OnInit {
     }
   }
 
-  private createSalaryResultTimer() {
+  private showSalaryResultWithTimer(message: string) {
+    this.createSalaryLastResult = message;
     const salaryLastResultTimer = timer(10000);
     salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');
   }
@@ -203,17 +238,16 @@ export class SalaryComponent implements OnInit {
     this.api.createEntry<Gehalt>(item).subscribe(
         res => {
           var response = <HttpResponse<Gehalt>>res;
-          this.createSalaryLastResult = `POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`;
-          this.createSalaryResultTimer();
+          this.showSalaryResultWithTimer(`POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`);
 
           if (res.ok) {
             this.resetNewSalaryItem();
             this.toggleNewEntryForm();
+            this.updateEntries();
           }
         },
         (err: HttpErrorResponse) => {
-          this.createSalaryLastResult = `Error creating the salary entry!: ${err}`;
-          this.createSalaryResultTimer();
+          this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
         }
       );
   }

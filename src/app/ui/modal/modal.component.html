@@ -9,6 +9,8 @@
   <div #container></div>
   {{ content }}
 </div>
-<div *ngIF="closeBtnName" class="modal-footer">
-  <button type="button" class="btn btn-default" (click)="bsModalRef.hide()">{{closeBtnName}}</button>
+<div *ngIf="closeBtnName || cancelBtnName" class="modal-footer">
+  <button *ngIf="closeBtnName" type="button" class="btn btn-default" (click)="handleAction(cancelBtnName != null)">{{closeBtnName}}</button>
+  &nbsp;
+  <button *ngIf="cancelBtnName" type="button" class="btn btn-secondary" (click)="handleAction(false)">{{cancelBtnName}}</button>
 </div>
