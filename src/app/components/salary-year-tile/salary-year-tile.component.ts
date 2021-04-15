@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+
 import { Gehalt } from 'src/app/services/models/gehalt';
 
 @Component({
@@ -17,6 +18,9 @@ export class SalaryYearTileComponent implements OnInit {
   @Input()
   percent: number;
 
+  @Output()
+  details = new EventEmitter<Array<Gehalt>>();
+
   constructor() { }
 
   ngOnInit(): void {
@@ -25,5 +29,9 @@ export class SalaryYearTileComponent implements OnInit {
   public summarize(attibute: string): number {
     let result =  this.data.reduce((p, c) => p + c[attibute], 0);
     return result;
+  }
+
+  public showDetails() {
+    this.details.emit(this.data);
   }
 }

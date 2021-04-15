@@ -1,6 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, DEFAULT_CURRENCY_CODE, LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BsModalRef, ModalModule } from 'ngx-bootstrap/modal';
+import { ChartsModule } from 'ng2-charts';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,6 +16,7 @@ import { TestComponent } from './components/test/test.component';
 import { SalaryYearTileComponent } from './components/salary-year-tile/salary-year-tile.component';
 import { SalaryAddEntryComponent } from './components/salary-add-entry/salary-add-entry.component'; 
 import { FormsModule } from '@angular/forms';
+import { SalaryChartComponent } from './components/salary-chart/salary-chart.component';
 registerLocaleData(localeDe);
 
 
@@ -25,7 +27,8 @@ registerLocaleData(localeDe);
     SalaryComponent,
     TestComponent,
     SalaryYearTileComponent,
-    SalaryAddEntryComponent
+    SalaryAddEntryComponent,
+    SalaryChartComponent
   ],
   imports: [
     BrowserModule,
@@ -33,7 +36,8 @@ registerLocaleData(localeDe);
     HttpClientModule,
     FormsModule,
     UiModule,
-    ModalModule.forRoot()
+    ModalModule.forRoot(),
+    ChartsModule
   ],
   providers: [
     BsModalRef,

@@ -1,5 +1,6 @@
 import { Component, OnInit, TemplateRef } from '@angular/core';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { SalaryChartComponent } from 'src/app/components/salary-chart/salary-chart.component';
 import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
@@ -71,6 +72,16 @@ export class OverviewComponent implements OnInit {
   public openModal() { 
     ModalComponent.prototype.componentName = "test";
     ModalComponent.prototype.title = "Details";
+    this.bsModalRef = this.modalService.show(ModalComponent);
+  }
+
+  public openSalaryChart(data: Array<Gehalt>) {
+    SalaryChartComponent.prototype.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0"+ d.Monat}`);
+    SalaryChartComponent.prototype.y = data.map(d => d.Brutto);
+    SalaryChartComponent.prototype.yLabel = 'Brutto';
+    ModalComponent.prototype.componentName = "salary-chart";
+    ModalComponent.prototype.closeBtnName = "Close";
+    ModalComponent.prototype.title = "Chart";
     this.bsModalRef = this.modalService.show(ModalComponent);
   }
 }

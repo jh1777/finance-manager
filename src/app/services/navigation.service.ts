@@ -55,6 +55,13 @@ export class NavigationService {
     result.push(insurance);
 
     // 4
+    let chart = new LinkNavigationItem({
+      label: 'Chart',
+      link: "/chart"
+    });
+    result.push(chart);
+
+    // 5
     let settings = new LinkNavigationItem({
       label: '',
       icon: getIconWithName('cog-line'),
