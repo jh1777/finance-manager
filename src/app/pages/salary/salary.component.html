@@ -17,10 +17,10 @@
     <app-table [header]="header" [rows]="rows" [size]="tableSize"></app-table>
 </div>
 
-<jw-modal id="json">
+<jw-modal id="json" class="small-modal">
     <h3>Salary Data</h3>
     <app-show-json [content]="jsonDetails"></app-show-json>
-    <button type="button" class="btn btn-primary" (click)="closeModal('json');">
+    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('json');">
         Close
     </button>
 </jw-modal>
@@ -32,7 +32,7 @@
         Delete
     </button>
     &nbsp;
-    <button type="button" class="btn btn-primary" (click)="closeModal('delete-confirmation');">
+    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('delete-confirmation');">
         Close
     </button>
 </jw-modal>

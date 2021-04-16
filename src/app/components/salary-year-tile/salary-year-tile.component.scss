@@ -7,9 +7,10 @@
 .card-header {
     font-weight: 700;
     font-size: large;
+    display: flex;
 }
 
-.kpi-header {
+.kpi-label {
     font-size: small;
     font-weight: 400;
     color: #909090;
@@ -22,4 +23,13 @@
     color: #007a93;
     font-size: small;
     float: right;
+}
+
+.header-info {
+    float: right;
+    font-size: small;
+    font-weight: 400;
+    color: #909090;
+    margin-left: auto;
+    align-self: center;
 }

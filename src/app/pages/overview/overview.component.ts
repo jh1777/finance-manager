@@ -18,7 +18,7 @@ export class OverviewComponent implements OnInit {
 
   // Config
   private _numberOfYears: number = 6;
-  public pageTitle: string = "Home";
+  public pageTitle: string = "Overview";
 
   // Cards
   public data: Dictionary<Array<Gehalt>> = {};
