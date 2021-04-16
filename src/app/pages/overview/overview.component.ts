@@ -1,11 +1,9 @@
-import { Component, OnInit, TemplateRef } from '@angular/core';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { SalaryChartComponent } from 'src/app/components/salary-chart/salary-chart.component';
+import { Component, OnInit } from '@angular/core';
 import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
+import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { ModalComponent } from 'src/app/ui/ui.module';
 import { Dictionary } from 'src/app/util/dictionary';
 import { getNYears } from 'src/app/util/getNYears';
 import { getUnique } from 'src/app/util/uniqueFromArray';
@@ -16,7 +14,6 @@ import { getUnique } from 'src/app/util/uniqueFromArray';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
-  public bsModalRef: BsModalRef;
   public showAllYears: boolean = false;
 
   // Config
@@ -29,11 +26,17 @@ export class OverviewComponent implements OnInit {
   public diffs: Dictionary<number> = {};
   //------
 
+  // CHart
+  public x: Array<string>;
+  public y: Array<number>;
+  public yLabel: string;
+
   constructor(
     private navigationService: NavigationService,
     private api: ApiService,
-    private modalService: BsModalService
-    ) { 
+    //private modalService: BsModalService
+    private modalService: ModalService
+  ) {
     this.navigationService.activeMenu.next(1);
   }
 
@@ -49,7 +52,7 @@ export class OverviewComponent implements OnInit {
         let data = result.body;
         this.years = getUnique(data.map(d => d.Jahr)).filter(y => years.includes(y)).sort((n1, n2) => {
           if (n1 > n2) { return -1; }
-          if (n1 < n2) { return 1;  }
+          if (n1 < n2) { return 1; }
           return 0;
         });
         //let diffedData = GehaltTransformer.calculateYearDiffs(data);
@@ -69,19 +72,19 @@ export class OverviewComponent implements OnInit {
     }
   }
 
-  public openModal() { 
-    ModalComponent.prototype.componentName = "test";
-    ModalComponent.prototype.title = "Details";
-    this.bsModalRef = this.modalService.show(ModalComponent);
+  public openSalaryChart(data: Array<Gehalt>) {
+    this.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0" + d.Monat}`);
+    this.y = data.map(d => d.Brutto);
+    this.yLabel = 'Brutto';
+    console.log(this.x);
+    this.openModal('year-chart');
+  } 
+
+  openModal(id: string) {
+    this.modalService.open(id);
   }
 
-  public openSalaryChart(data: Array<Gehalt>) {
-    SalaryChartComponent.prototype.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0"+ d.Monat}`);
-    SalaryChartComponent.prototype.y = data.map(d => d.Brutto);
-    SalaryChartComponent.prototype.yLabel = 'Brutto';
-    ModalComponent.prototype.componentName = "salary-chart";
-    ModalComponent.prototype.closeBtnName = "Close";
-    ModalComponent.prototype.title = "Chart";
-    this.bsModalRef = this.modalService.show(ModalComponent);
+  closeModal(id: string) {
+    this.modalService.close(id);
   }
 }

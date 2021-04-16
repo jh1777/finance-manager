@@ -13,9 +13,12 @@
     <div class="row row-cols-1 row-cols-md-3">
         <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]" [percent]="diffs[year]" (details)="openSalaryChart($event)"></app-salary-year-tile>
     </div>
-<!--     
-    <button type="button" class="btn btn-primary"  (click)="openModal()">
-        Launch demo modal
-    </button>
- -->
 </div>
+
+<jw-modal id="year-chart">
+    <h3>Chart</h3>
+    <app-salary-chart [x]="x" [y]="y" [yLabel]="yLabel"></app-salary-chart>
+    <button type="button" class="btn btn-primary" (click)="closeModal('year-chart');">
+        Close
+    </button>
+</jw-modal>

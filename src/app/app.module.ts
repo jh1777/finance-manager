@@ -1,7 +1,7 @@
 import { CUSTOM_ELEMENTS_SCHEMA, DEFAULT_CURRENCY_CODE, LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { BsModalRef, ModalModule } from 'ngx-bootstrap/modal';
 import { ChartsModule } from 'ng2-charts';
+import { ModalModule } from './modalModule';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -36,11 +36,10 @@ registerLocaleData(localeDe);
     HttpClientModule,
     FormsModule,
     UiModule,
-    ModalModule.forRoot(),
+    ModalModule,
     ChartsModule
   ],
   providers: [
-    BsModalRef,
     CurrencyPipe,
     {
       provide: LOCALE_ID,

@@ -17,3 +17,22 @@
     <app-table [header]="header" [rows]="rows" [size]="tableSize"></app-table>
 </div>
 
+<jw-modal id="json">
+    <h3>Salary Data</h3>
+    <app-show-json [content]="jsonDetails"></app-show-json>
+    <button type="button" class="btn btn-primary" (click)="closeModal('json');">
+        Close
+    </button>
+</jw-modal>
+
+<jw-modal id="delete-confirmation" class="small-modal">
+    <h3>Really Delete Entry</h3>
+    <p>{{deleteConfirmMessage}}</p>
+    <button type="button" class="btn btn-danger" (click)="deleteSalaryEntry(deletionEntry)">
+        Delete
+    </button>
+    &nbsp;
+    <button type="button" class="btn btn-primary" (click)="closeModal('delete-confirmation');">
+        Close
+    </button>
+</jw-modal>

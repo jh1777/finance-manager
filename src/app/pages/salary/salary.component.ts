@@ -1,7 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
@@ -11,11 +10,10 @@ import { TableRow } from 'src/app/ui/models/tableRow';
 import { TableRowAction } from 'src/app/ui/models/tableRowAction';
 import { TableSize } from 'src/app/ui/models/tableSize';
 import { TextTableCell } from 'src/app/ui/models/textTableCell';
-import { ModalComponent, ShowJsonComponent } from 'src/app/ui/ui.module';
 import { FillZero } from 'src/app/util/fillZero';
-import { Observable, timer } from 'rxjs';
-import { timestamp } from 'rxjs/operators';
-import { ModalService } from 'src/app/services/modal.service';
+import { timer } from 'rxjs';
+import { ModalService } from 'src/app/modalModule';
+
 
 @Component({
   selector: 'app-salary',
@@ -32,14 +30,18 @@ export class SalaryComponent implements OnInit {
   public header: Array<ITableCell> = [];
 
   public tableSize: TableSize = TableSize.Medium;
-  public details: string;
-
-  bsModalRef: BsModalRef;
 
   public showAddEntry: boolean = false;
   public addEntryLabel: string = "Add Salary";
   public addEntryIcon: string = getIconWithName('plus-circle-line');
   public createSalaryLastResult: string = '';
+
+  // Json Dialog
+  public jsonDetails: string;
+
+  // Delete Confirm
+  public deleteConfirmMessage: string;
+  public deletionEntry: Gehalt;
 
   public newSalaryEntry = new Gehalt({
     Arbeitgeber: 'Daimler Truck AG',
@@ -50,7 +52,6 @@ export class SalaryComponent implements OnInit {
 
   constructor(
     private api: ApiService,
-    private bsModalService: BsModalService,
     private navigationService: NavigationService,
     private modalService: ModalService,
     private currencyPipe: CurrencyPipe
@@ -101,28 +102,9 @@ export class SalaryComponent implements OnInit {
       action.tooltip = "Delete";
       action.icon = "../../assets/icons/trash-line.svg";
       action.action = (id: number) => {
-        // Subscrie to Modal Confirm Event
-        this.modalService.modalEvent.subscribe({
-          next: (result) => {
-            if (result == 'Delete Salary Entry') {
-              // Call the API to delete the entry
-              this.api.deleteEntry<Gehalt>(entry.Jahr, entry.Monat).subscribe({
-                next: (res) => {
-                  this.showSalaryResultWithTimer(`Item ${entry.id}: ${entry.Jahr}/${entry.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
-                  this.updateEntries();
-                },
-                error: (err) => {
-                  this.showSalaryResultWithTimer(`Item ${entry.id} Deletion Failed: ${err}`);
-                }
-              })
-            }
-          },
-          error: (err) => {
-            console.error("Error deleting salary entry!", err);
-          }
-        })
-        // Open Confrm Dialog
-        this.openDeleteEntryConfirmation(`Confirm Item ${entry.id}: ${entry.Jahr}/${entry.Monat} deletion`);
+        this.deletionEntry = entry;
+        this.deleteConfirmMessage = `Confirm deleting entry ${entry.id}: ${entry.Jahr}/${entry.Monat > 9 ? entry.Monat : "0"+entry.Monat}?`;
+        this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
       
@@ -130,8 +112,8 @@ export class SalaryComponent implements OnInit {
       info.tooltip = "Log";
       info.icon = getIconWithName('info-standard-line');
       info.action = (id: number) => {
-        this.details = JSON.stringify(entry, undefined, 2);
-        this.openEntryDetailsModal(this.details);
+        this.jsonDetails = JSON.stringify(entry, undefined, 2);
+        this.openModal('json');
       };
       row.actions.push(info);
 
@@ -200,22 +182,6 @@ export class SalaryComponent implements OnInit {
     });
   }
 
-  private openEntryDetailsModal(content: string) { 
-    ShowJsonComponent.prototype.content = content;
-    ModalComponent.prototype.componentName = 'json';
-    ModalComponent.prototype.title = "Details";
-    ModalComponent.prototype.closeBtnName = "Close";
-    this.bsModalRef = this.bsModalService.show(ModalComponent);
-  }
-
-  private openDeleteEntryConfirmation(content: string) {
-    ModalComponent.prototype.content = content;
-    ModalComponent.prototype.title = "Delete Salary Entry";
-    ModalComponent.prototype.closeBtnName = "Delete";
-    ModalComponent.prototype.cancelBtnName = "Cancel";
-    this.bsModalRef = this.bsModalService.show(ModalComponent);
-  }
-
   public toggleNewEntryForm() {
     this.showAddEntry = !this.showAddEntry;
     if (this.showAddEntry) {
@@ -257,5 +223,29 @@ export class SalaryComponent implements OnInit {
     this.newSalaryEntry.Netto = null;
     this.newSalaryEntry.Kantine = null;
     this.newSalaryEntry.AKP = null;
+  }
+
+  public deleteSalaryEntry($event: Gehalt) {
+    if ($event) {
+      // Call the API to delete the entry
+      this.api.deleteEntry<Gehalt>($event.Jahr, $event.Monat).subscribe({
+        next: (res) => {
+          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.updateEntries();
+        },
+        error: (err) => {
+          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+        }
+      });
+    }
+    this.closeModal('delete-confirmation');
+  }
+
+  openModal(id: string) {
+    this.modalService.open(id);
+  }
+
+  closeModal(id: string) {
+    this.modalService.close(id);
   }
 }

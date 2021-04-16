@@ -1,19 +1,17 @@
-<!--  <div class="row row-cols-1 row-cols-md-3"> -->
-    <div class="col mb-4">
-        <div class="card text-black">
-            <div class="card-header">{{ year }}</div>
-            <div class="card-body">
-            <h5 class="card-title">
-                <div class="kpi-header">BRUTTO</div>
-                {{ summarize("Brutto") | currency }} 
-                <app-badge *ngIf="percent" filled=true style="float: right;" [customClass]="percent > 0 ? 'green' : 'red'" [label]="percent/100 | percent: '1.2-2'"></app-badge>
-            </h5>
-            <h5 class="card-title">
-                <div class="kpi-header">NETTO</div>
-                {{ summarize("Netto") | currency }} 
-            </h5>
-            <p class="card-text"><span style="cursor: pointer;" (click)="showDetails()">Show Details</span></p>
-            </div>
+<div class="col mb-4">
+    <div class="card text-black">
+        <div class="card-header">{{ year }}</div>
+        <div class="card-body">
+        <h5 class="card-title">
+            <div class="kpi-header">BRUTTO</div>
+            {{ summarize("Brutto") | currency }} 
+            <app-badge *ngIf="percent" filled=true style="float: right;" [customClass]="percent > 0 ? 'green' : 'red'" [label]="percent/100 | percent: '1.2-2'"></app-badge>
+        </h5>
+        <h5 class="card-title">
+            <div class="kpi-header">NETTO</div>
+            {{ summarize("Netto") | currency }} 
+        </h5>
+        <p class="card-text"><span class="card-link" (click)="showDetails()">Show Details</span></p>
         </div>
     </div>
-<!-- </div> -->
+</div>
