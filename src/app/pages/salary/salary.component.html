@@ -13,6 +13,8 @@
         </div>
     </app-page-header>
     
+    <app-inline-button-group [buttons]="yearButtons" [multiSelect]="yearFilterMulti" (selectedButtons)="yearFilterChanged($event)"></app-inline-button-group>
+
     <app-salary-add-entry *ngIf="showAddEntry" [model]="newSalaryEntry" (newEntry)="createSalary($event)"></app-salary-add-entry>
     <app-table [header]="header" [rows]="rows" [size]="tableSize"></app-table>
 </div>
