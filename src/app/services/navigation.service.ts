@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { getIconWithName } from '../data/iconFactory';
-import { INavigationItem } from '../ui/models/INavigationItem';
-import { LinkNavigationItem } from '../ui/models/linkNavigationItem';
-import { TextNavigationItem } from '../ui/models/textNavigationItem';
+import { INavigationItem } from '../ui/models/navigation-bar/INavigationItem';
+import { LinkNavigationItem } from '../ui/models/navigation-bar/linkNavigationItem';
+import { TextNavigationItem } from '../ui/models/navigation-bar/textNavigationItem';
 
 @Injectable({
   providedIn: 'root'
@@ -55,13 +55,6 @@ export class NavigationService {
     result.push(insurance);
 
     // 4
-    let chart = new LinkNavigationItem({
-      label: 'Chart',
-      link: "/chart"
-    });
-    result.push(chart);
-
-    // 5
     let settings = new LinkNavigationItem({
       label: '',
       icon: getIconWithName('cog-line'),

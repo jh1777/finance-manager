@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { INavigationItem } from '../models/INavigationItem';
+import { INavigationItem } from '../models/navigation-bar/INavigationItem';
 
 @Component({
   selector: 'app-navigation-bar',

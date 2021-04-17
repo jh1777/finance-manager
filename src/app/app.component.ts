@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { NavigationService } from './services/navigation.service';
-import { INavigationItem } from './ui/models/INavigationItem';
+import { INavigationItem } from './ui/models/navigation-bar/INavigationItem';
 
 @Component({
   selector: 'app-root',

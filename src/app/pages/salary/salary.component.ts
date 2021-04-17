@@ -5,14 +5,11 @@ import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { ITableCell } from 'src/app/ui/models/ITableCell';
-import { TableRow } from 'src/app/ui/models/tableRow';
-import { TableRowAction } from 'src/app/ui/models/tableRowAction';
-import { TableSize } from 'src/app/ui/models/tableSize';
-import { TextTableCell } from 'src/app/ui/models/textTableCell';
 import { FillZero } from 'src/app/util/fillZero';
 import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
+import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
+import { getDistinctYearsFromSalary } from 'src/app/util/getSalaryYears';
 
 
 @Component({
@@ -42,6 +39,10 @@ export class SalaryComponent implements OnInit {
   // Delete Confirm
   public deleteConfirmMessage: string;
   public deletionEntry: Gehalt;
+
+  // Butttons
+  public yearButtons: Array<Button> = [];
+  public yearFilterMulti: boolean = true;
 
   public newSalaryEntry = new Gehalt({
     Arbeitgeber: 'Daimler Truck AG',
@@ -87,15 +88,33 @@ export class SalaryComponent implements OnInit {
 
           return 0;
         });
+        
+
+        let currentYear = new Date().getFullYear();
+
+        // Set Buttons
+        if (this.yearButtons.length == 0) {
+          let years = getDistinctYearsFromSalary(data);
+          years.map(y => this.yearButtons.push({
+            label: y.toString(),
+            isSelected: currentYear == y || currentYear - 1 == y
+          }));
+        }
+
         // Map to generic table model
         this.rows = this.mapToTableModel(data);
       }
     );
   }
 
+  private getSelectedYearsFromButtonGroup(): Array<number> {
+    return this.yearButtons.filter(b => b.isSelected).map(b => Number(b.label));
+  }
+
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
     let result = new Array<TableRow>();
-    data.forEach(entry => {
+    let years = this.getSelectedYearsFromButtonGroup();
+    data.filter(d => years.includes(d.Jahr)).forEach(entry => {
       let row = new TableRow();
            
       let action = new TableRowAction();
@@ -247,5 +266,9 @@ export class SalaryComponent implements OnInit {
 
   closeModal(id: string) {
     this.modalService.close(id);
+  }
+
+  public yearFilterChanged(selectedButtons: Array<Button>) {
+    this.updateEntries();
   }
 }

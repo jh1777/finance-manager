@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { ITableCell } from '../models/ITableCell';
-import { TableRow } from '../models/tableRow';
-import { TableRowAction } from '../models/tableRowAction';
-import { TableSize } from '../models/tableSize';
+import { ITableCell } from '../models/table/ITableCell';
+import { TableRow } from '../models/table/tableRow';
+import { TableRowAction } from '../models/table/tableRowAction';
+import { TableSize } from '../models/table/tableSize';
 
 @Component({
   selector: 'app-table',

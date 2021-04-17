@@ -6,6 +6,7 @@ import { PageHeaderComponent } from './page-header/page-header.component';
 import { ShowJsonComponent } from './show-json/show-json.component';
 import { BadgeComponent } from './badge/badge.component';
 import { MenuButtonComponent } from './menu-button/menu-button.component';
+import { InlineButtonGroupComponent } from './inline-button-group/inline-button-group.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 export { TableComponent } from './table/table.component';
@@ -13,6 +14,7 @@ export { PageHeaderComponent } from './page-header/page-header.component';
 export { ShowJsonComponent } from './show-json/show-json.component';
 export { BadgeComponent } from './badge/badge.component';
 export { MenuButtonComponent } from './menu-button/menu-button.component';
+export { InlineButtonGroupComponent } from './inline-button-group/inline-button-group.component';
 
 @NgModule({
     declarations: [
@@ -21,7 +23,8 @@ export { MenuButtonComponent } from './menu-button/menu-button.component';
       PageHeaderComponent,
       ShowJsonComponent,
       BadgeComponent,
-      MenuButtonComponent
+      MenuButtonComponent,
+      InlineButtonGroupComponent
     ],
   imports: [
     CommonModule
@@ -32,7 +35,8 @@ export { MenuButtonComponent } from './menu-button/menu-button.component';
     PageHeaderComponent,
     ShowJsonComponent,
     BadgeComponent,
-    MenuButtonComponent
+    MenuButtonComponent,
+    InlineButtonGroupComponent
   ]
 })
 export class UiModule { }
