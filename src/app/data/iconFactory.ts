@@ -9,6 +9,9 @@ export const getIconWithName = (name: string): string => {
         case 'home-line':
             return '../assets/icons/home-line.svg';
 
+        case 'trash-line':
+            return "../assets/icons/trash-line.svg";
+            
         case 'wallet-line':
             return '../assets/icons/wallet-line.svg';
         
@@ -20,6 +23,10 @@ export const getIconWithName = (name: string): string => {
 
         case 'times-circle-line':
             return '../assets/icons/times-circle-line.svg';
+
+        case 'bar-chart-line':
+            return '../assets/icons/bar-chart-line.svg';
+            
         default:
             break;
     }

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ChartDataSets } from 'chart.js';
 import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
+import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
@@ -7,6 +9,7 @@ import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
 import { getNYears } from 'src/app/util/getNYears';
 import { getUnique } from 'src/app/util/uniqueFromArray';
+import '../../util/numberZeroPadded';
 
 @Component({
   selector: 'app-overview',
@@ -28,9 +31,9 @@ export class OverviewComponent implements OnInit {
 
   // CHart
   public x: Array<string>;
-  public y: Array<number>;
-  public yLabel: string;
-
+  public y: Array<ChartDataSets>;
+  public chartButtonIcon = getIconWithName('bar-chart-line');
+  
   constructor(
     private navigationService: NavigationService,
     private api: ApiService,
@@ -72,14 +75,34 @@ export class OverviewComponent implements OnInit {
     }
   }
 
+  public openAllYearsChart(property: string) {
+
+    this.x = new Array<string>();
+    for(var i = 1; i < 13; i++) {
+      this.x.push(i.PadWithZero());
+    }
+    this.y = new Array<ChartDataSets>();    
+    this.years.forEach(y => {
+      this.y.push({
+        data: this.data[y].map(d => d[property]),
+        label: y.toString()
+      });
+    });
+    this.openModal('year-chart');
+  }
+
   public openSalaryChart(data: Array<Gehalt>) {
     this.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0" + d.Monat}`);
-    this.y = data.map(d => d.Brutto);
-    this.yLabel = 'Brutto';
-    console.log(this.x);
+    let yearData = data.map(d => d.Brutto);
+    this.y = new Array<ChartDataSets>();
+    this.y.push({
+      data: yearData,
+      label: 'Brutto'
+    });
+    //this.yLabel = 'Brutto';
     this.openModal('year-chart');
-  } 
-
+  }
+  
   openModal(id: string) {
     this.modalService.open(id);
   }

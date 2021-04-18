@@ -15,10 +15,11 @@ export class SalaryChartComponent implements OnInit {
   x: Array<string>;
 
   @Input()
-  y: Array<number>;
+  y: Array<ChartDataSets>;
+  //y: Array<number>;
 
-  @Input()
-  yLabel: string;
+/*   @Input()
+  yLabel: string; */
 
 
   constructor() { 
@@ -76,10 +77,11 @@ export class SalaryChartComponent implements OnInit {
     console.log("Chart data x:",this.x);
     if (this.x && this.y) {
       this.barChartLabels = this.x;
-      this.barChartData = new Array<ChartDataSets>({
+      this.barChartData = this.y;
+      /* this.barChartData = new Array<ChartDataSets>({
         data: this.y,
         label: this.yLabel ?? ''
-      });
+      }); */
     }
   }
 

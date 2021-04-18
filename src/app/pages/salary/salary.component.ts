@@ -119,7 +119,7 @@ export class SalaryComponent implements OnInit {
            
       let action = new TableRowAction();
       action.tooltip = "Delete";
-      action.icon = "../../assets/icons/trash-line.svg";
+      action.icon = getIconWithName("trash-line");
       action.action = (id: number) => {
         this.deletionEntry = entry;
         this.deleteConfirmMessage = `Confirm deleting entry ${entry.id}: ${entry.Jahr}/${entry.Monat > 9 ? entry.Monat : "0"+entry.Monat}?`;
