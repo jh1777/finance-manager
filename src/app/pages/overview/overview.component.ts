@@ -93,12 +93,17 @@ export class OverviewComponent implements OnInit {
 
   public openSalaryChart(data: Array<Gehalt>) {
     this.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0" + d.Monat}`);
-    let yearData = data.map(d => d.Brutto);
+    let yearDataBrutto = data.map(d => d.Brutto);
+    let yearDataNetto = data.map(d => d.Netto);
     this.y = new Array<ChartDataSets>();
     this.y.push({
-      data: yearData,
+      data: yearDataBrutto,
       label: 'Brutto'
-    });
+    },{
+      data: yearDataNetto,
+      label: 'Netto'
+    }
+    );
     //this.yLabel = 'Brutto';
     this.openModal('year-chart');
   }

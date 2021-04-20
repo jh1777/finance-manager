@@ -1,5 +1,5 @@
 export class Gehalt {
-  id?: number;
+  id: number;
   Monat: number;
   Jahr: number;
   Brutto: number;

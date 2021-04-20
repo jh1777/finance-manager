@@ -26,7 +26,13 @@ export const getIconWithName = (name: string): string => {
 
         case 'bar-chart-line':
             return '../assets/icons/bar-chart-line.svg';
-            
+        
+        case 'filter-line':
+            return '../assets/icons/filter-line.svg';
+
+        case 'filter-solid':
+            return '../assets/icons/filter-solid.svg';
+                        
         default:
             break;
     }

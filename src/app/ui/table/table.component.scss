@@ -3,7 +3,9 @@
     height: 1em;
     width:  1em;
     cursor: pointer;
-    margin-right: .7em;
+    margin-right: .5em;
+    display: inline-flex;
+    margin-bottom: 2px;
 }
 
 .table-header {
@@ -11,7 +13,7 @@
 }
 
 .table-row {
-
+    cursor: pointer;
     &.even-row {
         background-color: #f9f9f9;
     }
@@ -22,6 +24,10 @@
 }
 
 .table {
+    -webkit-box-shadow: 0 0 0.7em 0 #e0e0e0;
+    -moz-box-shadow: 0 0 0.7em 0 #e0e0e0;
+    box-shadow: 0 0 0.7em 0  #e0e0e0;
+
     &.small {
         font-size: small;
     }

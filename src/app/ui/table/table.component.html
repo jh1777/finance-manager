@@ -6,8 +6,10 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let row of rows; let i = index" class="table-row" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
-            <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}</td>
+        <tr *ngFor="let row of rows; let i = index" class="table-row" (click)="rowEvent(row)" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
+            <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}
+                <img *ngIf="cell.actionIcon" class="action-icon" [src]="cell.actionIcon" (click)="cellAction(cell)" />
+            </td>
             <td *ngIf="hasActions()" >
                 <img *ngFor="let action of row.actions" class="action-icon" [src]="action.icon" (click)="callback(i, action)" />
             </td>

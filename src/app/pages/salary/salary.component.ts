@@ -10,6 +10,7 @@ import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
 import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import { getDistinctYearsFromSalary } from 'src/app/util/getSalaryYears';
+import '../../util/arrayExtensions';
 
 
 @Component({
@@ -32,6 +33,9 @@ export class SalaryComponent implements OnInit {
   public addEntryLabel: string = "Add Salary";
   public addEntryIcon: string = getIconWithName('plus-circle-line');
   public createSalaryLastResult: string = '';
+
+  // Month filter
+  public monthFilterBy: number = null;
 
   // Json Dialog
   public jsonDetails: string;
@@ -76,24 +80,14 @@ export class SalaryComponent implements OnInit {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
-        // Sort by id
-        data.sort((n1, n2) => {
-          if (n1.id > n2.id) {
-            return -1;
-          }
-
-          if (n1.id < n2.id) {
-            return 1;
-          }
-
-          return 0;
-        });
-        
-
-        let currentYear = new Date().getFullYear();
+        if (this.monthFilterBy) {
+          data = data.filter(d => d.Monat == this.monthFilterBy);
+        }
+        data = data.SortDescending('id');
 
         // Set Buttons
         if (this.yearButtons.length == 0) {
+          let currentYear = new Date().getFullYear();
           let years = getDistinctYearsFromSalary(data);
           years.map(y => this.yearButtons.push({
             label: y.toString(),
@@ -111,12 +105,28 @@ export class SalaryComponent implements OnInit {
     return this.yearButtons.filter(b => b.isSelected).map(b => Number(b.label));
   }
 
+  public rowClicked(row: TableRow) {
+/*  Maybe future use ... conflicts with icon on-click 
+    let id = row.cells.map(r => r.id)[0];
+    this.api.getEntry<Gehalt>(id).subscribe(
+      result => {
+        this.showEntryAsJson(result.filter(r => r.id == id).First());
+      }
+    ); */
+  }
+
+  private showEntryAsJson(entry: Gehalt) {
+    this.jsonDetails = JSON.stringify(entry, undefined, 2);
+    this.openModal('json');
+  }
+
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
     let result = new Array<TableRow>();
     let years = this.getSelectedYearsFromButtonGroup();
     data.filter(d => years.includes(d.Jahr)).forEach(entry => {
       let row = new TableRow();
            
+      // Actions
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
@@ -130,34 +140,47 @@ export class SalaryComponent implements OnInit {
       let info = new TableRowAction();
       info.tooltip = "Log";
       info.icon = getIconWithName('info-standard-line');
-      info.action = (id: number) => {
-        this.jsonDetails = JSON.stringify(entry, undefined, 2);
-        this.openModal('json');
+      info.action = () => {
+        this.showEntryAsJson(entry);
       };
       row.actions.push(info);
 
-      let cell = new TextTableCell(entry.id ? `${entry.id}` : "n/a");
+      // Cells
+      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new TextTableCell(`${entry.Jahr}`);
+      cell = new TextTableCell({ id: entry.id, label:`${entry.Jahr}`});
       row.cells.push(cell);
 
-      cell = new TextTableCell(FillZero(entry.Monat));
+      cell = new TextTableCell({ 
+        id: entry.id, 
+        label: FillZero(entry.Monat), 
+        actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), 
+        action: () => {
+          if (!this.monthFilterBy) {
+            this.monthFilterBy = entry.Monat;
+            this.updateEntries();
+          } else {
+            this.monthFilterBy = null;
+            this.updateEntries();
+          }
+        } 
+      });
       row.cells.push(cell);
       
-      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Brutto)}`);
+      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`});
       row.cells.push(cell);
       
-      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Netto)}`);
+      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`});
       row.cells.push(cell);
             
-      cell = new TextTableCell(`${this.currencyPipe.transform(entry.AKP)}`);
+      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`});
       row.cells.push(cell);
             
-      cell = new TextTableCell(`${this.currencyPipe.transform(entry.Kantine)}`);
+      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`});
       row.cells.push(cell);
             
-      cell = new TextTableCell(`${entry.Wochenstunden}`);
+      cell = new TextTableCell({ id: entry.id, label:`${entry.Wochenstunden}`});
       row.cells.push(cell);
 
       result.push(row);
