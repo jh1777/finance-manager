@@ -23,10 +23,16 @@
     }
 }
 
+
 .table-group {
     cursor: pointer;
     background-color: #e5e5e5;
     font-weight: 600;
+}
+
+.icon {
+    vertical-align: text-top !important;
+    margin-right: .2rem;
 }
 
 .table {
@@ -48,7 +54,7 @@
     }
 }
 
-img {
+/* img {
     vertical-align: text-top !important;
     margin-right: .2rem;
-}
+} */

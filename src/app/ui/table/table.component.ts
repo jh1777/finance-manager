@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { ITableCell } from '../models/table/ITableCell';
 import { TableRow } from '../models/table/tableRow';
 import { TableRowAction } from '../models/table/tableRowAction';
@@ -13,7 +13,8 @@ import { getIconWithName } from 'src/app/data/iconFactory';
   selector: 'app-table',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None
 })
 export class TableComponent implements OnInit, OnChanges {
   public tableSizeEnum = TableSize;
@@ -78,11 +79,11 @@ export class TableComponent implements OnInit, OnChanges {
         let result = new Array<TableRow>();
         labels.forEach(group => {
           let isCollapsed = this.excludeGroupsInTable.includes(group);
-          let groupIcon =  isCollapsed ? getIconWithName('folder-line') : getIconWithName('folder-open-line');
-          let groupRow = new GroupRow({ groupLabel: group, icon: groupIcon });
+          let groupIcon =  isCollapsed ? "../assets/icons/angle-line-90.svg" : "../assets/icons/angle-line-180.svg";
+          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
+          let groupRow = new GroupRow({ groupLabel: group, icon: groupIcon, itemCount: groupData.length, isCollapsed: isCollapsed });
           result.push(groupRow);
 
-          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
           for (var i = 0; i < groupData.length ; i++) {
             groupData[i].hidden = isCollapsed;
             result.push(groupData[i]);
@@ -104,6 +105,7 @@ export class TableComponent implements OnInit, OnChanges {
     } else {
       this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel), 1);
     }
+    row.isCollapsed = !row.isCollapsed;
     this.grouped = false;
     this.createGroups();
   }

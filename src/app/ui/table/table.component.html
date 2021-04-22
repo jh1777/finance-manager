@@ -17,8 +17,8 @@
             </tr>
             <tr *ngIf="isGroupRow(row)" class="table-group" (click)="groupRowClick(row)">
                 <td [attr.colspan]="getNoOfColumns()">
-                    <img [src]="row.icon" width="18px"/>
-                    {{ row.groupLabel }}
+                    <img [src]="row.icon" width="18px" class="icon"/>
+                    {{ row.groupLabel }}<span *ngIf="row.isCollapsed"> ({{ row.itemCount }})</span>
                 </td>
             </tr>
         </ng-container>

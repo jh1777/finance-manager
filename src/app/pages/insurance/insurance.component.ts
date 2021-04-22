@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell, TableRow, TableSize, TextTableCell } from 'src/app/ui';
+import { Distinct } from 'src/app/util/uniqueFromArray';
 
 @Component({
   selector: 'app-insurance',
@@ -21,7 +22,8 @@ export class InsuranceComponent implements OnInit {
   public header: Array<ITableCell> = [];
   public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
-  
+  public footerText: string;
+
   public data: Array<Versicherung>;
  
   constructor(
@@ -46,7 +48,7 @@ export class InsuranceComponent implements OnInit {
     this.api.setService("versicherungen");
     this.api.getAllEntries<Versicherung>().subscribe({
       next: (result) => {
-        this.data = result.body;
+        this.data = result.body.SortDescending('Erstellt');
         this.mapDataToTableModel();
       },
       error: (e) => {
@@ -57,6 +59,7 @@ export class InsuranceComponent implements OnInit {
 
   private mapDataToTableModel() {
     this.createHeader();
+    this.createFooter();
 
     let result = new Array<TableRow>();
     this.data.forEach(entry => {
@@ -83,6 +86,9 @@ export class InsuranceComponent implements OnInit {
 
     this.rows = result;
   }
+  private createFooter() {
+    this.footerText = `${Distinct(this.data.map(d => d.Name)).length} Versicherungen`;
+  }
 
   private createHeader() {
     this.header.push({
@@ -94,7 +100,7 @@ export class InsuranceComponent implements OnInit {
       type: 'header'
     });
     this.header.push({
-      label: 'Rueckkaufswert',
+      label: 'Rückkaufswert',
       type: 'header'
     });
     this.header.push({
@@ -106,6 +112,6 @@ export class InsuranceComponent implements OnInit {
       type: 'header'
     });
 
-    this.groupCell = this.header[3];
+    this.groupCell = this.header[1];
   }
 }
