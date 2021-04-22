@@ -59,12 +59,13 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private createGroups() {
-    // BUG: Searches in all columns!!!
+    // ToDo: Add component input boolean 'collapseGroupsByDefault'
     if (this.groupColumn) {
       let colIndex = this.header.indexOf(this.groupColumn);
       if (colIndex != -1) {
 
-        let labels = Distinct<string>(this.rows.filter(r => !(r instanceof GroupRow)).map(r => r.cells[colIndex].label));
+        let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));
+        let labels = Distinct<string>(filterableRows.map(r => r.cells[colIndex].label));
 
         let result = new Array<TableRow>();
         labels.forEach(group => {
@@ -77,7 +78,7 @@ export class TableComponent implements OnInit, OnChanges {
           let groupRow = new GroupRow({ groupLabel: group, icon: groupIcon });
           result.push(groupRow);
 
-          let groupData = this.rows.filter(r => r.cells.some(c => c.label == group));
+          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
           for (var i = 0; i < groupData.length ; i++) {
             groupData[i].hidden = false;
             if (isCollapsed) {
