@@ -28,6 +28,9 @@ export class TableComponent implements OnInit, OnChanges {
   groupColumn: ITableCell = null;
 
   @Input()
+  collapseGroupsByDefault: boolean = false;
+
+  @Input()
   footer: string;
 
   @Input()
@@ -38,6 +41,7 @@ export class TableComponent implements OnInit, OnChanges {
 
   private grouped = false;
   private excludeGroupsInTable: Array<string> = [];
+  private firstLoad: boolean = true;
 
   constructor() { }
 
@@ -59,13 +63,17 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private createGroups() {
-    // ToDo: Add component input boolean 'collapseGroupsByDefault'
     if (this.groupColumn) {
       let colIndex = this.header.indexOf(this.groupColumn);
       if (colIndex != -1) {
 
         let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));
         let labels = Distinct<string>(filterableRows.map(r => r.cells[colIndex].label));
+        if (this.firstLoad && this.collapseGroupsByDefault) {
+          this.excludeGroupsInTable = [];
+          labels.forEach(l => this.excludeGroupsInTable.push(l));
+          this.firstLoad = false;
+        }
 
         let result = new Array<TableRow>();
         labels.forEach(group => {
@@ -92,16 +100,12 @@ export class TableComponent implements OnInit, OnChanges {
 
   public groupRowClick(row: GroupRow) {
     if (!this.excludeGroupsInTable.includes(row.groupLabel)) {
-      row.icon = getIconWithName('folder-line');
       this.excludeGroupsInTable.push(row.groupLabel);
-      this.grouped = false;
-      this.createGroups();
     } else {
-      row.icon = getIconWithName('folder-open-line');
-      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel));
-      this.grouped = false;
-      this.createGroups();
+      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel), 1);
     }
+    this.grouped = false;
+    this.createGroups();
   }
   
   public hasActions(): boolean {

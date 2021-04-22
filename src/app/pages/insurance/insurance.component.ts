@@ -1,3 +1,4 @@
+import { CurrencyPipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime';
@@ -25,6 +26,7 @@ export class InsuranceComponent implements OnInit {
  
   constructor(
     private navigationService: NavigationService,
+    private currencyPipe: CurrencyPipe,
     private api: ApiService
   ) { 
     this.navigationService.activeMenu.next(3);
@@ -67,7 +69,7 @@ export class InsuranceComponent implements OnInit {
       cell = new TextTableCell({ id: entry.id, label:`${entry.Name}`});
       row.cells.push(cell);
 
-      cell = new TextTableCell({ id: entry.id, label:`${entry.Rueckkaufswert.toFixed(2) } €`});
+      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
       row.cells.push(cell);
 
       cell = new TextTableCell({ id: entry.id, label:`${ dayjs(entry.Datum).fromNow() }`});

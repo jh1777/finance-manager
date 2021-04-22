@@ -8,6 +8,6 @@
 
     </app-page-header>
     <p></p>
-    <app-table [header]="header" [rows]="rows" [size]="tableSize" [groupColumn]="groupCell" (rowAction)="rowClicked($event)"></app-table>
+    <app-table [header]="header" [rows]="rows" [size]="tableSize" collapseGroupsByDefault=true [groupColumn]="groupCell" (rowAction)="rowClicked($event)"></app-table>
 
 </div>
