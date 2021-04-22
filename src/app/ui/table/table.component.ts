@@ -69,21 +69,14 @@ export class TableComponent implements OnInit, OnChanges {
 
         let result = new Array<TableRow>();
         labels.forEach(group => {
-          let groupIcon = getIconWithName('folder-open-line');
           let isCollapsed = this.excludeGroupsInTable.includes(group);
-          if (isCollapsed) {
-            groupIcon = getIconWithName('folder-line');
-          }
-
+          let groupIcon =  isCollapsed ? getIconWithName('folder-line') : getIconWithName('folder-open-line');
           let groupRow = new GroupRow({ groupLabel: group, icon: groupIcon });
           result.push(groupRow);
 
           let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
           for (var i = 0; i < groupData.length ; i++) {
-            groupData[i].hidden = false;
-            if (isCollapsed) {
-              groupData[i].hidden = true;
-            }
+            groupData[i].hidden = isCollapsed;
             result.push(groupData[i]);
           }
         })
@@ -105,7 +98,7 @@ export class TableComponent implements OnInit, OnChanges {
       this.createGroups();
     } else {
       row.icon = getIconWithName('folder-open-line');
-      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel, 0), 1);
+      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel));
       this.grouped = false;
       this.createGroups();
     }
