@@ -8,7 +8,7 @@ import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
 import { getNYears } from 'src/app/util/getNYears';
-import { getUnique } from 'src/app/util/uniqueFromArray';
+import { Distinct } from 'src/app/util/uniqueFromArray';
 import '../../util/numberZeroPadded';
 
 @Component({
@@ -53,7 +53,7 @@ export class OverviewComponent implements OnInit {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
-        this.years = getUnique(data.map(d => d.Jahr)).filter(y => years.includes(y)).sort((n1, n2) => {
+        this.years = Distinct(data.map(d => d.Jahr)).filter(y => years.includes(y)).sort((n1, n2) => {
           if (n1 > n2) { return -1; }
           if (n1 < n2) { return 1; }
           return 0;

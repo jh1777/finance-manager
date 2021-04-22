@@ -32,7 +32,14 @@ export const getIconWithName = (name: string): string => {
 
         case 'filter-solid':
             return '../assets/icons/filter-solid.svg';
-                        
+
+
+        case 'folder-line':
+            return '../assets/icons/folder-line.svg';
+
+        case 'folder-open-line':
+            return '../assets/icons/folder-open-line.svg';
+                    
         default:
             break;
     }

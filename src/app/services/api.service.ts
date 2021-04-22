@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -19,6 +19,11 @@ export class ApiService {
     'Cache-Control': 'no-cache'
   });
      
+  setService(service: string) {
+    this.service = service;
+    this.url = `${environment.apiUrl}/${service}`;
+  }
+
   getAllEntries<T>(): Observable<HttpResponse<T[]>> {
     return this.httpClient.get<T[]>(
       this.url, { observe: 'response' })
