@@ -74,7 +74,6 @@ export class SalaryChartComponent implements OnInit {
   }
 
   ngOnChanges() {
-    console.log("Chart data x:",this.x);
     if (this.x && this.y) {
       this.barChartLabels = this.x;
       this.barChartData = this.y;

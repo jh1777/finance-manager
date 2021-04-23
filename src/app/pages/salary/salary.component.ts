@@ -11,6 +11,7 @@ import { ModalService } from 'src/app/modalModule';
 import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import { getDistinctYearsFromSalary } from 'src/app/util/getSalaryYears';
 import '../../util/arrayExtensions';
+import { environment } from 'src/environments/environment';
 
 
 @Component({
@@ -80,6 +81,11 @@ export class SalaryComponent implements OnInit {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
+        if (environment.mockData) {
+          data.map(d => d.Netto = d.Netto * 63 * Math.random());
+          data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
+        }
+
         if (this.monthFilterBy) {
           data = data.filter(d => d.Monat == this.monthFilterBy);
         }

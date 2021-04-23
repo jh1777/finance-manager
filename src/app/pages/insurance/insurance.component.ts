@@ -8,6 +8,7 @@ import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell, TableRow, TableSize, TextTableCell } from 'src/app/ui';
 import { Distinct } from 'src/app/util/uniqueFromArray';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-insurance',
@@ -49,6 +50,9 @@ export class InsuranceComponent implements OnInit {
     this.api.getAllEntries<Versicherung>().subscribe({
       next: (result) => {
         this.data = result.body.SortDescending('Erstellt');
+        if (environment.mockData) {
+          this.data.map(d => d.Rueckkaufswert = d.Rueckkaufswert * 45 * Math.random());
+        }
         this.mapDataToTableModel();
       },
       error: (e) => {

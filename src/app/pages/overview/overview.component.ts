@@ -7,8 +7,10 @@ import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
+import { FillZero } from 'src/app/util/fillZero';
 import { getNYears } from 'src/app/util/getNYears';
 import { Distinct } from 'src/app/util/uniqueFromArray';
+import { environment } from 'src/environments/environment';
 import '../../util/numberZeroPadded';
 
 @Component({
@@ -53,6 +55,10 @@ export class OverviewComponent implements OnInit {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
+        if (environment.mockData) {
+          data.map(d => d.Netto = d.Netto * 63 * Math.random());
+          data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
+        }
         this.years = Distinct(data.map(d => d.Jahr)).filter(y => years.includes(y)).sort((n1, n2) => {
           if (n1 > n2) { return -1; }
           if (n1 < n2) { return 1; }
@@ -92,7 +98,7 @@ export class OverviewComponent implements OnInit {
   }
 
   public openSalaryChart(data: Array<Gehalt>) {
-    this.x = data.map(d => `${d.Jahr}/${d.Monat > 9 ? d.Monat : "0" + d.Monat}`);
+    this.x = data.map(d => `${d.Jahr}/${FillZero(d.Monat)}`);
     let yearDataBrutto = data.map(d => d.Brutto);
     let yearDataNetto = data.map(d => d.Netto);
     this.y = new Array<ChartDataSets>();
