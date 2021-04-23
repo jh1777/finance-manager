@@ -73,7 +73,6 @@ export class SalaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.createHeader();
     this.updateEntries();
   }
 
@@ -92,26 +91,11 @@ export class SalaryComponent implements OnInit {
         }
         data = data.SortDescending('id');
 
-        // Set Buttons
-        /* if (this.yearButtons.length == 0) {
-          let currentYear = new Date().getFullYear();
-          let years = getDistinctYearsFromSalary(data);
-          years.map(y => this.yearButtons.push({
-            label: y.toString(),
-            isSelected: currentYear == y || currentYear - 1 == y
-          }));
-        }
- */
-        
         // Map to generic table model
         this.rows = this.mapToTableModel(data);
       }
     );
   }
-
-/*   private getSelectedYearsFromButtonGroup(): Array<number> {
-    return this.yearButtons.filter(b => b.isSelected).map(b => Number(b.label));
-  } */
 
   public rowClicked(row: TableRow) {
 /*  Maybe future use ... conflicts with icon on-click 
@@ -129,11 +113,9 @@ export class SalaryComponent implements OnInit {
   }
 
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
-    
+    this.createHeader();
     
     let result = new Array<TableRow>();
-    //let years = this.getSelectedYearsFromButtonGroup();
-    //data.filter(d => years.includes(d.Jahr)).forEach(entry => {
     data.forEach(entry => {
       let row = new TableRow();
            
@@ -238,7 +220,11 @@ export class SalaryComponent implements OnInit {
       type: 'header'
     });
     this.header = header;
-    this.groupCell = header[1];
+    
+    if (!this.monthFilterBy) {
+      this.groupCell = header[1];
+    }
+    
   }
 
   public toggleNewEntryForm() {
@@ -307,8 +293,4 @@ export class SalaryComponent implements OnInit {
   closeModal(id: string) {
     this.modalService.close(id);
   }
-
-/*   public yearFilterChanged(selectedButtons: Array<Button>) {
-    this.updateEntries();
-  } */
 }
