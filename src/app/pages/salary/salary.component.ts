@@ -9,7 +9,6 @@ import { FillZero } from 'src/app/util/fillZero';
 import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
 import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
-import { getDistinctYearsFromSalary } from 'src/app/util/getSalaryYears';
 import '../../util/arrayExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
@@ -23,6 +22,8 @@ import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell
 export class SalaryComponent implements OnInit {
   public pageTitle = "Payments";
 
+  private data: Array<Gehalt>;
+
   public tableSizeEnum = TableSize;
   public hideToast: boolean = true;
 
@@ -30,6 +31,7 @@ export class SalaryComponent implements OnInit {
   public header: Array<ITableCell> = [];
   public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
+  public footerText: string;
 
   public showAddEntry: boolean = false;
   public addEntryLabel: string = "Add Salary";
@@ -80,19 +82,19 @@ export class SalaryComponent implements OnInit {
     // Get Data from API
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
-        let data = result.body;
+        this.data = result.body;
         if (environment.mockData) {
-          data.map(d => d.Netto = d.Netto * 63 * Math.random());
-          data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
+          this.data.map(d => d.Netto = d.Netto * 63 * Math.random());
+          this.data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
         }
 
         if (this.monthFilterBy) {
-          data = data.filter(d => d.Monat == this.monthFilterBy);
+          this.data = this.data.filter(d => d.Monat == this.monthFilterBy);
         }
-        data = data.SortDescending('id');
+        this.data = this.data.SortDescending('id');
 
         // Map to generic table model
-        this.rows = this.mapToTableModel(data);
+        this.rows = this.mapToTableModel(this.data);
       }
     );
   }
@@ -114,7 +116,8 @@ export class SalaryComponent implements OnInit {
 
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
     this.createHeader();
-    
+    this.createFooter();
+
     let result = new Array<TableRow>();
     data.forEach(entry => {
       let row = new TableRow();
@@ -284,6 +287,10 @@ export class SalaryComponent implements OnInit {
       });
     }
     this.closeModal('delete-confirmation');
+  }
+
+  private createFooter() {
+    this.footerText = `${this.data.map(d => d.Jahr).Distinct().length} Years (${ this.data.map(d => d.Monat).length} Months)`;
   }
 
   openModal(id: string) {

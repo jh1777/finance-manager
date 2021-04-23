@@ -3,11 +3,7 @@ import { ITableCell } from '../models/table/ITableCell';
 import { TableRow } from '../models/table/tableRow';
 import { TableRowAction } from '../models/table/tableRowAction';
 import { TableSize } from '../models/table/tableSize';
-import { Dictionary } from "../../util/dictionary";
 import { GroupRow } from '../models/table/groupRow';
-import { Distinct } from 'src/app/util/uniqueFromArray';
-import { getIconWithName } from 'src/app/data/iconFactory';
-
 
 @Component({
   selector: 'app-table',
@@ -43,7 +39,7 @@ export class TableComponent implements OnInit, OnChanges {
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
 
-  // TODO: Add collapse all button in group rows 
+  // TODO: Add "collapse all groups" button in group row 
   constructor() { }
 
   ngOnInit(): void {
@@ -68,7 +64,7 @@ export class TableComponent implements OnInit, OnChanges {
       if (colIndex != -1) {
 
         let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));
-        let labels = Distinct<string>(filterableRows.map(r => r.cells[colIndex].label));
+        let labels = filterableRows.map(r => r.cells[colIndex].label).Distinct();
         if (this.firstLoad && this.collapseGroupsByDefault) { 
           this.excludeGroupsInTable = [];
           labels.forEach(l => this.excludeGroupsInTable.push(l));
@@ -120,4 +116,3 @@ export class TableComponent implements OnInit, OnChanges {
     cell.action();
   }
 }
-

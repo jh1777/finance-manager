@@ -8,7 +8,6 @@ import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell, TableRow, TableSize, TextTableCell } from 'src/app/ui';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
-import { Distinct } from 'src/app/util/uniqueFromArray';
 import { environment } from 'src/environments/environment';
 
 @Component({
@@ -91,8 +90,9 @@ export class InsuranceComponent implements OnInit {
 
     this.rows = result;
   }
+
   private createFooter() {
-    this.footerText = `${Distinct(this.data.map(d => d.Name)).length} Categories`;
+    this.footerText = `${this.data.map(d => d.Name).Distinct().length} Categories`;
   }
 
   private createHeader() {

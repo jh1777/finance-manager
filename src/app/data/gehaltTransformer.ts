@@ -1,8 +1,5 @@
 import { Gehalt } from "../services/models/gehalt";
-import { TableRow } from "../ui";
-import { GroupRow } from "../ui/models/table/groupRow";
 import { Dictionary } from "../util/dictionary";
-import { Distinct } from "../util/uniqueFromArray";
 
 export class GehaltTransformer {
 
@@ -15,7 +12,7 @@ export class GehaltTransformer {
         var result: Dictionary<Array<Gehalt>> = {};
 
         let years = data.map(d => d.Jahr);
-        let yearsUnique = Distinct<number>(years);
+        let yearsUnique = years.Distinct();
 
         yearsUnique.forEach(y => {
             let yearData = data.filter(d => d.Jahr === y);
@@ -39,7 +36,7 @@ export class GehaltTransformer {
     public static calculateYearDiffs(data: Array<Gehalt>, attribute: string): Dictionary<number> {
         var result: Dictionary<number> = {};
         let years = data.map(d => d.Jahr);
-        let yearsUnique = Distinct<number>(years);
+        let yearsUnique = years.Distinct();
 
         yearsUnique.forEach(y => {
             let yearData = data.filter(d => d.Jahr === y);

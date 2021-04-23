@@ -9,7 +9,6 @@ import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
 import { FillZero } from 'src/app/util/fillZero';
 import { getNYears } from 'src/app/util/getNYears';
-import { Distinct } from 'src/app/util/uniqueFromArray';
 import { environment } from 'src/environments/environment';
 import '../../util/numberZeroPadded';
 
@@ -59,7 +58,7 @@ export class OverviewComponent implements OnInit {
           data.map(d => d.Netto = d.Netto * 63 * Math.random());
           data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
         }
-        this.years = Distinct(data.map(d => d.Jahr)).filter(y => years.includes(y)).sort((n1, n2) => {
+        this.years = data.map(d => d.Jahr).Distinct().filter(y => years.includes(y)).sort((n1, n2) => {
           if (n1 > n2) { return -1; }
           if (n1 < n2) { return 1; }
           return 0;
