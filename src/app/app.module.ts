@@ -12,7 +12,6 @@ import { HttpClientModule } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
-import { TestComponent } from './components/test/test.component';
 import { SalaryYearTileComponent } from './components/salary-year-tile/salary-year-tile.component';
 import { SalaryAddEntryComponent } from './components/salary-add-entry/salary-add-entry.component'; 
 import { FormsModule } from '@angular/forms';
@@ -26,7 +25,6 @@ registerLocaleData(localeDe);
     AppComponent,
     OverviewComponent,
     SalaryComponent,
-    TestComponent,
     SalaryYearTileComponent,
     SalaryAddEntryComponent,
     SalaryChartComponent,

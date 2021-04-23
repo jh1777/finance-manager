@@ -91,7 +91,7 @@ export class InsuranceComponent implements OnInit {
     this.rows = result;
   }
   private createFooter() {
-    this.footerText = `${Distinct(this.data.map(d => d.Name)).length} Versicherungen`;
+    this.footerText = `${Distinct(this.data.map(d => d.Name)).length} Categories`;
   }
 
   private createHeader() {
