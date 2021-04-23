@@ -2,6 +2,7 @@ declare global {
     export interface Array<T> {
         SortDescending(prop: string): Array<T>;
         First(): T;
+        Distinct(): Array<T>;
     }
 }
 
@@ -11,6 +12,10 @@ Array.prototype.SortDescending = function (prop: string) {
         if (n1[prop] < n2[prop]) { return 1; }
         return 0;
       });
+}
+
+Array.prototype.Distinct = function ()  {
+    return  [...new Set(this)];
 }
 
 Array.prototype.First = function () {

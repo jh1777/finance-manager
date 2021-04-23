@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell, TableRow, TableSize, TextTableCell } from 'src/app/ui';
+import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { Distinct } from 'src/app/util/uniqueFromArray';
 import { environment } from 'src/environments/environment';
 
@@ -73,16 +74,16 @@ export class InsuranceComponent implements OnInit {
       let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new TextTableCell({ id: entry.id, label:`${entry.Name}`});
+      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });
       row.cells.push(cell);
 
       cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
       row.cells.push(cell);
 
-      cell = new TextTableCell({ id: entry.id, label:`${ dayjs(entry.Datum).fromNow() }`});
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ dayjs(entry.Datum).fromNow() }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
-      cell = new TextTableCell({ id: entry.id, label:`${dayjs(entry.Erstellt).fromNow()}`});
+      cell = new StyledTextTableCell({ id: entry.id, label:`${dayjs(entry.Erstellt).fromNow()}`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
       result.push(row);

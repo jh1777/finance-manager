@@ -40,19 +40,17 @@ export class TableComponent implements OnInit, OnChanges {
   @Output()
   rowAction = new EventEmitter<TableRow>();
 
-  private grouped = false;
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
 
+  // TODO: Add collapse all button in group rows 
   constructor() { }
 
   ngOnInit(): void {
   }
 
   ngOnChanges() {
-    if (!this.grouped) {
-      this.createGroups();
-    }
+    this.createGroups();
   }
 
   public isGroupRow(row: TableRow) {
@@ -60,17 +58,18 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   public getNoOfColumns(): number {
-    return this.header.length;
+    return this.header.length + (this.hasActions() ? 1 : 0);
   }
 
   private createGroups() {
     if (this.groupColumn) {
+
       let colIndex = this.header.indexOf(this.groupColumn);
       if (colIndex != -1) {
 
         let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));
         let labels = Distinct<string>(filterableRows.map(r => r.cells[colIndex].label));
-        if (this.firstLoad && this.collapseGroupsByDefault) {
+        if (this.firstLoad && this.collapseGroupsByDefault) { 
           this.excludeGroupsInTable = [];
           labels.forEach(l => this.excludeGroupsInTable.push(l));
           this.firstLoad = false;
@@ -90,7 +89,6 @@ export class TableComponent implements OnInit, OnChanges {
           }
         })
         this.rows = result;
-        this.grouped = true;
       }
     }
   }
@@ -106,7 +104,6 @@ export class TableComponent implements OnInit, OnChanges {
       this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel), 1);
     }
     row.isCollapsed = !row.isCollapsed;
-    this.grouped = false;
     this.createGroups();
   }
   

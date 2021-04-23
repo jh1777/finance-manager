@@ -13,11 +13,18 @@
         </div>
     </app-page-header>
     
-    <app-inline-button-group [buttons]="yearButtons" [multiSelect]="yearFilterMulti" (selectedButtons)="yearFilterChanged($event)"></app-inline-button-group>
+  <!--   <app-inline-button-group [buttons]="yearButtons" [multiSelect]="yearFilterMulti" (selectedButtons)="yearFilterChanged($event)"></app-inline-button-group>  -->
 
     <app-salary-add-entry *ngIf="showAddEntry" [model]="newSalaryEntry" (newEntry)="createSalary($event)"></app-salary-add-entry>
     <p></p>
-    <app-table [header]="header" [rows]="rows" [size]="tableSize" (rowAction)="rowClicked($event)"></app-table>
+    <app-table 
+        [header]="header" 
+        [rows]="rows" 
+        [size]="tableSize" 
+        collapseGroupsByDefault=true 
+        [groupColumn]="groupCell"
+        (rowAction)="rowClicked($event)">
+    </app-table>
 </div>
 
 <jw-modal id="json" class="small-modal">

@@ -12,6 +12,7 @@ import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell 
 import { getDistinctYearsFromSalary } from 'src/app/util/getSalaryYears';
 import '../../util/arrayExtensions';
 import { environment } from 'src/environments/environment';
+import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 
 
 @Component({
@@ -27,7 +28,7 @@ export class SalaryComponent implements OnInit {
 
   public rows: Array<TableRow> = [];
   public header: Array<ITableCell> = [];
-
+  public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
 
   public showAddEntry: boolean = false;
@@ -63,7 +64,6 @@ export class SalaryComponent implements OnInit {
     private currencyPipe: CurrencyPipe
     ) { 
 
-    this.createHeader();
     this.navigationService.activeMenu.next(2);
 
   }
@@ -73,6 +73,7 @@ export class SalaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.createHeader();
     this.updateEntries();
   }
 
@@ -92,7 +93,7 @@ export class SalaryComponent implements OnInit {
         data = data.SortDescending('id');
 
         // Set Buttons
-        if (this.yearButtons.length == 0) {
+        /* if (this.yearButtons.length == 0) {
           let currentYear = new Date().getFullYear();
           let years = getDistinctYearsFromSalary(data);
           years.map(y => this.yearButtons.push({
@@ -100,16 +101,17 @@ export class SalaryComponent implements OnInit {
             isSelected: currentYear == y || currentYear - 1 == y
           }));
         }
-
+ */
+        
         // Map to generic table model
         this.rows = this.mapToTableModel(data);
       }
     );
   }
 
-  private getSelectedYearsFromButtonGroup(): Array<number> {
+/*   private getSelectedYearsFromButtonGroup(): Array<number> {
     return this.yearButtons.filter(b => b.isSelected).map(b => Number(b.label));
-  }
+  } */
 
   public rowClicked(row: TableRow) {
 /*  Maybe future use ... conflicts with icon on-click 
@@ -127,9 +129,12 @@ export class SalaryComponent implements OnInit {
   }
 
   private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
+    
+    
     let result = new Array<TableRow>();
-    let years = this.getSelectedYearsFromButtonGroup();
-    data.filter(d => years.includes(d.Jahr)).forEach(entry => {
+    //let years = this.getSelectedYearsFromButtonGroup();
+    //data.filter(d => years.includes(d.Jahr)).forEach(entry => {
+    data.forEach(entry => {
       let row = new TableRow();
            
       // Actions
@@ -155,19 +160,22 @@ export class SalaryComponent implements OnInit {
       let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new TextTableCell({ id: entry.id, label:`${entry.Jahr}`});
+      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});
       row.cells.push(cell);
 
-      cell = new TextTableCell({ 
+      cell = new StyledTextTableCell({ 
         id: entry.id, 
         label: FillZero(entry.Monat), 
+        style:{ 'font-weight': '500' },
         actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), 
         action: () => {
           if (!this.monthFilterBy) {
             this.monthFilterBy = entry.Monat;
+            this.groupCell = null;
             this.updateEntries();
           } else {
             this.monthFilterBy = null;
+            this.groupCell = this.header[1];
             this.updateEntries();
           }
         } 
@@ -196,38 +204,41 @@ export class SalaryComponent implements OnInit {
   }
 
   private createHeader() {
-    this.header.push({
+    let header = [];
+    header.push({
       label: 'No.',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Jahr',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Monat',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Brutto',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Netto',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'AKP',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Kantine',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Stunden/Woche',
       type: 'header'
     });
+    this.header = header;
+    this.groupCell = header[1];
   }
 
   public toggleNewEntryForm() {
@@ -297,7 +308,7 @@ export class SalaryComponent implements OnInit {
     this.modalService.close(id);
   }
 
-  public yearFilterChanged(selectedButtons: Array<Button>) {
+/*   public yearFilterChanged(selectedButtons: Array<Button>) {
     this.updateEntries();
-  }
+  } */
 }

@@ -8,7 +8,7 @@
     <tbody>
         <ng-container *ngFor="let row of rows; let i = index">
             <tr *ngIf="!isGroupRow(row) && !row.hidden" class="table-row" (click)="rowEvent(row)" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
-                <td *ngFor="let cell of row.cells" scope="row">{{ cell.label }}
+                <td *ngFor="let cell of row.cells" scope="row" [ngStyle]="cell.style">{{ cell.label }}
                     <img *ngIf="cell.actionIcon" class="action-icon" [src]="cell.actionIcon" (click)="cellAction(cell)" />
                 </td>
                 <td *ngIf="hasActions()" >
