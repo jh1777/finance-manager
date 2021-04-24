@@ -9,7 +9,7 @@ import { OverviewComponent } from './pages/overview/overview.component';
 import { SalaryComponent } from './pages/salary/salary.component';
 import { UiModule } from './ui/ui.module';
 import { HttpClientModule } from '@angular/common/http';
-import { CurrencyPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe } from '@angular/common';
 import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { SalaryYearTileComponent } from './components/salary-year-tile/salary-year-tile.component';
@@ -41,6 +41,7 @@ registerLocaleData(localeDe);
   ],
   providers: [
     CurrencyPipe,
+    DatePipe,
     {
       provide: LOCALE_ID,
       useValue: 'de' // 'de-DE' for Germany, 'fr-FR' for France ...

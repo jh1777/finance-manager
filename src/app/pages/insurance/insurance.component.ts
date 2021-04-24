@@ -1,7 +1,7 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import * as dayjs from 'dayjs';
-import * as relativeTime from 'dayjs/plugin/relativeTime';
+/* import * as dayjs from 'dayjs';
+import * as relativeTime from 'dayjs/plugin/relativeTime'; */
 
 import { ApiService } from 'src/app/services/api.service';
 import { Versicherung } from 'src/app/services/models/versicherung';
@@ -30,10 +30,11 @@ export class InsuranceComponent implements OnInit {
   constructor(
     private navigationService: NavigationService,
     private currencyPipe: CurrencyPipe,
+    private datePipe: DatePipe,
     private api: ApiService
   ) { 
     this.navigationService.activeMenu.next(3);
-    dayjs.extend(relativeTime);
+    // no loonger used: dayjs.extend(relativeTime);
   }
 
   ngOnInit(): void {
@@ -49,7 +50,7 @@ export class InsuranceComponent implements OnInit {
     this.api.setService("versicherungen");
     this.api.getAllEntries<Versicherung>().subscribe({
       next: (result) => {
-        this.data = result.body.SortDescending('Erstellt');
+        this.data = result.body.SortDescending('Datum');
         if (environment.mockData) {
           this.data.map(d => d.Rueckkaufswert = d.Rueckkaufswert * 45 * Math.random());
         }
@@ -79,10 +80,10 @@ export class InsuranceComponent implements OnInit {
       cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ dayjs(entry.Datum).fromNow() }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${dayjs(entry.Erstellt).fromNow()}`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ entry.Erstellt }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
       result.push(row);
