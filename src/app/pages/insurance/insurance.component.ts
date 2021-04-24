@@ -1,5 +1,8 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { timer } from 'rxjs';
+import { getIconWithName } from 'src/app/data/iconFactory';
 /* import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime'; */
 
@@ -26,6 +29,14 @@ export class InsuranceComponent implements OnInit {
   public footerText: string;
 
   public data: Array<Versicherung>;
+
+  public showAddEntry: boolean = false;
+  public addEntryLabel: string = "Add Insurance";
+  public addEntryIcon: string = getIconWithName('plus-circle-line');
+  public newInsuranceEntry = new Versicherung({
+    Erstellt: this.datePipe.transform(new Date(), 'yyyy-MM-dd')
+  });
+  public createEntryLastResult: string = '';
  
   constructor(
     private navigationService: NavigationService,
@@ -111,31 +122,78 @@ export class InsuranceComponent implements OnInit {
   }
 
   private createHeader() {
-    this.header.push({
+    let header: Array<ITableCell> = [];
+
+    header.push({
       label: 'No.',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Name',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Rückkaufswert',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Delta',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Datum',
       type: 'header'
     });
-    this.header.push({
+    header.push({
       label: 'Erstellt',
       type: 'header'
     });
-
+    this.header = header;
     this.groupCell = this.header[1];
   }
+
+  public toggleNewEntryForm() {
+    this.showAddEntry = !this.showAddEntry;
+    if (this.showAddEntry) {
+      this.addEntryLabel = "Close Form";
+      this.addEntryIcon = getIconWithName('times-circle-line');
+    } else {
+      this.addEntryLabel = "Add Insurance";
+      this.addEntryIcon = getIconWithName('plus-circle-line');
+    }
+  }
+
+  public createInsurance(item: Versicherung) {
+
+    console.log(item);
+    this.api.setService("versicherungen");
+    this.api.createEntry<Versicherung>(item).subscribe(
+        res => {
+          var response = <HttpResponse<Versicherung>>res;
+          this.showResultWithTimer(`POST Versicherung Eintrag ${item.Name}/${item.Datum}: HTTP Code ${response.status}`);
+
+          if (res.ok) {
+            this.resetNewInsuranceItem();
+            this.toggleNewEntryForm();
+            this.getData();
+          }
+        },
+        (err: HttpErrorResponse) => {
+          this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);
+        }
+      );
+  }
+
+  private resetNewInsuranceItem() {
+    this.newInsuranceEntry.Name = null;
+    this.newInsuranceEntry.Rueckkaufswert = null;
+    this.newInsuranceEntry.Datum = null;
+  }
+
+  private showResultWithTimer(message: string) {
+    this.createEntryLastResult = message;
+    const salaryLastResultTimer = timer(10000);
+    salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');
+  }
+
 }

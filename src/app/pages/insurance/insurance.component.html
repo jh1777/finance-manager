@@ -2,11 +2,11 @@
     <app-page-header>
         <div class="left">{{ pageTitle }}</div>
         <div class="right">
-            
-          
+            <span class="status-text">{{ createEntryLastResult }}</span>
+            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=18 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
         </div>
-
     </app-page-header>
+    <app-insurance-add-entry *ngIf="showAddEntry" [model]="newInsuranceEntry" (newEntry)="createInsurance($event)"></app-insurance-add-entry>
     <p></p>
     <app-table 
         [header]="header" 

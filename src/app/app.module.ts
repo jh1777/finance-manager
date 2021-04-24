@@ -17,6 +17,7 @@ import { SalaryAddEntryComponent } from './components/salary-add-entry/salary-ad
 import { FormsModule } from '@angular/forms';
 import { SalaryChartComponent } from './components/salary-chart/salary-chart.component';
 import { InsuranceComponent } from './pages/insurance/insurance.component';
+import { InsuranceAddEntryComponent } from './components/insurance-add-entry/insurance-add-entry.component';
 registerLocaleData(localeDe);
 
 
@@ -28,7 +29,8 @@ registerLocaleData(localeDe);
     SalaryYearTileComponent,
     SalaryAddEntryComponent,
     SalaryChartComponent,
-    InsuranceComponent
+    InsuranceComponent,
+    InsuranceAddEntryComponent
   ],
   imports: [
     BrowserModule,

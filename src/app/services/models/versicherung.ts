@@ -7,4 +7,8 @@ export class Versicherung implements IName, IDatum {
     AusgabenId?: number;
     Datum: string;
     Erstellt: string;
+
+    constructor(init?: Partial<Versicherung>) {
+        Object.assign(this, init);
+    }
 }

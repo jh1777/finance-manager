@@ -191,7 +191,8 @@ export class SalaryComponent implements OnInit {
   }
 
   private createHeader() {
-    let header = [];
+    let header: Array<ITableCell> = [];
+
     header.push({
       label: 'No.',
       type: 'header'
@@ -224,6 +225,7 @@ export class SalaryComponent implements OnInit {
       label: 'Stunden/Woche',
       type: 'header'
     });
+    
     this.header = header;
     
     if (!this.monthFilterBy) {
@@ -278,6 +280,7 @@ export class SalaryComponent implements OnInit {
   public deleteSalaryEntry($event: Gehalt) {
     if ($event) {
       // Call the API to delete the entry
+      this.api.setService("gehalt");
       this.api.deleteEntry<Gehalt>($event.Jahr, $event.Monat).subscribe({
         next: (res) => {
           this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
