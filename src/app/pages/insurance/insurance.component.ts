@@ -70,6 +70,8 @@ export class InsuranceComponent implements OnInit {
     this.data.forEach(entry => {
       let row = new TableRow();
 
+      let prev = this.getPreviousEntry(entry);
+      let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;
       // Cells
       let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
@@ -80,16 +82,28 @@ export class InsuranceComponent implements OnInit {
       cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
       row.cells.push(cell);
 
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });
+      row.cells.push(cell);
+
       cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ entry.Erstellt }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Erstellt, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
       result.push(row);
     })
 
     this.rows = result;
+  }
+
+  private getPreviousEntry(entry: Versicherung): Versicherung {
+    let filteredData = this.data.filter(d => d.Name == entry.Name);
+    let index = filteredData.indexOf(entry);
+    if (index == filteredData.length - 1) {
+      return null;
+    } 
+    return filteredData[index + 1];
   }
 
   private createFooter() {
@@ -107,6 +121,10 @@ export class InsuranceComponent implements OnInit {
     });
     this.header.push({
       label: 'Rückkaufswert',
+      type: 'header'
+    });
+    this.header.push({
+      label: 'Delta',
       type: 'header'
     });
     this.header.push({
