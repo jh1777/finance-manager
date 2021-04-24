@@ -7,10 +7,10 @@ import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
-import { FillZero } from 'src/app/util/fillZero';
 import { getNYears } from 'src/app/util/getNYears';
 import { environment } from 'src/environments/environment';
-import '../../util/numberZeroPadded';
+import '../../util/arrayExtensions';
+import '../../util/numberExtensions';
 
 @Component({
   selector: 'app-overview',
@@ -42,15 +42,17 @@ export class OverviewComponent implements OnInit {
     private modalService: ModalService
   ) {
     this.navigationService.activeMenu.next(1);
+    this.loadData();
   }
 
   ngOnInit(): void {
-    this.loadData();
+   
   }
 
   private loadData() {
     let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
     // Get Data from API
+    this.api.setService("gehalt");
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;
@@ -97,7 +99,7 @@ export class OverviewComponent implements OnInit {
   }
 
   public openSalaryChart(data: Array<Gehalt>) {
-    this.x = data.map(d => `${d.Jahr}/${FillZero(d.Monat)}`);
+    this.x = data.map(d => `${ d.Jahr }/${ d.Monat.PadWithZero() }`);
     let yearDataBrutto = data.map(d => d.Brutto);
     let yearDataNetto = data.map(d => d.Netto);
     this.y = new Array<ChartDataSets>();

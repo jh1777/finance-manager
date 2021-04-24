@@ -5,11 +5,11 @@ import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { FillZero } from 'src/app/util/fillZero';
 import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
 import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
+import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 
@@ -67,6 +67,7 @@ export class SalaryComponent implements OnInit {
     ) { 
 
     this.navigationService.activeMenu.next(2);
+    this.updateEntries();
 
   }
 
@@ -75,11 +76,12 @@ export class SalaryComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.updateEntries();
+    
   }
 
   private updateEntries() {
     // Get Data from API
+    this.api.setService("gehalt");
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         this.data = result.body;
@@ -150,7 +152,7 @@ export class SalaryComponent implements OnInit {
 
       cell = new StyledTextTableCell({ 
         id: entry.id, 
-        label: FillZero(entry.Monat), 
+        label: entry.Monat.PadWithZero(), 
         style:{ 'font-weight': '500' },
         actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), 
         action: () => {

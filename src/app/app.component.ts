@@ -27,7 +27,5 @@ export class AppComponent {
     if (item.isLinkItem && item.toLinkItem().link != null) {
       this.router.navigate([item.toLinkItem().link]);
     }
-
-    console.log(item);
   }
 }

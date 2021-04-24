@@ -4,6 +4,7 @@ import { TableRow } from '../models/table/tableRow';
 import { TableRowAction } from '../models/table/tableRowAction';
 import { TableSize } from '../models/table/tableSize';
 import { GroupRow } from '../models/table/groupRow';
+import '../../util/arrayExtensions';
 
 @Component({
   selector: 'app-table',
