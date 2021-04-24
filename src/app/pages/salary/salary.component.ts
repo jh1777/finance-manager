@@ -130,7 +130,7 @@ export class SalaryComponent implements OnInit {
       action.icon = getIconWithName("trash-line");
       action.action = (id: number) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm deleting entry ${entry.id}: ${entry.Jahr}/${entry.Monat > 9 ? entry.Monat : "0"+entry.Monat}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 

@@ -63,6 +63,16 @@ export class ApiService {
     return result;
   }
 
+  deleteEntryById<T>(id: number): Observable<HttpResponse<T>> {
+    var removeUrl = `${this.url}/${id}`;
+    var result = this.httpClient.delete<T>(removeUrl, { headers: this.httpOptions, observe: 'response' })
+      .pipe(
+        catchError(this.errorHandler)
+      );
+
+    return result;
+  }
+
   createEntry<T>(model: T): Observable<HttpResponse<T>> {
     var result = this.httpClient.post<T>(this.url, model, { headers: this.httpOptions, observe: 'response' })
       .pipe(

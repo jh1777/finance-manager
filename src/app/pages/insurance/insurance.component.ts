@@ -3,13 +3,14 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
+import { ModalService } from 'src/app/modalModule';
 /* import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime'; */
 
 import { ApiService } from 'src/app/services/api.service';
 import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { ITableCell, TableRow, TableSize, TextTableCell } from 'src/app/ui';
+import { ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { environment } from 'src/environments/environment';
 
@@ -29,6 +30,8 @@ export class InsuranceComponent implements OnInit {
   public footerText: string;
 
   public data: Array<Versicherung>;
+  public deletionEntry: Versicherung;
+  public deleteConfirmMessage: string;
 
   public showAddEntry: boolean = false;
   public addEntryLabel: string = "Add Insurance";
@@ -40,6 +43,7 @@ export class InsuranceComponent implements OnInit {
  
   constructor(
     private navigationService: NavigationService,
+    private modalService: ModalService,
     private currencyPipe: CurrencyPipe,
     private datePipe: DatePipe,
     private api: ApiService
@@ -81,6 +85,18 @@ export class InsuranceComponent implements OnInit {
     this.data.forEach(entry => {
       let row = new TableRow();
 
+      // Actions
+      let action = new TableRowAction();
+      action.tooltip = "Delete";
+      action.icon = getIconWithName("trash-line");
+      action.action = (id: number) => {
+        this.deletionEntry = entry;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}/${entry.Datum}?`;
+        this.openModal('delete-confirmation');
+      };
+      row.actions.push(action); 
+      
+      
       let prev = this.getPreviousEntry(entry);
       let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;
       // Cells
@@ -196,4 +212,28 @@ export class InsuranceComponent implements OnInit {
     salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');
   }
 
+  public deleteEntry($event: Versicherung) {
+    if ($event) {
+      // Call the API to delete the entry
+      this.api.setService("versicherungen");
+      this.api.deleteEntryById<Versicherung>($event.id).subscribe({
+        next: (res) => {
+          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.getData();
+        },
+        error: (err) => {
+          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+        }
+      });
+    }
+    this.closeModal('delete-confirmation');
+  }
+
+  openModal(id: string) {
+    this.modalService.open(id);
+  }
+
+  closeModal(id: string) {
+    this.modalService.close(id);
+  }
 }
