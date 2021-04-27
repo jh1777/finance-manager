@@ -55,6 +55,14 @@ export class NavigationService {
     result.push(insurance);
 
     // 4
+    let expenses = new LinkNavigationItem({
+      label: 'Expenses',
+      icon: getIconWithName('briefcase-line'),
+      link: "/expenses"
+    });
+    result.push(expenses);
+
+    // 5
     let settings = new LinkNavigationItem({
       label: '',
       icon: getIconWithName('cog-line'),

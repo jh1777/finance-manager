@@ -1,6 +1,6 @@
 {
   "name": "finance-manager",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 4567 --host 0.0.0.0 --disableHostCheck",

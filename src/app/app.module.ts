@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { SalaryChartComponent } from './components/salary-chart/salary-chart.component';
 import { InsuranceComponent } from './pages/insurance/insurance.component';
 import { InsuranceAddEntryComponent } from './components/insurance-add-entry/insurance-add-entry.component';
+import { ExpensesComponent } from './pages/expenses/expenses.component';
 registerLocaleData(localeDe);
 
 
@@ -30,7 +31,8 @@ registerLocaleData(localeDe);
     SalaryAddEntryComponent,
     SalaryChartComponent,
     InsuranceComponent,
-    InsuranceAddEntryComponent
+    InsuranceAddEntryComponent,
+    ExpensesComponent
   ],
   imports: [
     BrowserModule,

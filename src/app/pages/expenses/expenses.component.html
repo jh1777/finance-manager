@@ -1,0 +1,40 @@
+<div class="page">
+    <app-page-header>
+        <div class="left">{{ pageTitle }}</div>
+        <div class="right">
+            <span class="status-text">{{ lastResult }}</span>
+<!--            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=18 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
+ -->
+        </div>
+    </app-page-header>
+    <p></p>
+    <app-table 
+        [header]="header" 
+        [rows]="rows" 
+        [size]="tableSize"
+        [footer]="footerText"
+        collapseGroupsByDefault=true 
+        [groupColumn]="groupCell" 
+        (rowAction)="rowClicked($event)">
+    </app-table>
+</div>
+
+<jw-modal id="delete-confirmation" class="small-modal">
+    <h3>Really Delete Entry</h3>
+    <p>{{deleteConfirmMessage}}</p>
+    <button type="button" class="btn btn-danger" (click)="deleteEntry(deletionEntry)">Delete</button>
+    &nbsp;
+    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('delete-confirmation');">Cancel</button>
+</jw-modal>
+
+<jw-modal id="change-value" class="small-modal">
+    <h4>Change expense record</h4>
+    <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <strong>New Value:</strong>
+    <input style="margin-left: 0.5rem;" name="value" [(ngModel)]="changeEntry.Betrag"/>  
+    <p></p>
+
+    <button type="button" class="btn btn-danger" (click)="change()">Change</button>
+    &nbsp;
+    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('change-value');">Cancel</button>
+</jw-modal>
