@@ -45,12 +45,8 @@ export class TableComponent implements OnInit, OnChanges {
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
 
-  public currentSortEntry: SortEntry = null;
-
-  public sortIcon = {
-    asc: '../assets/icons/arrow-asc-line.svg',
-    desc: '../assets/icons/arrow-desc-line.svg'
-  }
+  @Input()
+  public sortEntry: SortEntry = null;
 
   // TODO: Add "collapse all groups" button in group row 
   constructor() { }
@@ -102,30 +98,28 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   public sort(column: TableHeader) {
+    let defaultItem = new SortEntry({
+      direction: 'asc',
+      column: column    
+    });
 
-    if (this.currentSortEntry != null) {
-      if (this.currentSortEntry.column.label == column.label) {
+    if (this.sortEntry != null) {
+      if (this.sortEntry.column.label === column.label) {
         // Sort same column
-        if (this.currentSortEntry.direction === 'desc') {
+        if (this.sortEntry.direction === 'desc') {
           // Sort deactivation
-          this.currentSortEntry = null;
+          this.sortEntry = null;
         } else {
           // Switch direction
-          this.currentSortEntry.direction = 'desc';
+          this.sortEntry.direction = 'desc';
         }
       } else {
-        this.currentSortEntry = new SortEntry({
-          direction: 'asc',
-          column: column    
-        });
+        this.sortEntry = defaultItem;
       }
     } else {
-      this.currentSortEntry = new SortEntry({
-        direction: 'asc',
-        column: column
-      });
+      this.sortEntry = defaultItem;
     }
-    this.sortAction.emit(this.currentSortEntry);
+    this.sortAction.emit(this.sortEntry);
   }
 
   public rowEvent(row: TableRow) {

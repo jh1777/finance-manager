@@ -30,7 +30,13 @@ export class ExpensesComponent implements OnInit {
   public deleteConfirmMessage: string;
   
   public lastResult: string = '';
-  private currentSortEntry: SortEntry = null;
+  public currentSortEntry: SortEntry = new SortEntry({
+    column: new TableHeader({
+      isSortable: true,
+      label: 'Name'
+    }),
+    direction: 'asc'
+  });
 
   public changeEntry: Ausgabe = new Ausgabe();
 
@@ -47,9 +53,30 @@ export class ExpensesComponent implements OnInit {
     this.api.setService("ausgaben");
     this.loadData();
 
-   }
+  }
 
   ngOnInit(): void {
+  }
+
+  private loadData() {
+    this.api.getEntries<Ausgabe>().subscribe({
+      next: (result) => {
+        if (this.currentSortEntry != null) {
+          if (this.currentSortEntry.direction == 'asc') {
+            this.data = result.SortAscending(this.currentSortEntry.column.label);
+          } else if (this.currentSortEntry.direction == 'desc') {
+            this.data = result.SortDescending(this.currentSortEntry.column.label);
+          }
+        } else {
+          this.data = result.SortAscending('Name');
+        }
+        
+        this.mapDataToTableModel();
+      },
+      error: (err) => {
+        console.log("Error loading expenses!", err);
+      }
+    })
   }
 
   public rowClicked(row: TableRow) {
@@ -124,32 +151,11 @@ export class ExpensesComponent implements OnInit {
 
       result.push(row);
     });
+
     this.rows = result;
   }
 
-  private loadData() {
-    this.api.getEntries<Ausgabe>().subscribe({
-      next: (result) => {
-        if (this.currentSortEntry != null) {
-          if (this.currentSortEntry.direction == 'asc') {
-            this.data = result.SortAscending(this.currentSortEntry.column.label);
-          } else if (this.currentSortEntry.direction == 'desc') {
-            this.data = result.SortDescending(this.currentSortEntry.column.label);
-          }
-        } else {
-          this.data = result.SortAscending('Name');
-        }
-        
-        this.mapDataToTableModel();
-      },
-      error: (err) => {
-        console.log("Error loading expenses!", err);
-      }
-    })
-  }
-
   public sortColumn(sortEntry: SortEntry) {
-    console.log(sortEntry);
     this.currentSortEntry = sortEntry;
     this.loadData();
   }
