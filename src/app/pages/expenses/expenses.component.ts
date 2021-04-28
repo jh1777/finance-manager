@@ -7,6 +7,7 @@ import { ApiService } from 'src/app/services/api.service';
 import { Ausgabe } from 'src/app/services/models/ausgabe';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
+import { SortEntry } from 'src/app/ui/models/table/sortEntry';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { Describer } from 'src/app/util/objectDescriber';
 
@@ -29,6 +30,7 @@ export class ExpensesComponent implements OnInit {
   public deleteConfirmMessage: string;
   
   public lastResult: string = '';
+  private currentSortEntry: SortEntry = null;
 
   public changeEntry: Ausgabe = new Ausgabe();
 
@@ -128,7 +130,16 @@ export class ExpensesComponent implements OnInit {
   private loadData() {
     this.api.getEntries<Ausgabe>().subscribe({
       next: (result) => {
-        this.data = result.SortAscending('Name');
+        if (this.currentSortEntry != null) {
+          if (this.currentSortEntry.direction == 'asc') {
+            this.data = result.SortAscending(this.currentSortEntry.column.label);
+          } else if (this.currentSortEntry.direction == 'desc') {
+            this.data = result.SortDescending(this.currentSortEntry.column.label);
+          }
+        } else {
+          this.data = result.SortAscending('Name');
+        }
+        
         this.mapDataToTableModel();
       },
       error: (err) => {
@@ -137,16 +148,22 @@ export class ExpensesComponent implements OnInit {
     })
   }
 
+  public sortColumn(sortEntry: SortEntry) {
+    console.log(sortEntry);
+    this.currentSortEntry = sortEntry;
+    this.loadData();
+  }
+
   private createHeader() {
     let header: Array<TableHeader> = [];
 
     header.push({ label: 'No.' });
-    header.push({ label: 'Name' });
+    header.push({ label: 'Name', isSortable: true });
     header.push({ label: 'Intervall' });
-    header.push({ label: 'Betrag' });
+    header.push({ label: 'Betrag', isSortable: true  });
     header.push({ label: 'Monatsbetrag' });
     header.push({ label: 'Beschreibung' });
-    header.push({ label: 'Erstellt' });
+    header.push({ label: 'Erstellt', isSortable: true });
 
     this.header = header;
     this.groupCell = this.header[2];

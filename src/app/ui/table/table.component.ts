@@ -6,6 +6,7 @@ import { TableSize } from '../models/table/tableSize';
 import { GroupRow } from '../models/table/groupRow';
 import '../../util/arrayExtensions';
 import { TableHeader } from '../models/table/tableHeader';
+import { SortEntry } from '../models/table/sortEntry';
 
 @Component({
   selector: 'app-table',
@@ -38,8 +39,18 @@ export class TableComponent implements OnInit, OnChanges {
   @Output()
   rowAction = new EventEmitter<TableRow>();
 
+  @Output()
+  sortAction = new EventEmitter<SortEntry>();
+
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
+
+  public currentSortEntry: SortEntry = null;
+
+  public sortIcon = {
+    asc: '../assets/icons/arrow-asc-line.svg',
+    desc: '../assets/icons/arrow-desc-line.svg'
+  }
 
   // TODO: Add "collapse all groups" button in group row 
   constructor() { }
@@ -89,6 +100,33 @@ export class TableComponent implements OnInit, OnChanges {
         this.rows = result;
       }
     }
+  }
+
+  public sort(column: TableHeader) {
+
+    if (this.currentSortEntry != null) {
+      if (this.currentSortEntry.column.label == column.label) {
+        // Sort same column
+        if (this.currentSortEntry.direction === 'desc') {
+          // Sort deactivation
+          this.currentSortEntry = null;
+        } else {
+          // Switch direction
+          this.currentSortEntry.direction = 'desc';
+        }
+      } else {
+        this.currentSortEntry = new SortEntry({
+          direction: 'asc',
+          column: column    
+        });
+      }
+    } else {
+      this.currentSortEntry = new SortEntry({
+        direction: 'asc',
+        column: column
+      });
+    }
+    this.sortAction.emit(this.currentSortEntry);
   }
 
   public rowEvent(row: TableRow) {

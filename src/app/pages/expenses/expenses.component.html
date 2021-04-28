@@ -15,6 +15,7 @@
         [footer]="footerText"
         collapseGroupsByDefault=true 
         [groupColumn]="groupCell" 
+        (sortAction)="sortColumn($event)"
         (rowAction)="rowClicked($event)">
     </app-table>
 </div>
