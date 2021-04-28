@@ -5,6 +5,7 @@ import { TableRowAction } from '../models/table/tableRowAction';
 import { TableSize } from '../models/table/tableSize';
 import { GroupRow } from '../models/table/groupRow';
 import '../../util/arrayExtensions';
+import { TableHeader } from '../models/table/tableHeader';
 
 @Component({
   selector: 'app-table',
@@ -20,10 +21,10 @@ export class TableComponent implements OnInit, OnChanges {
   rows: Array<TableRow> = [];
   
   @Input()
-  header: Array<ITableCell> = [];
+  header: Array<TableHeader> = [];
 
   @Input()
-  groupColumn: ITableCell = null;
+  groupColumn: TableHeader = null;
 
   @Input()
   collapseGroupsByDefault: boolean = false;

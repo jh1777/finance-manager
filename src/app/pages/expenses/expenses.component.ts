@@ -6,7 +6,7 @@ import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
 import { Ausgabe } from 'src/app/services/models/ausgabe';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction } from 'src/app/ui';
+import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { Describer } from 'src/app/util/objectDescriber';
 
@@ -20,7 +20,7 @@ export class ExpensesComponent implements OnInit {
   private data: Array<Ausgabe> = [];
 
   public rows: Array<TableRow> = [];
-  public header: Array<ITableCell> = [];
+  public header: Array<TableHeader> = [];
   public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
@@ -138,36 +138,15 @@ export class ExpensesComponent implements OnInit {
   }
 
   private createHeader() {
-    let header: Array<ITableCell> = [];
+    let header: Array<TableHeader> = [];
 
-    header.push({
-      label: 'No.',
-      type: 'header'
-    });
-    header.push({
-      label: 'Name',
-      type: 'header'
-    });
-    header.push({
-      label: 'Intervall',
-      type: 'header'
-    });
-    header.push({
-      label: 'Betrag',
-      type: 'header'
-    });
-    header.push({
-      label: 'Monatsbetrag',
-      type: 'header'
-    });
-    header.push({
-      label: 'Beschreibung',
-      type: 'header'
-    });
-    header.push({
-      label: 'Erstellt',
-      type: 'header'
-    });
+    header.push({ label: 'No.' });
+    header.push({ label: 'Name' });
+    header.push({ label: 'Intervall' });
+    header.push({ label: 'Betrag' });
+    header.push({ label: 'Monatsbetrag' });
+    header.push({ label: 'Beschreibung' });
+    header.push({ label: 'Erstellt' });
 
     this.header = header;
     this.groupCell = this.header[2];

@@ -7,11 +7,12 @@ import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
-import { Button, ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
+import { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
 import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
+
 
 
 @Component({
@@ -28,7 +29,7 @@ export class SalaryComponent implements OnInit {
   public hideToast: boolean = true;
 
   public rows: Array<TableRow> = [];
-  public header: Array<ITableCell> = [];
+  public header: Array<TableHeader> = [];
   public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
@@ -191,41 +192,16 @@ export class SalaryComponent implements OnInit {
   }
 
   private createHeader() {
-    let header: Array<ITableCell> = [];
+    let header: Array<TableHeader> = [];
 
-    header.push({
-      label: 'No.',
-      type: 'header'
-    });
-    header.push({
-      label: 'Jahr',
-      type: 'header'
-    });
-    header.push({
-      label: 'Monat',
-      type: 'header'
-    });
-    header.push({
-      label: 'Brutto',
-      type: 'header'
-    });
-    header.push({
-      label: 'Netto',
-      type: 'header'
-    });
-    header.push({
-      label: 'AKP',
-      type: 'header'
-    });
-    header.push({
-      label: 'Kantine',
-      type: 'header'
-    });
-    header.push({
-      label: 'Stunden/Woche',
-      type: 'header'
-    });
-    
+    header.push({ label: 'No.' });
+    header.push({ label: 'Jahr' });
+    header.push({ label: 'Monat' });
+    header.push({ label: 'Brutto' });
+    header.push({ label: 'Netto' });
+    header.push({ label: 'AKP' });
+    header.push({ label: 'Kantine' });
+    header.push({ label: 'Stunden/Woche' });
     this.header = header;
     
     if (!this.monthFilterBy) {

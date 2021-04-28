@@ -10,7 +10,7 @@ import * as relativeTime from 'dayjs/plugin/relativeTime'; */
 import { ApiService } from 'src/app/services/api.service';
 import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { ITableCell, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
+import { ITableCell, TableHeader, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { environment } from 'src/environments/environment';
 
@@ -24,7 +24,7 @@ export class InsuranceComponent implements OnInit {
   public pageTitle: string = "Insurance";
 
   public rows: Array<TableRow> = [];
-  public header: Array<ITableCell> = [];
+  public header: Array<TableHeader> = [];
   public groupCell: ITableCell;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
@@ -138,32 +138,14 @@ export class InsuranceComponent implements OnInit {
   }
 
   private createHeader() {
-    let header: Array<ITableCell> = [];
+    let header: Array<TableHeader> = [];
 
-    header.push({
-      label: 'No.',
-      type: 'header'
-    });
-    header.push({
-      label: 'Name',
-      type: 'header'
-    });
-    header.push({
-      label: 'Rückkaufswert',
-      type: 'header'
-    });
-    header.push({
-      label: 'Delta',
-      type: 'header'
-    });
-    header.push({
-      label: 'Datum',
-      type: 'header'
-    });
-    header.push({
-      label: 'Erstellt',
-      type: 'header'
-    });
+    header.push({ label: 'No.' });
+    header.push({ label: 'Name' });
+    header.push({ label: 'Rückkaufswert' });
+    header.push({ label: 'Delta' });
+    header.push({ label: 'Datum' });
+    header.push({ label: 'Erstellt' });
     this.header = header;
     this.groupCell = this.header[1];
   }

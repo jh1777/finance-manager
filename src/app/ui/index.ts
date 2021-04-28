@@ -4,3 +4,5 @@ export * from './models/table/tableRow';
 export * from './models/table/tableRowAction';
 export * from './models/table/tableSize';
 export * from './models/table/textTableCell';
+export * from './models/table/tableHeader';
+
