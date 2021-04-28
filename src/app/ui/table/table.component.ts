@@ -87,9 +87,8 @@ export class TableComponent implements OnInit, OnChanges {
         let result = new Array<TableRow>();
         labels.forEach(group => {
           let isCollapsed = this.excludeGroupsInTable.includes(group);
-          let groupIcon =  isCollapsed ? "../assets/icons/angle-line-90.svg" : "../assets/icons/angle-line-180.svg";
           let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
-          let groupRow = new GroupRow({ groupLabel: group, icon: groupIcon, itemCount: groupData.length, isCollapsed: isCollapsed });
+          let groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });
           result.push(groupRow);
 
           for (var i = 0; i < groupData.length ; i++) {
