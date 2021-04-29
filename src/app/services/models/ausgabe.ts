@@ -7,7 +7,9 @@ export class Ausgabe implements IName {
     Intervall: 'Monat' | 'Jahr' | 'Quartal' = 'Monat'
     Kategorie?: string;
     Tag?: string;
-    id: number;
+    id?: number;
+    Start: string;
+    Ende: string;
     Erstellt: string;
     Bearbeitet: string;
 

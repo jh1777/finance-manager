@@ -16,8 +16,7 @@
         collapseGroupsByDefault=true 
         [groupColumn]="groupCell" 
         [sortEntry]="currentSortEntry"
-        (sortAction)="sortColumn($event)"
-        (rowAction)="rowClicked($event)">
+        (sortAction)="sortColumn($event)">
     </app-table>
 </div>
 
@@ -32,8 +31,27 @@
 <jw-modal id="change-value" class="small-modal">
     <h4>Change expense record</h4>
     <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
-    <strong>New Value:</strong>
-    <input style="margin-left: 0.5rem;" name="value" [(ngModel)]="changeEntry.Betrag"/>  
+
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 30%;">
+                <strong>New Value:</strong>
+            </td>
+            <td>
+                <input type="number" id="value" name="Betrag" required [(ngModel)]="changeEntry.Betrag"/>
+            </td>
+        </tr>
+        <tr>&nbsp;</tr>
+        <tr>
+            <td style="width: 30%;">
+                <strong>Start Date:</strong>
+            </td>
+            <td>
+                <input type="date" id="datum" required [(ngModel)]="changeEntry.Start" name="Datum">
+            </td>
+        </tr>
+    </table>
+
     <p></p>
 
     <button type="button" class="btn btn-danger" (click)="change()">Change</button>

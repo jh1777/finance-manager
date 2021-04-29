@@ -145,7 +145,6 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   public cellAction(cell: ITableCell) {
-    console.log("Action in Cell triggered:", cell);
     cell.action();
   }
 }

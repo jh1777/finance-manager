@@ -78,9 +78,15 @@ export class ApiService {
       .pipe(
         catchError(this.errorHandler)
       );
+    return result;
+  }
 
-    //this.messageService.logMessage('POST Call URL: ' + this.url, true);
-    
+  changeEntry<T>(id: number, model: T): Observable<HttpResponse<T>> {
+    var url = `${this.url}/${id}`;
+    var result = this.httpClient.put<T>(url, model, { headers: this.httpOptions, observe: 'response' })
+      .pipe(
+        catchError(this.errorHandler)
+      );
     return result;
   }
 

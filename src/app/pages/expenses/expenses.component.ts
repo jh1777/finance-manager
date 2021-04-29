@@ -1,4 +1,5 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
@@ -9,7 +10,8 @@ import { NavigationService } from 'src/app/services/navigation.service';
 import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
 import { SortEntry } from 'src/app/ui/models/table/sortEntry';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
-import { Describer } from 'src/app/util/objectDescriber';
+import '../../util/dateExtensions';
+
 
 @Component({
   selector: 'app-expenses',
@@ -78,11 +80,10 @@ export class ExpensesComponent implements OnInit {
       }
     })
   }
-
-  public rowClicked(row: TableRow) {
-    console.log(row);
-  }
   
+  /**
+   * Creates Table model from Input Data Model
+   */
   private mapDataToTableModel() {
     this.createHeader();
 
@@ -111,43 +112,32 @@ export class ExpensesComponent implements OnInit {
       row.actions.push(action); 
 
       // Cells
-      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
-      row.cells.push(cell);
+      row.cells.push(new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"}));
+      row.cells.push(new StyledTextTableCell({ id: entry.id, label: entry.Name, style: {'font-weight':'500'} }));
+      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Kategorie }));
+      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Intervall }));
 
       // Cells
-      cell = new StyledTextTableCell({ id: entry.id, label: entry.Name, style: {'font-weight':'500'} });
-      row.cells.push(cell);
-
-      // Cells
-      cell = new TextTableCell({ id: entry.id, label: entry.Intervall });
-      row.cells.push(cell);
-
-      // Cells
-      cell = new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Betrag) });
+      let cell = new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Betrag) });
       cell.action = () => {
         this.changeEntry = entry;
+        this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
         this.openModal('change-value');
       };
       cell.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell);
 
-      // Cells
+      // Monthly Column calculated
       let monthly = entry.Betrag;
       if (entry.Intervall == 'Jahr') {
         monthly = monthly / 12;
       } else if (entry.Intervall == 'Quartal') {
         monthly = monthly / 3;
       }
-      cell = new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(monthly) });
-      row.cells.push(cell);
+      row.cells.push(new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(monthly) }));
 
-      // Cells
-      cell = new TextTableCell({ id: entry.id, label: entry.Beschreibung });
-      row.cells.push(cell);
-
-      // Cells
-      cell = new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Erstellt) });
-      row.cells.push(cell);
+      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Beschreibung }));
+      row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Erstellt) }));
 
       result.push(row);
     });
@@ -165,7 +155,8 @@ export class ExpensesComponent implements OnInit {
 
     header.push({ label: 'No.' });
     header.push({ label: 'Name', isSortable: true });
-    header.push({ label: 'Intervall' });
+    header.push({ label: 'Kategorie' });
+    header.push({ label: 'Intervall', isSortable: true });
     header.push({ label: 'Betrag', isSortable: true  });
     header.push({ label: 'Monatsbetrag' });
     header.push({ label: 'Beschreibung' });
@@ -177,10 +168,14 @@ export class ExpensesComponent implements OnInit {
   
   private showResultWithTimer(message: string) {
     this.lastResult = message;
-    const salaryLastResultTimer = timer(10000);
-    salaryLastResultTimer.subscribe(v => this.lastResult = '');
+    const resultTimer = timer(10000);
+    resultTimer.subscribe(v => this.lastResult = '');
   }
 
+  /**
+   * Deletes one entry from the Database
+   * @param $event Ausgabe
+   */
   public deleteEntry($event: Ausgabe) {
     if ($event) {
       // Call the API to delete the entry
@@ -206,8 +201,88 @@ export class ExpensesComponent implements OnInit {
     this.modalService.close(id);
   }
 
-  public change() {
+  /**
+   * Create new entry from given one with updated timestamps
+   * @param entry Ausgabe
+   * @returns Ausgabe
+   */
+  private mapToNewEntry(entry: Ausgabe): Ausgabe {
+    let result = new Ausgabe({
+      Bearbeitet: new Date().toPreferredStringFormat(),
+      Erstellt: new Date().toPreferredStringFormat(),
+      Beschreibung: entry.Beschreibung,
+      Betrag: entry.Betrag,
+      Start: entry.Start,
+      Intervall: entry.Intervall,
+      Kategorie: entry.Kategorie,
+      Name: entry.Name,
+      Tag: entry.Tag
+    });
+    return result;
+  }
 
-    console.log(this.changeEntry);
+  /**
+   * Value change of an item was triggered by click on a button
+   */
+  public change() {
+    // Create newly mapped item
+    let newItem = this.mapToNewEntry(this.changeEntry);
+    if (!newItem.Start || newItem.Start == '') 
+      newItem.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    
+    // Create change partial item
+    let changedData: Partial<Ausgabe> = {
+      Ende: newItem.Start
+    }
+
+    this.changeItem(this.changeEntry.id, changedData);
+    this.createItem(newItem);
+    this.closeModal('change-value');
+  }
+
+  /**
+   * Change new Item in Database
+   * @param id number Item id to change
+   * @param item Partial<Ausgabe>
+   */
+  private changeItem(id: number, item: Partial<Ausgabe>) {
+    this.api.setService("ausgaben");
+    this.api.changeEntry<Partial<Ausgabe>>(id, item).subscribe(
+        res => {
+          var response = <HttpResponse<Partial<Ausgabe>>>res;
+          this.showResultWithTimer(`PUT Ausgabe item: ${item.Name}/${item.Betrag}: HTTP Code ${response.status}`);
+        },
+        (err: HttpErrorResponse) => {
+          this.showResultWithTimer(`Error changing the expense entry!: ${err}`);
+          console.error(`Error changing the expense entry!: ${err}`);
+        }
+      );
+  }
+
+  /**
+   * Create new Item in Database
+   * @param item Ausgabe
+   */
+  private createItem(item: Ausgabe, fromForm: boolean = false) {
+    this.api.setService("ausgaben");
+    this.api.createEntry<Ausgabe>(item).subscribe(
+        res => {
+          var response = <HttpResponse<Ausgabe>>res;
+          this.showResultWithTimer(`POST Ausgabe item: ${item.Name}/${item.Betrag}: HTTP Code ${response.status}`);
+
+          if (res.ok) {
+            if (fromForm) {
+              // TODO::
+
+              //this.resetNewAusgabeItem();
+              //this.toggleNewEntryForm();
+            }
+            this.loadData();
+          }
+        },
+        (err: HttpErrorResponse) => {
+          this.showResultWithTimer(`Error creating the expense entry!: ${err}`);
+        }
+      );
   }
 }
