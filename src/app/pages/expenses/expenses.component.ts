@@ -155,8 +155,8 @@ export class ExpensesComponent implements OnInit {
 
     header.push({ label: 'No.' });
     header.push({ label: 'Name', isSortable: true });
-    header.push({ label: 'Kategorie' });
-    header.push({ label: 'Intervall', isSortable: true });
+    header.push({ label: 'Kategorie', isGroupable: true });
+    header.push({ label: 'Intervall', isGroupable: true, isSortable: true });
     header.push({ label: 'Betrag', isSortable: true  });
     header.push({ label: 'Monatsbetrag' });
     header.push({ label: 'Beschreibung' });
