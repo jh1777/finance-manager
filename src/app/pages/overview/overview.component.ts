@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Route } from '@angular/router';
 import { ChartDataSets } from 'chart.js';
 import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
 import { getIconWithName } from 'src/app/data/iconFactory';
@@ -24,6 +25,16 @@ export class OverviewComponent implements OnInit {
   public showAppsTest() {
     this.showApps = !this.showApps;
   }
+
+  public subnavItems: Array<Route> = [
+    {
+      data: { label: "Overview", icon: getIconWithName('wallet-line') }
+    },
+    {
+      data: { label: "Test", icon: getIconWithName('shield-line') }
+    }
+  ];
+
   //----
   public showAllYears: boolean = false;
 

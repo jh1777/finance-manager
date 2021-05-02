@@ -1,0 +1,8 @@
+<div class="csgp-subnav-container">
+    <ng-container *ngFor="let item of routes">
+        <div class="csgp-subnav-item"  [class]="isCurrentRoute() ? 'active' : ''" (click)="itemClicked(item)">
+            <img [src]="item.data.icon" class="icon"/>
+            {{ item.data.label }}
+        </div>
+    </ng-container>
+</div>

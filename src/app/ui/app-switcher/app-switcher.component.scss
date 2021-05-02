@@ -12,28 +12,28 @@
 }
 
 .app-switch-item {
-    border-radius: .4rem;
-    background-image: linear-gradient(#00566A, #01778F);
+    //border-radius: .4rem;
+    background-image: linear-gradient(#004554, #01778F);
     color: white;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-
     
     -webkit-box-shadow: 0 0 .4rem 0 #404040;
     -moz-box-shadow: 0 0 .4rem 0 #404040;
     box-shadow: 0 0 .4rem 0  #404040;
 
     &.grey {
-        background-image: linear-gradient(#404040, #909090);
+        background-image: linear-gradient(#404040, #808080);
     }
     
-    transition: 300ms linear;
+    transition: 500ms linear;
 
     &:hover {
-        transform: scale(1.1);
+        transform-origin: top;
+        transform: scale(1.05);  //translateY(5%);
         transition: 100ms linear;
     }
 }

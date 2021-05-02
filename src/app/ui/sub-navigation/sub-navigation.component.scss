@@ -1,0 +1,37 @@
+.csgp-subnav-container-grid {
+    background-color: transparent;
+    display: grid;
+    grid-template-columns: repeat(10, 130px) 1fr;
+    grid-template-rows: 40px;
+    column-gap: 10px;
+    justify-items: stretch;
+}
+.csgp-subnav-container {
+    background-color: transparent;
+    display: flex
+}
+
+
+.csgp-subnav-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 400;
+    font-size: 1.1rem;
+    padding: .4rem .9rem .4rem .4rem;
+    &:hover {
+        background-color: #e0e0e0;
+    }
+    
+    .icon {
+        margin-right: .3rem;
+        width: 22px;
+    }
+
+    &.active {
+        font-weight: 600;
+        color: #0071a8;
+    }
+}
