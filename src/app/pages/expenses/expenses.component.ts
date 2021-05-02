@@ -21,6 +21,7 @@ import '../../util/dateExtensions';
 export class ExpensesComponent implements OnInit {
   public pageTitle = "Expenses";
   private data: Array<Ausgabe> = [];
+  public categories: Array<string> = ['Telefon', 'Streaming', 'Versicherung', 'Wohnung', 'Freizeit', 'KFZ', 'Kinder', 'Sparen', 'Bahn'];
 
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
@@ -96,7 +97,9 @@ export class ExpensesComponent implements OnInit {
       action.tooltip = "Change";
       action.icon = getIconWithName("pencil-line");
       action.action = (id: number) => {
-        
+        this.changeEntry = entry;
+        this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+        this.openModal('change-entry');
       };
       row.actions.push(action); 
 
@@ -284,5 +287,9 @@ export class ExpensesComponent implements OnInit {
           this.showResultWithTimer(`Error creating the expense entry!: ${err}`);
         }
       );
+  }
+
+  public changeExistingEntry() {
+
   }
 }

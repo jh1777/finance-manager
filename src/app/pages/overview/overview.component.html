@@ -1,6 +1,11 @@
 <div class="page">
+    <app-app-switcher [show]="showApps"></app-app-switcher>
+
     <app-page-header>
-        <div class="left">{{ pageTitle }}</div>
+        <div class="left">{{ pageTitle }}
+            <app-menu-button label="Show Apps" (clickEvent)="showAppsTest()"></app-menu-button>
+
+        </div>
         <div class="right">
             
             <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
@@ -17,6 +22,7 @@
     <div class="row row-cols-1 row-cols-md-3">
         <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]" [percent]="diffs[year]" (details)="openSalaryChart($event)"></app-salary-year-tile>
     </div>
+
 </div>
 
 <jw-modal id="year-chart" class="big-modal">

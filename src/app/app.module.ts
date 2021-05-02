@@ -2,6 +2,7 @@ import { CUSTOM_ELEMENTS_SCHEMA, DEFAULT_CURRENCY_CODE, LOCALE_ID, NgModule } fr
 import { BrowserModule } from '@angular/platform-browser';
 import { ChartsModule } from 'ng2-charts';
 import { ModalModule } from './modalModule';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -36,6 +37,7 @@ registerLocaleData(localeDe);
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,

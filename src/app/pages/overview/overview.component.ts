@@ -18,6 +18,13 @@ import '../../util/numberExtensions';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent implements OnInit {
+
+  // TEST
+  showApps: boolean = false;
+  public showAppsTest() {
+    this.showApps = !this.showApps;
+  }
+  //----
   public showAllYears: boolean = false;
 
   // Config
