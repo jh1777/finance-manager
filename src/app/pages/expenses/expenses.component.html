@@ -75,14 +75,14 @@
     
           <div class="form-group col-md-6">
             <label for="kategorie"><strong>Kategorie</strong></label>
-            <select class="form-control" id="kategorie">
+            <select class="form-control" id="kategorie" required [(ngModel)]="changeEntry.Kategorie" name="Kategorie">
                 <option *ngFor="let c of categories"> {{ c }}</option>
             </select>
           </div>
 
           <div class="form-group col-md-6">
-            <label for="kategorie"><strong>Intervall</strong></label>
-            <select class="form-control" id="intervall">
+            <label for="intervall"><strong>Intervall</strong></label>
+            <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall">
                 <option>Monat</option>
                 <option>Quartal</option>
                 <option>Jahr</option>

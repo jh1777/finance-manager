@@ -248,12 +248,15 @@ export class ExpensesComponent implements OnInit {
    * @param id number Item id to change
    * @param item Partial<Ausgabe>
    */
-  private changeItem(id: number, item: Partial<Ausgabe>) {
+  private changeItem(id: number, item: Partial<Ausgabe>, reload: boolean = false) {
     this.api.setService("ausgaben");
     this.api.changeEntry<Partial<Ausgabe>>(id, item).subscribe(
         res => {
           var response = <HttpResponse<Partial<Ausgabe>>>res;
           this.showResultWithTimer(`PUT Ausgabe item: ${item.Name}/${item.Betrag}: HTTP Code ${response.status}`);
+          if (reload) {
+            this.loadData();
+          }
         },
         (err: HttpErrorResponse) => {
           this.showResultWithTimer(`Error changing the expense entry!: ${err}`);
@@ -290,6 +293,8 @@ export class ExpensesComponent implements OnInit {
   }
 
   public changeExistingEntry() {
+    this.changeItem(this.changeEntry.id, this.changeEntry,true);
+    this.closeModal('change-entry');
 
   }
 }
