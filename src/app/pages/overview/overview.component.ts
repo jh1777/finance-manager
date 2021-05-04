@@ -20,21 +20,6 @@ import '../../util/numberExtensions';
 })
 export class OverviewComponent implements OnInit {
 
-  // TEST
-  showApps: boolean = false;
-  public showAppsTest() {
-    this.showApps = !this.showApps;
-  }
-
-  public subnavItems: Array<Route> = [
-    {
-      data: { label: "Overview", icon: getIconWithName('wallet-line') }
-    },
-    {
-      data: { label: "Test", icon: getIconWithName('shield-line') }
-    }
-  ];
-
   //----
   public showAllYears: boolean = false;
 
