@@ -7,6 +7,8 @@ import { GroupRow } from '../models/table/groupRow';
 import '../../util/arrayExtensions';
 import { TableHeader } from '../models/table/tableHeader';
 import { SortEntry } from '../models/table/sortEntry';
+import { NumberTableCell } from '../models/table/numberTableCell';
+import { Dictionary } from 'src/app/util/dictionary';
 
 @Component({
   selector: 'app-table',
@@ -72,21 +74,41 @@ export class TableComponent implements OnInit, OnChanges {
       let colIndex = this.header.indexOf(this.groupColumn);
       if (colIndex != -1) {
 
+        // Get all non-Group Rows
         let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));
+        // Get the groups: Distinct column content
         let labels = filterableRows.map(r => r.cells[colIndex].label).Distinct();
+
+        // Handle Auto-Group
         if (this.firstLoad && this.collapseGroupsByDefault) { 
           this.excludeGroupsInTable = [];
           labels.forEach(l => this.excludeGroupsInTable.push(l));
           this.firstLoad = false;
         }
 
+        // Create each Group and add its data
         let result = new Array<TableRow>();
         labels.forEach(group => {
           let isCollapsed = this.excludeGroupsInTable.includes(group);
+          // Get Data Rows for current group
           let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
+          // Create GroupRow
           let groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });
-          result.push(groupRow);
 
+          //---sum
+          for (var i = 0; i < this.header.length ; i++) {
+            if (this.header[i].summarizeWhenGrouped && i != colIndex) {
+              let numberCells = groupData.map(g => g.cells[i]).filter(c => c instanceof NumberTableCell);
+              var sum = 0;
+              numberCells.forEach(c => c.numericValue ?  sum += c.numericValue : c );
+              groupRow.summarizedData.push(sum);
+            } else {
+              groupRow.summarizedData.push(null);
+            }
+          }
+          //-------
+          result.push(groupRow);
+          // Set Hidden Property for data rows
           for (var i = 0; i < groupData.length ; i++) {
             groupData[i].hidden = isCollapsed;
             result.push(groupData[i]);
@@ -95,6 +117,16 @@ export class TableComponent implements OnInit, OnChanges {
         this.rows = result;
       }
     }
+  }
+
+  public getTotalForColumn(index: number): number {
+    var result = 0;
+    this.rows.filter(row => row instanceof GroupRow).forEach((row: GroupRow) => {
+      if (row.summarizedData) {
+        result += row.summarizedData[index];
+      }
+    });
+    return result;
   }
 
   public sort(column: TableHeader) {

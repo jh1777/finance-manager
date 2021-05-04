@@ -4,6 +4,7 @@ export class GroupRow extends TableRow {
     groupLabel: string;
     itemCount: number;
     isCollapsed: boolean = false;
+    summarizedData?: Array<number> = [];
 
     constructor(init?: Partial<GroupRow>) {
         super();

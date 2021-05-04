@@ -8,6 +8,8 @@ import { ApiService } from 'src/app/services/api.service';
 import { Ausgabe } from 'src/app/services/models/ausgabe';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
+import { GroupRow } from 'src/app/ui/models/table/groupRow';
+import { NumberTableCell } from 'src/app/ui/models/table/numberTableCell';
 import { SortEntry } from 'src/app/ui/models/table/sortEntry';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import '../../util/dateExtensions';
@@ -121,7 +123,7 @@ export class ExpensesComponent implements OnInit {
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.Intervall }));
 
       // Cells
-      let cell = new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Betrag) });
+      let cell = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Betrag), numericValue: entry.Betrag });
       cell.action = () => {
         this.changeEntry = entry;
         this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
@@ -137,15 +139,16 @@ export class ExpensesComponent implements OnInit {
       } else if (entry.Intervall == 'Quartal') {
         monthly = monthly / 3;
       }
-      row.cells.push(new TextTableCell({ id: entry.id, label: this.currencyPipe.transform(monthly) }));
+      row.cells.push(new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(monthly), numericValue: monthly }));
 
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.Beschreibung }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Erstellt) }));
+      row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Start) }));
 
       result.push(row);
     });
 
     this.rows = result;
+    this.footerText = `${this.rows.length} Entries`;
   }
 
   public sortColumn(sortEntry: SortEntry) {
@@ -160,10 +163,10 @@ export class ExpensesComponent implements OnInit {
     header.push({ label: 'Name', isSortable: true });
     header.push({ label: 'Kategorie', isGroupable: true });
     header.push({ label: 'Intervall', isGroupable: true, isSortable: true });
-    header.push({ label: 'Betrag', isSortable: true  });
-    header.push({ label: 'Monatsbetrag' });
+    header.push({ label: 'Betrag', isSortable: true, summarizeWhenGrouped: false });
+    header.push({ label: 'Monatsbetrag', summarizeWhenGrouped: true });
     header.push({ label: 'Beschreibung' });
-    header.push({ label: 'Erstellt', isSortable: true });
+    header.push({ label: 'Start', isSortable: true });
 
     this.header = header;
     this.groupCell = this.header[2];
