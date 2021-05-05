@@ -24,7 +24,8 @@ Array.prototype.SortAscending = function (prop: string) {
 }
 
 Array.prototype.Distinct = function ()  {
-    return  [...new Set(this)];
+    //return  [...new Set(this)];
+    return this.filter((value, index, self) => self.indexOf(value) === index);
 }
 
 Array.prototype.First = function () {

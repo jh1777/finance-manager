@@ -3,6 +3,8 @@
         <div class="left">{{ pageTitle }}</div>
         <div class="right">
             <span class="status-text">{{ lastResult }}</span>
+            <app-menu-button label="New Expense" [icon]="addEntryIcon" iconSize=18 (clickEvent)="newExpenseEntry()"></app-menu-button>
+
 <!--            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=18 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
  -->
         </div>
@@ -60,10 +62,10 @@
 </jw-modal>
 
 <jw-modal id="change-entry" class="small-modal">
-    <h4>Change expense record</h4>
-    <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <h4>{{ changeEntry.id ? 'Change' :'Create'}} expense record</h4>
+    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
 
-    <form (ngSubmit)="changeExistingEntry()" #ausgabeForm="ngForm">
+    <form (ngSubmit)="changeOrCreateEntry()" #ausgabeForm="ngForm">
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="name"><strong>Name</strong></label>
@@ -75,18 +77,22 @@
     
           <div class="form-group col-md-6">
             <label for="kategorie"><strong>Kategorie</strong></label>
-            <select class="form-control" id="kategorie" required [(ngModel)]="changeEntry.Kategorie" name="Kategorie">
+            <select class="form-control" id="kategorie" required [(ngModel)]="changeEntry.Kategorie" name="Kategorie" #kategorie="ngModel">
                 <option *ngFor="let c of categories"> {{ c }}</option>
             </select>
+            <div [hidden]="kategorie.valid || kategorie.pristine" class="alert alert-danger">
+                Kategorie is required</div>
           </div>
 
           <div class="form-group col-md-6">
             <label for="intervall"><strong>Intervall</strong></label>
-            <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall">
+            <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall" #intervall="ngModel">
                 <option>Monat</option>
                 <option>Quartal</option>
                 <option>Jahr</option>
               </select>
+              <div [hidden]="intervall.valid || intervall.pristine" class="alert alert-danger">
+                Intervall is required</div>
           </div>
 
           <div class="form-group col-md-6">
@@ -101,7 +107,19 @@
             <label for="beschreibung"><strong>Beschreibung</strong></label>
             <input type="text" class="form-control" id="beschreibung" [(ngModel)]="changeEntry.Beschreibung" name="Beschreibung" 
                 #beschreibung="ngModel">
-          </div>
+        </div>
+
+        <div class="form-group col-md-6">
+            <label for="start"><strong>Start</strong></label>
+            <input type="date" class="form-control" id="start" [(ngModel)]="changeEntry.Start" name="Start" 
+                #start="ngModel">
+        </div>
+
+        <div class="form-group col-md-6">
+            <label for="ende"><strong>Ende</strong></label>
+            <input type="date" class="form-control" id="ende" [(ngModel)]="changeEntry.Ende" name="Ende" 
+                #ende="ngModel">
+        </div>
     
         </div>
         <button type="button" class="btn btn-secondary" style="float: right;" (click)="closeModal('change-entry');">Cancel</button>

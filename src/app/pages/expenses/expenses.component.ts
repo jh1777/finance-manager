@@ -31,6 +31,8 @@ export class ExpensesComponent implements OnInit {
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
 
+  public addEntryIcon: string = getIconWithName('plus-circle-line');
+
   public deletionEntry: Ausgabe;
   public deleteConfirmMessage: string;
   
@@ -83,7 +85,12 @@ export class ExpensesComponent implements OnInit {
       }
     })
   }
-  
+  public newExpenseEntry() {
+    this.changeEntry = new Ausgabe();
+    this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    this.openModal('change-entry');
+  }
+
   /**
    * Creates Table model from Input Data Model
    */
@@ -100,7 +107,7 @@ export class ExpensesComponent implements OnInit {
       action.icon = getIconWithName("pencil-line");
       action.action = (id: number) => {
         this.changeEntry = entry;
-        this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+        this.changeEntry.Start = this.datePipe.transform(this.changeEntry.Start, 'yyyy-MM-dd');
         this.openModal('change-entry');
       };
       row.actions.push(action); 
@@ -252,6 +259,7 @@ export class ExpensesComponent implements OnInit {
    * @param item Partial<Ausgabe>
    */
   private changeItem(id: number, item: Partial<Ausgabe>, reload: boolean = false) {
+    item.Bearbeitet = new Date().toPreferredStringFormat();
     this.api.setService("ausgaben");
     this.api.changeEntry<Partial<Ausgabe>>(id, item).subscribe(
         res => {
@@ -273,6 +281,9 @@ export class ExpensesComponent implements OnInit {
    * @param item Ausgabe
    */
   private createItem(item: Ausgabe, fromForm: boolean = false) {
+    item.Erstellt = new Date().toPreferredStringFormat();
+    item.Bearbeitet = new Date().toPreferredStringFormat();
+
     this.api.setService("ausgaben");
     this.api.createEntry<Ausgabe>(item).subscribe(
         res => {
@@ -280,12 +291,6 @@ export class ExpensesComponent implements OnInit {
           this.showResultWithTimer(`POST Ausgabe item: ${item.Name}/${item.Betrag}: HTTP Code ${response.status}`);
 
           if (res.ok) {
-            if (fromForm) {
-              // TODO::
-
-              //this.resetNewAusgabeItem();
-              //this.toggleNewEntryForm();
-            }
             this.loadData();
           }
         },
@@ -295,9 +300,13 @@ export class ExpensesComponent implements OnInit {
       );
   }
 
-  public changeExistingEntry() {
-    this.changeItem(this.changeEntry.id, this.changeEntry,true);
+  public changeOrCreateEntry() {
+    if (this.changeEntry.id) {
+      this.changeItem(this.changeEntry.id, this.changeEntry,true);
+    } else {
+      // New Entry
+      this.createItem(this.changeEntry);
+    }
     this.closeModal('change-entry');
-
   }
 }
