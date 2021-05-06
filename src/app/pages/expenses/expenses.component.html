@@ -1,12 +1,16 @@
 <div class="page">
     <app-page-header>
-        <div class="left">{{ pageTitle }}</div>
+        <div class="left">
+            {{ pageTitle }}
+            
+        </div>
         <div class="right">
             <span class="status-text">{{ lastResult }}</span>
-            <app-menu-button label="New Expense" [icon]="addEntryIcon" iconSize=18 (clickEvent)="newExpenseEntry()"></app-menu-button>
 
-<!--            <app-menu-button [label]="addEntryLabel" [icon]="addEntryIcon" iconSize=18 (clickEvent)="toggleNewEntryForm()"></app-menu-button>
- -->
+            <ng-container *ngFor="let p of persons">
+                <app-menu-button *ngIf="currentPerson != p" [label]="personButtonLabel(p)" [icon]="personIcon" iconSize=18 (clickEvent)="changeUser(p)"></app-menu-button>
+            </ng-container>
+            <app-menu-button label="New Expense" [icon]="addEntryIcon" iconSize=18 (clickEvent)="newExpenseEntry()"></app-menu-button>
         </div>
     </app-page-header>
     <p></p>
@@ -85,6 +89,15 @@
           </div>
 
           <div class="form-group col-md-6">
+            <label for="person"><strong>Person</strong></label>
+            <select class="form-control" id="person" required [(ngModel)]="changeEntry.Person" name="Person" #person="ngModel">
+                <option *ngFor="let c of persons"> {{ c }}</option>
+            </select>
+            <div [hidden]="person.valid || person.pristine" class="alert alert-danger">
+                Person is required</div>
+          </div>
+
+          <div class="form-group col-md-6">
             <label for="intervall"><strong>Intervall</strong></label>
             <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall" #intervall="ngModel">
                 <option>Monat</option>
@@ -123,6 +136,6 @@
     
         </div>
         <button type="button" class="btn btn-secondary" style="float: right;" (click)="closeModal('change-entry');">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!ausgabeForm.form.valid">Change</button>&nbsp;
+        <button type="submit" class="btn btn-primary" [disabled]="!ausgabeForm.form.valid">{{ changeEntry.id ? 'Change' :'Create'}}</button>&nbsp;
     </form>
 </jw-modal>

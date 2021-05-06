@@ -12,6 +12,7 @@ export class Ausgabe implements IName {
     Ende: string;
     Erstellt: string;
     Bearbeitet: string;
+    Person: string;
 
     constructor(init?: Partial<Ausgabe>) {
         Object.assign(this, init);

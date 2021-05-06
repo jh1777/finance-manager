@@ -47,7 +47,10 @@ export const getIconWithName = (name: string): string => {
         
         case 'slider-line':
             return '../assets/icons/slider-line.svg';
-                        
+    
+        case 'user-line':
+            return '../assets/icons/user-line.svg';
+
         default:
             break;
     }

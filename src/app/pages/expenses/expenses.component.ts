@@ -25,6 +25,11 @@ export class ExpensesComponent implements OnInit {
   private data: Array<Ausgabe> = [];
   public categories: Array<string> = ['Telefon', 'Streaming', 'Versicherung', 'Wohnung', 'Freizeit', 'KFZ', 'Kinder', 'Sparen', 'Bahn'];
 
+  public persons: Array<string> = ['Julia', 'Jörg'];
+  public currentPerson: string = 'Jörg';
+  public personIcon: string = getIconWithName('user-line');
+  public personButtonLabel = (p: string) => `Switch to ${p}`;
+
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
   public groupCell: ITableCell;
@@ -77,7 +82,9 @@ export class ExpensesComponent implements OnInit {
         } else {
           this.data = result.SortAscending('Name');
         }
-        
+        // Person filter
+        this.data = this.data.filter(d => d.Person == this.currentPerson);
+        //  Mapping
         this.mapDataToTableModel();
       },
       error: (err) => {
@@ -88,6 +95,7 @@ export class ExpensesComponent implements OnInit {
   public newExpenseEntry() {
     this.changeEntry = new Ausgabe();
     this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    this.changeEntry.Person = this.currentPerson;
     this.openModal('change-entry');
   }
 
@@ -280,9 +288,10 @@ export class ExpensesComponent implements OnInit {
    * Create new Item in Database
    * @param item Ausgabe
    */
-  private createItem(item: Ausgabe, fromForm: boolean = false) {
+  private createItem(item: Ausgabe) {
     item.Erstellt = new Date().toPreferredStringFormat();
     item.Bearbeitet = new Date().toPreferredStringFormat();
+    item.Person = this.currentPerson;
 
     this.api.setService("ausgaben");
     this.api.createEntry<Ausgabe>(item).subscribe(
@@ -308,5 +317,10 @@ export class ExpensesComponent implements OnInit {
       this.createItem(this.changeEntry);
     }
     this.closeModal('change-entry');
+  }
+
+  public changeUser(person: string) {
+    this.currentPerson = person;
+    this.loadData();
   }
 }
