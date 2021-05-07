@@ -9,6 +9,7 @@ import { TableHeader } from '../models/table/tableHeader';
 import { SortEntry } from '../models/table/sortEntry';
 import { NumberTableCell } from '../models/table/numberTableCell';
 import { Dictionary } from 'src/app/util/dictionary';
+import { TableSpan } from '../models/table/tableSpan';
 
 @Component({
   selector: 'app-table',
@@ -46,6 +47,7 @@ export class TableComponent implements OnInit, OnChanges {
 
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
+  public spans: Array<TableSpan> = [];
 
   @Input()
   public sortEntry: SortEntry = null;
@@ -117,6 +119,7 @@ export class TableComponent implements OnInit, OnChanges {
         this.rows = result;
       }
     }
+    this.spans = this.calculateSpans(this.header);
   }
 
   public getTotalForColumn(index: number): number {
@@ -178,5 +181,35 @@ export class TableComponent implements OnInit, OnChanges {
 
   public cellAction(cell: ITableCell) {
     cell.action();
+  }
+
+  private calculateSpans(input: Array<TableHeader>): Array<TableSpan> {
+    var start = 0;
+    let spans: Array<TableSpan> = [];
+    for (let i = 1; i < input.length; i++) {
+        const item = input[i];
+        if (item.summarizeWhenGrouped) {
+            if (i - start > 1) {
+              spans.push({
+                columnId: start == 0 ? 0 : i,
+                columnsToSpan: i - start
+              })
+                //spans.push(i - start); // prev. colspan
+            }
+            spans.push({
+              columnId: i,
+              columnsToSpan: 1
+            }); // current colspan
+            start = i;
+        }
+    }
+
+    if (input.length - start > 0) 
+      //spans.push(input.length - start - 1);
+      spans.push({
+        columnId: null,
+        columnsToSpan: input.length - start - 1
+      })
+    return spans;
   }
 }
