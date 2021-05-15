@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { INavigationItem } from '../models/navigation-bar/INavigationItem';
 
 @Component({
@@ -23,17 +22,17 @@ export class NavigationBarComponent {
   darkmode: boolean = false;
 
   @Output()
-  selectionEvent = new EventEmitter<INavigationItem>();
+  onClick = new EventEmitter<INavigationItem>();
 
-  constructor(private router: Router) { }
+  constructor() { }
 
   public select(id: number) {
     let item = this.items[id];
 
-    if (item.isActionItem && item.toActionItem().action != null) {
-      item.toActionItem().action();
+    if (item.isActionItem && item.toActionItem().onClick != null) {
+      item.toActionItem().onClick();
     }
 
-    this.selectionEvent.emit(item);
+    this.onClick.emit(item);
   }
 }

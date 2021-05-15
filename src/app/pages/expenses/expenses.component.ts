@@ -32,7 +32,7 @@ export class ExpensesComponent implements OnInit {
 
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
-  public groupCell: ITableCell;
+  public groupCell: number;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
 
@@ -184,7 +184,7 @@ export class ExpensesComponent implements OnInit {
     header.push({ label: 'Start', isSortable: true });
 
     this.header = header;
-    this.groupCell = this.header[2];
+    this.groupCell = 2;
   }
   
   private showResultWithTimer(message: string) {

@@ -5,4 +5,9 @@ export * from './models/table/tableRowAction';
 export * from './models/table/tableSize';
 export * from './models/table/textTableCell';
 export * from './models/table/tableHeader';
-
+export * from './models/table/styledTextTableCell';
+export * from './models/table/numberTableCell';
+export * from './models/navigation-bar/INavigationItem';
+export * from './models/navigation-bar/actionNavigationItem';
+export * from './models/navigation-bar/textNavigationItem';
+export * from './models/navigation-bar/linkNavigationItem';

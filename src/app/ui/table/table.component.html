@@ -30,7 +30,7 @@
     <tbody>
         <ng-container *ngFor="let row of rows; let i = index">
             <tr *ngIf="!isGroupRow(row) && !row.hidden" class="table-row" (click)="rowEvent(row)" [ngClass]="i % 2 == 0 ? 'even-row' : ''">
-                <td *ngFor="let cell of row.cells" scope="row" [ngStyle]="cell.style">{{ cell.label }}
+                <td *ngFor="let cell of row.cells" scope="row" [ngStyle]="cell.style">{{ cell.label ? cell.label : cell.numericValue ? cell.numericValue : '' }}
                     <img *ngIf="cell.actionIcon" class="action-icon" [src]="cell.actionIcon" (click)="cellAction(cell)" />
                 </td>
                 <td *ngIf="hasActions()" >
@@ -38,7 +38,7 @@
                 </td>
             </tr>
             <tr *ngIf="isGroupRow(row)" class="table-group" (click)="groupRowClick(row)">
-                <!-- <ng-container *ngFor="let col of header; let j = index">
+                <ng-container *ngFor="let col of header; let j = index">
                     <td *ngIf="j == 0">
                         <svg *ngIf="row.isCollapsed" class="icon" version="1.1" width="18" height="18"  viewBox="0 0 36 36" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <path transform="rotate(90 18 18)" class="clr-i-outline clr-i-outline-path-1" d="M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z"></path>
@@ -53,9 +53,9 @@
                     <td *ngIf="j != 0">
                         <span *ngIf="row.summarizedData[j]" style="color: #909090; font-weight: 500;">&sum; {{ row.summarizedData[j].toFixed(2) }}</span>
                     </td>
-                </ng-container> -->
+                </ng-container>
 
-                <ng-container *ngFor="let span of spans; let j = index">
+<!--    Test with spans:                <ng-container *ngFor="let span of spans; let j = index">
                     <td *ngIf="j == 0" [attr.colspan]="span.columnsToSpan">
                         <svg *ngIf="row.isCollapsed" class="icon" version="1.1" width="18" height="18"  viewBox="0 0 36 36" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                             <path transform="rotate(90 18 18)" class="clr-i-outline clr-i-outline-path-1" d="M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z"></path>
@@ -70,7 +70,7 @@
                     <td *ngIf="j != 0" [attr.colspan]="span.columnsToSpan">
                         <span *ngIf="span.columnId != null && row.summarizedData[span.columnId]" style="color: #909090; font-weight: 500;">&sum; {{ row.summarizedData[span.columnId].toFixed(2) }}</span>
                     </td>
-                </ng-container>
+                </ng-container> -->
                 <td *ngIf="hasActions()">
                 </td>
             </tr>
@@ -79,20 +79,20 @@
     <tfoot *ngIf="footer">
         <tr style="background-color: rgb(240, 243, 245);">
             <!-- <td [attr.colspan]="header.length">{{ footer }}</td> -->
-            <!-- <ng-container *ngFor="let col of header; let j = index">
+            <ng-container *ngFor="let col of header; let j = index">
                 <td *ngIf="j == 0">{{ footer }}</td>
                 <td *ngIf="j != 0">
                     <span *ngIf="col.summarizeWhenGrouped" style="color: #909090; font-weight: 500;">&sum; {{ getTotalForColumn(j).toFixed(2) }}</span>
 
                 </td>
-            </ng-container> -->
+            </ng-container>
 
-            <ng-container *ngFor="let span of spans; let j = index">
+            <!-- Test with spans:  <ng-container *ngFor="let span of spans; let j = index">
                 <td *ngIf="j == 0" [attr.colspan]="span.columnsToSpan">{{ footer }}</td>
                 <td *ngIf="j != 0" [attr.colspan]="span.columnsToSpan">
                     <span *ngIf="span.columnId != null && header[span.columnId].summarizeWhenGrouped" style="color: #909090; font-weight: 500;">&sum; {{ getTotalForColumn(span.columnId).toFixed(2) }}</span>
                 </td>
-            </ng-container>
+            </ng-container> -->
             <td *ngIf="hasActions()"></td>
         </tr>
     </tfoot>

@@ -11,7 +11,7 @@ export class BadgeComponent implements OnInit {
   label: string;
 
   @Input()
-  customClass: string = '';
+  customClass: 'green' | 'red' | '' = '';
 
   @Input()
   filled: boolean = false;
