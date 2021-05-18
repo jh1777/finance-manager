@@ -2536,7 +2536,7 @@
                     }
                 ]
             },
-            "templateData": "<app-navigation-bar \n    [items]=\"items\" \n    [selected]=\"selectedTab\" \n    (selectionEvent)=\"selectItem($event)\" \n    size=\"medium\"\n    darkmode=true>\n</app-navigation-bar>\n<router-outlet></router-outlet>"
+            "templateData": "<app-navigation-bar \n    [items]=\"items\" \n    [selected]=\"selectedTab\" \n    (onClick)=\"selectItem($event)\" \n    size=\"medium\"\n    darkmode=true>\n</app-navigation-bar>\n<router-outlet></router-outlet>"
         },
         {
             "name": "BadgeComponent",
@@ -3479,7 +3479,7 @@
         },
         {
             "name": "InsuranceComponent",
-            "id": "component-InsuranceComponent-615cfcb114d1b9fda282cba9963bfe8c",
+            "id": "component-InsuranceComponent-a815e83d7a618207ee76150b51533589",
             "file": "src/app/pages/insurance/insurance.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -3572,8 +3572,8 @@
                     ]
                 },
                 {
-                    "name": "groupCell",
-                    "type": "ITableCell",
+                    "name": "groupCellIndex",
+                    "type": "number",
                     "optional": false,
                     "description": "",
                     "line": 28,
@@ -3898,7 +3898,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { CurrencyPipe, DatePipe } from '@angular/common';\nimport { HttpErrorResponse, HttpResponse } from '@angular/common/http';\nimport { Component, OnInit } from '@angular/core';\nimport { timer } from 'rxjs';\nimport { getIconWithName } from 'src/app/data/iconFactory';\nimport { ModalService } from 'src/app/modalModule';\n/* import * as dayjs from 'dayjs';\nimport * as relativeTime from 'dayjs/plugin/relativeTime'; */\n\nimport { ApiService } from 'src/app/services/api.service';\nimport { Versicherung } from 'src/app/services/models/versicherung';\nimport { NavigationService } from 'src/app/services/navigation.service';\nimport { ITableCell, TableHeader, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';\nimport { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';\nimport { environment } from 'src/environments/environment';\n\n@Component({\n  selector: 'app-insurance',\n  templateUrl: './insurance.component.html',\n  styleUrls: ['./insurance.component.scss']\n})\nexport class InsuranceComponent implements OnInit {\n\n  public pageTitle: string = \"Insurance\";\n\n  public rows: Array<TableRow> = [];\n  public header: Array<TableHeader> = [];\n  public groupCell: ITableCell;\n  public tableSize: TableSize = TableSize.Medium;\n  public footerText: string;\n\n  public data: Array<Versicherung>;\n  public deletionEntry: Versicherung;\n  public deleteConfirmMessage: string;\n\n  public showAddEntry: boolean = false;\n  public addEntryLabel: string = \"Add Insurance\";\n  public addEntryIcon: string = getIconWithName('plus-circle-line');\n  public newInsuranceEntry = new Versicherung({\n    Erstellt: this.datePipe.transform(new Date(), 'yyyy-MM-dd')\n  });\n  public createEntryLastResult: string = '';\n \n  constructor(\n    private navigationService: NavigationService,\n    private modalService: ModalService,\n    private currencyPipe: CurrencyPipe,\n    private datePipe: DatePipe,\n    private api: ApiService\n  ) { \n    this.navigationService.activeMenu.next(3);\n    // no loonger used: dayjs.extend(relativeTime);\n  }\n\n  ngOnInit(): void {\n    this.getData();\n  }\n\n  public rowClicked(row: TableRow) {\n    console.log(row);\n  }\n\n\n  private getData() {\n    this.api.setService(\"versicherungen\");\n    this.api.getAllEntries<Versicherung>().subscribe({\n      next: (result) => {\n        this.data = result.body.SortDescending('Datum');\n        if (environment.mockData) {\n          this.data.map(d => d.Rueckkaufswert = d.Rueckkaufswert * 45 * Math.random());\n        }\n        this.mapDataToTableModel();\n      },\n      error: (e) => {\n        console.error(\"Error getting Versicherungen!\", e);\n      }\n    })\n  }\n\n  private mapDataToTableModel() {\n    this.createHeader();\n    this.createFooter();\n\n    let result = new Array<TableRow>();\n    this.data.forEach(entry => {\n      let row = new TableRow();\n\n      // Actions\n      let action = new TableRowAction();\n      action.tooltip = \"Delete\";\n      action.icon = getIconWithName(\"trash-line\");\n      action.action = (id: number) => {\n        this.deletionEntry = entry;\n        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}/${entry.Datum}?`;\n        this.openModal('delete-confirmation');\n      };\n      row.actions.push(action); \n      \n      \n      let prev = this.getPreviousEntry(entry);\n      let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;\n      // Cells\n      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : \"n/a\"});\n      row.cells.push(cell);\n      \n      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });\n      row.cells.push(cell);\n\n      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Erstellt, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });\n      row.cells.push(cell);\n\n      result.push(row);\n    })\n\n    this.rows = result;\n  }\n\n  private getPreviousEntry(entry: Versicherung): Versicherung {\n    let filteredData = this.data.filter(d => d.Name == entry.Name);\n    let index = filteredData.indexOf(entry);\n    if (index == filteredData.length - 1) {\n      return null;\n    } \n    return filteredData[index + 1];\n  }\n\n  private createFooter() {\n    this.footerText = `${this.data.map(d => d.Name).Distinct().length} Categories`;\n  }\n\n  private createHeader() {\n    let header: Array<TableHeader> = [];\n\n    header.push({ label: 'No.' });\n    header.push({ label: 'Name' });\n    header.push({ label: 'Rückkaufswert' });\n    header.push({ label: 'Delta' });\n    header.push({ label: 'Datum' });\n    header.push({ label: 'Erstellt' });\n    this.header = header;\n    this.groupCell = this.header[1];\n  }\n\n  public toggleNewEntryForm() {\n    this.showAddEntry = !this.showAddEntry;\n    if (this.showAddEntry) {\n      this.addEntryLabel = \"Close Form\";\n      this.addEntryIcon = getIconWithName('times-circle-line');\n    } else {\n      this.addEntryLabel = \"Add Insurance\";\n      this.addEntryIcon = getIconWithName('plus-circle-line');\n    }\n  }\n\n  public createInsurance(item: Versicherung) {\n\n    console.log(\"Create Item: Versicherung: \", item);\n    this.api.setService(\"versicherungen\");\n    this.api.createEntry<Versicherung>(item).subscribe(\n        res => {\n          var response = <HttpResponse<Versicherung>>res;\n          this.showResultWithTimer(`POST Versicherung item: ${item.Name}/${item.Datum}: HTTP Code ${response.status}`);\n\n          if (res.ok) {\n            this.resetNewInsuranceItem();\n            this.toggleNewEntryForm();\n            this.getData();\n          }\n        },\n        (err: HttpErrorResponse) => {\n          this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);\n        }\n      );\n  }\n\n  private resetNewInsuranceItem() {\n    this.newInsuranceEntry.Name = null;\n    this.newInsuranceEntry.Rueckkaufswert = null;\n    this.newInsuranceEntry.Datum = null;\n  }\n\n  private showResultWithTimer(message: string) {\n    this.createEntryLastResult = message;\n    const salaryLastResultTimer = timer(10000);\n    salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');\n  }\n\n  public deleteEntry($event: Versicherung) {\n    if ($event) {\n      // Call the API to delete the entry\n      this.api.setService(\"versicherungen\");\n      this.api.deleteEntryById<Versicherung>($event.id).subscribe({\n        next: (res) => {\n          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);\n          this.getData();\n        },\n        error: (err) => {\n          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);\n        }\n      });\n    }\n    this.closeModal('delete-confirmation');\n  }\n\n  openModal(id: string) {\n    this.modalService.open(id);\n  }\n\n  closeModal(id: string) {\n    this.modalService.close(id);\n  }\n}",
+            "sourceCode": "import { CurrencyPipe, DatePipe } from '@angular/common';\nimport { HttpErrorResponse, HttpResponse } from '@angular/common/http';\nimport { Component, OnInit } from '@angular/core';\nimport { timer } from 'rxjs';\nimport { getIconWithName } from 'src/app/data/iconFactory';\nimport { ModalService } from 'src/app/modalModule';\n/* import * as dayjs from 'dayjs';\nimport * as relativeTime from 'dayjs/plugin/relativeTime'; */\n\nimport { ApiService } from 'src/app/services/api.service';\nimport { Versicherung } from 'src/app/services/models/versicherung';\nimport { NavigationService } from 'src/app/services/navigation.service';\nimport { ITableCell, TableHeader, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';\nimport { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';\nimport { environment } from 'src/environments/environment';\n\n@Component({\n  selector: 'app-insurance',\n  templateUrl: './insurance.component.html',\n  styleUrls: ['./insurance.component.scss']\n})\nexport class InsuranceComponent implements OnInit {\n\n  public pageTitle: string = \"Insurance\";\n\n  public rows: Array<TableRow> = [];\n  public header: Array<TableHeader> = [];\n  public groupCellIndex: number;\n  public tableSize: TableSize = TableSize.Medium;\n  public footerText: string;\n\n  public data: Array<Versicherung>;\n  public deletionEntry: Versicherung;\n  public deleteConfirmMessage: string;\n\n  public showAddEntry: boolean = false;\n  public addEntryLabel: string = \"Add Insurance\";\n  public addEntryIcon: string = getIconWithName('plus-circle-line');\n  public newInsuranceEntry = new Versicherung({\n    Erstellt: this.datePipe.transform(new Date(), 'yyyy-MM-dd')\n  });\n  public createEntryLastResult: string = '';\n \n  constructor(\n    private navigationService: NavigationService,\n    private modalService: ModalService,\n    private currencyPipe: CurrencyPipe,\n    private datePipe: DatePipe,\n    private api: ApiService\n  ) { \n    this.navigationService.activeMenu.next(3);\n    // no loonger used: dayjs.extend(relativeTime);\n  }\n\n  ngOnInit(): void {\n    this.getData();\n  }\n\n  public rowClicked(row: TableRow) {\n    console.log(row);\n  }\n\n\n  private getData() {\n    this.api.setService(\"versicherungen\");\n    this.api.getAllEntries<Versicherung>().subscribe({\n      next: (result) => {\n        this.data = result.body.SortDescending('Datum');\n        if (environment.mockData) {\n          this.data.map(d => d.Rueckkaufswert = d.Rueckkaufswert * 45 * Math.random());\n        }\n        this.mapDataToTableModel();\n      },\n      error: (e) => {\n        console.error(\"Error getting Versicherungen!\", e);\n      }\n    })\n  }\n\n  private mapDataToTableModel() {\n    this.createHeader();\n    this.createFooter();\n\n    let result = new Array<TableRow>();\n    this.data.forEach(entry => {\n      let row = new TableRow();\n\n      // Actions\n      let action = new TableRowAction();\n      action.tooltip = \"Delete\";\n      action.icon = getIconWithName(\"trash-line\");\n      action.action = (id: number) => {\n        this.deletionEntry = entry;\n        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}/${entry.Datum}?`;\n        this.openModal('delete-confirmation');\n      };\n      row.actions.push(action); \n      \n      \n      let prev = this.getPreviousEntry(entry);\n      let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;\n      // Cells\n      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : \"n/a\"});\n      row.cells.push(cell);\n      \n      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });\n      row.cells.push(cell);\n\n      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Erstellt, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });\n      row.cells.push(cell);\n\n      result.push(row);\n    })\n\n    this.rows = result;\n  }\n\n  private getPreviousEntry(entry: Versicherung): Versicherung {\n    let filteredData = this.data.filter(d => d.Name == entry.Name);\n    let index = filteredData.indexOf(entry);\n    if (index == filteredData.length - 1) {\n      return null;\n    } \n    return filteredData[index + 1];\n  }\n\n  private createFooter() {\n    this.footerText = `${this.data.map(d => d.Name).Distinct().length} Categories`;\n  }\n\n  private createHeader() {\n    let header: Array<TableHeader> = [];\n\n    header.push({ label: 'No.' });\n    header.push({ label: 'Name' });\n    header.push({ label: 'Rückkaufswert' });\n    header.push({ label: 'Delta' });\n    header.push({ label: 'Datum' });\n    header.push({ label: 'Erstellt' });\n    this.header = header;\n    this.groupCellIndex = 1;\n  }\n\n  public toggleNewEntryForm() {\n    this.showAddEntry = !this.showAddEntry;\n    if (this.showAddEntry) {\n      this.addEntryLabel = \"Close Form\";\n      this.addEntryIcon = getIconWithName('times-circle-line');\n    } else {\n      this.addEntryLabel = \"Add Insurance\";\n      this.addEntryIcon = getIconWithName('plus-circle-line');\n    }\n  }\n\n  public createInsurance(item: Versicherung) {\n\n    console.log(\"Create Item: Versicherung: \", item);\n    this.api.setService(\"versicherungen\");\n    this.api.createEntry<Versicherung>(item).subscribe(\n        res => {\n          var response = <HttpResponse<Versicherung>>res;\n          this.showResultWithTimer(`POST Versicherung item: ${item.Name}/${item.Datum}: HTTP Code ${response.status}`);\n\n          if (res.ok) {\n            this.resetNewInsuranceItem();\n            this.toggleNewEntryForm();\n            this.getData();\n          }\n        },\n        (err: HttpErrorResponse) => {\n          this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);\n        }\n      );\n  }\n\n  private resetNewInsuranceItem() {\n    this.newInsuranceEntry.Name = null;\n    this.newInsuranceEntry.Rueckkaufswert = null;\n    this.newInsuranceEntry.Datum = null;\n  }\n\n  private showResultWithTimer(message: string) {\n    this.createEntryLastResult = message;\n    const salaryLastResultTimer = timer(10000);\n    salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');\n  }\n\n  public deleteEntry($event: Versicherung) {\n    if ($event) {\n      // Call the API to delete the entry\n      this.api.setService(\"versicherungen\");\n      this.api.deleteEntryById<Versicherung>($event.id).subscribe({\n        next: (res) => {\n          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);\n          this.getData();\n        },\n        error: (err) => {\n          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);\n        }\n      });\n    }\n    this.closeModal('delete-confirmation');\n  }\n\n  openModal(id: string) {\n    this.modalService.open(id);\n  }\n\n  closeModal(id: string) {\n    this.modalService.close(id);\n  }\n}",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -3974,7 +3974,7 @@
             "implements": [
                 "OnInit"
             ],
-            "templateData": "<div class=\"page\">\n    <app-page-header>\n        <div class=\"left\">{{ pageTitle }}</div>\n        <div class=\"right\">\n            <span class=\"status-text\">{{ createEntryLastResult }}</span>\n            <app-menu-button [label]=\"addEntryLabel\" [icon]=\"addEntryIcon\" iconSize=18 (clickEvent)=\"toggleNewEntryForm()\"></app-menu-button>\n        </div>\n    </app-page-header>\n    <app-insurance-add-entry *ngIf=\"showAddEntry\" [model]=\"newInsuranceEntry\" (newEntry)=\"createInsurance($event)\"></app-insurance-add-entry>\n    <p></p>\n    <app-table \n        [header]=\"header\" \n        [rows]=\"rows\" \n        [size]=\"tableSize\"\n        [footer]=\"footerText\"\n        collapseGroupsByDefault=true \n        [groupColumn]=\"groupCell\" \n        (rowAction)=\"rowClicked($event)\">\n    </app-table>\n</div>\n\n<jw-modal id=\"delete-confirmation\" class=\"small-modal\">\n    <h3>Really Delete Entry</h3>\n    <p>{{deleteConfirmMessage}}</p>\n    <button type=\"button\" class=\"btn btn-danger\" (click)=\"deleteEntry(deletionEntry)\">\n        Delete\n    </button>\n    &nbsp;\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('delete-confirmation');\">\n        Close\n    </button>\n</jw-modal>"
+            "templateData": "<div class=\"page\">\n    <app-page-header>\n        <div class=\"left\">{{ pageTitle }}</div>\n        <div class=\"right\">\n            <span class=\"status-text\">{{ createEntryLastResult }}</span>\n            <app-menu-button [label]=\"addEntryLabel\" [icon]=\"addEntryIcon\" iconSize=18 (clickEvent)=\"toggleNewEntryForm()\"></app-menu-button>\n        </div>\n    </app-page-header>\n    <app-insurance-add-entry *ngIf=\"showAddEntry\" [model]=\"newInsuranceEntry\" (newEntry)=\"createInsurance($event)\"></app-insurance-add-entry>\n    <p></p>\n    <app-table \n        [header]=\"header\" \n        [rows]=\"rows\" \n        [size]=\"tableSize\"\n        [footer]=\"footerText\"\n        collapseGroupsByDefault=true \n        [groupColumnIndex]=\"groupCellIndex\" \n        (rowAction)=\"rowClicked($event)\">\n    </app-table>\n</div>\n\n<jw-modal id=\"delete-confirmation\" class=\"small-modal\">\n    <h3>Really Delete Entry</h3>\n    <p>{{deleteConfirmMessage}}</p>\n    <button type=\"button\" class=\"btn btn-danger\" (click)=\"deleteEntry(deletionEntry)\">\n        Delete\n    </button>\n    &nbsp;\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('delete-confirmation');\">\n        Close\n    </button>\n</jw-modal>"
         },
         {
             "name": "MenuButtonComponent",
@@ -4895,7 +4895,7 @@
         },
         {
             "name": "SalaryComponent",
-            "id": "component-SalaryComponent-c698bd540ddf3a2328709c10c237b49c",
+            "id": "component-SalaryComponent-9ff3b8faf767572585fb3979917f185a",
             "file": "src/app/pages/salary/salary.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -4920,7 +4920,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 39,
+                    "line": 40,
                     "modifierKind": [
                         114
                     ]
@@ -4931,7 +4931,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 38,
+                    "line": 39,
                     "modifierKind": [
                         114
                     ]
@@ -4942,7 +4942,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 40,
+                    "line": 41,
                     "modifierKind": [
                         114
                     ]
@@ -4962,7 +4962,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 49,
+                    "line": 50,
                     "modifierKind": [
                         114
                     ]
@@ -4972,7 +4972,7 @@
                     "type": "Gehalt",
                     "optional": false,
                     "description": "",
-                    "line": 50,
+                    "line": 51,
                     "modifierKind": [
                         114
                     ]
@@ -4982,17 +4982,17 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 35,
+                    "line": 36,
                     "modifierKind": [
                         114
                     ]
                 },
                 {
-                    "name": "groupCell",
-                    "type": "ITableCell",
+                    "name": "groupCellIndex",
+                    "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 33,
+                    "line": 34,
                     "modifierKind": [
                         114
                     ]
@@ -5024,7 +5024,7 @@
                     "type": "string",
                     "optional": false,
                     "description": "",
-                    "line": 46,
+                    "line": 47,
                     "modifierKind": [
                         114
                     ]
@@ -5035,7 +5035,7 @@
                     "type": "number",
                     "optional": false,
                     "description": "",
-                    "line": 43,
+                    "line": 44,
                     "modifierKind": [
                         114
                     ]
@@ -5046,7 +5046,7 @@
                     "type": "",
                     "optional": false,
                     "description": "",
-                    "line": 56,
+                    "line": 57,
                     "modifierKind": [
                         114
                     ]
@@ -5079,7 +5079,7 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 37,
+                    "line": 38,
                     "modifierKind": [
                         114
                     ]
@@ -5090,7 +5090,7 @@
                     "type": "TableSize",
                     "optional": false,
                     "description": "",
-                    "line": 34,
+                    "line": 35,
                     "modifierKind": [
                         114
                     ]
@@ -5112,7 +5112,7 @@
                     "type": "Array<Button>",
                     "optional": false,
                     "description": "",
-                    "line": 53,
+                    "line": 54,
                     "modifierKind": [
                         114
                     ]
@@ -5123,7 +5123,7 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 54,
+                    "line": 55,
                     "modifierKind": [
                         114
                     ]
@@ -5141,7 +5141,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 281,
+                    "line": 282,
                     "jsdoctags": [
                         {
                             "name": "id",
@@ -5158,7 +5158,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 273,
+                    "line": 274,
                     "modifierKind": [
                         112
                     ]
@@ -5169,7 +5169,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 194,
+                    "line": 195,
                     "modifierKind": [
                         112
                     ]
@@ -5185,7 +5185,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 230,
+                    "line": 231,
                     "modifierKind": [
                         114
                     ],
@@ -5210,7 +5210,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 256,
+                    "line": 257,
                     "modifierKind": [
                         114
                     ],
@@ -5235,7 +5235,7 @@
                     "optional": false,
                     "returnType": "Array<TableRow>",
                     "typeParameters": [],
-                    "line": 120,
+                    "line": 121,
                     "modifierKind": [
                         112
                     ],
@@ -5255,7 +5255,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 79
+                    "line": 80
                 },
                 {
                     "name": "openModal",
@@ -5268,7 +5268,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 277,
+                    "line": 278,
                     "jsdoctags": [
                         {
                             "name": "id",
@@ -5285,7 +5285,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 249,
+                    "line": 250,
                     "modifierKind": [
                         112
                     ]
@@ -5301,7 +5301,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 105,
+                    "line": 106,
                     "modifierKind": [
                         114
                     ],
@@ -5326,7 +5326,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 75,
+                    "line": 76,
                     "modifierKind": [
                         114
                     ],
@@ -5351,7 +5351,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 115,
+                    "line": 116,
                     "modifierKind": [
                         112
                     ],
@@ -5376,7 +5376,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 224,
+                    "line": 225,
                     "modifierKind": [
                         112
                     ],
@@ -5396,7 +5396,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 213,
+                    "line": 214,
                     "modifierKind": [
                         114
                     ]
@@ -5407,7 +5407,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 83,
+                    "line": 84,
                     "modifierKind": [
                         112
                     ]
@@ -5418,7 +5418,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { CurrencyPipe } from '@angular/common';\nimport { HttpErrorResponse, HttpResponse } from '@angular/common/http';\nimport { Component, OnInit } from '@angular/core';\nimport { getIconWithName } from 'src/app/data/iconFactory';\nimport { ApiService } from 'src/app/services/api.service';\nimport { Gehalt } from 'src/app/services/models/gehalt';\nimport { NavigationService } from 'src/app/services/navigation.service';\nimport { timer } from 'rxjs';\nimport { ModalService } from 'src/app/modalModule';\nimport { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell } from 'src/app/ui';\nimport '../../util/arrayExtensions';\nimport '../../util/numberExtensions';\nimport { environment } from 'src/environments/environment';\nimport { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';\n\n\n\n@Component({\n  selector: 'app-salary',\n  templateUrl: './salary.component.html',\n  styleUrls: ['./salary.component.scss']\n})\nexport class SalaryComponent implements OnInit {\n  public pageTitle = \"Payments\";\n\n  private data: Array<Gehalt>;\n\n  public tableSizeEnum = TableSize;\n  public hideToast: boolean = true;\n\n  public rows: Array<TableRow> = [];\n  public header: Array<TableHeader> = [];\n  public groupCell: ITableCell;\n  public tableSize: TableSize = TableSize.Medium;\n  public footerText: string;\n\n  public showAddEntry: boolean = false;\n  public addEntryLabel: string = \"Add Salary\";\n  public addEntryIcon: string = getIconWithName('plus-circle-line');\n  public createSalaryLastResult: string = '';\n\n  // Month filter\n  public monthFilterBy: number = null;\n\n  // Json Dialog\n  public jsonDetails: string;\n\n  // Delete Confirm\n  public deleteConfirmMessage: string;\n  public deletionEntry: Gehalt;\n\n  // Butttons\n  public yearButtons: Array<Button> = [];\n  public yearFilterMulti: boolean = true;\n\n  public newSalaryEntry = new Gehalt({\n    Arbeitgeber: 'Daimler Truck AG',\n    Wochenstunden: 35,\n    Jahr: new Date().getFullYear(),\n    Monat: new Date().getMonth()\n  });\n\n  constructor(\n    private api: ApiService,\n    private navigationService: NavigationService,\n    private modalService: ModalService,\n    private currencyPipe: CurrencyPipe\n    ) { \n\n    this.navigationService.activeMenu.next(2);\n    this.updateEntries();\n\n  }\n\n  public setSize(size: TableSize) {\n    this.tableSize = size;\n  }\n\n  ngOnInit(): void {\n    \n  }\n\n  private updateEntries() {\n    // Get Data from API\n    this.api.setService(\"gehalt\");\n    this.api.getAllEntries<Gehalt>().subscribe(\n      result => {\n        this.data = result.body;\n        if (environment.mockData) {\n          this.data.map(d => d.Netto = d.Netto * 63 * Math.random());\n          this.data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());\n        }\n\n        if (this.monthFilterBy) {\n          this.data = this.data.filter(d => d.Monat == this.monthFilterBy);\n        }\n        this.data = this.data.SortDescending('id');\n\n        // Map to generic table model\n        this.rows = this.mapToTableModel(this.data);\n      }\n    );\n  }\n\n  public rowClicked(row: TableRow) {\n/*  Maybe future use ... conflicts with icon on-click \n    let id = row.cells.map(r => r.id)[0];\n    this.api.getEntry<Gehalt>(id).subscribe(\n      result => {\n        this.showEntryAsJson(result.filter(r => r.id == id).First());\n      }\n    ); */\n  }\n\n  private showEntryAsJson(entry: Gehalt) {\n    this.jsonDetails = JSON.stringify(entry, undefined, 2);\n    this.openModal('json');\n  }\n\n  private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {\n    this.createHeader();\n    this.createFooter();\n\n    let result = new Array<TableRow>();\n    data.forEach(entry => {\n      let row = new TableRow();\n           \n      // Actions\n      let action = new TableRowAction();\n      action.tooltip = \"Delete\";\n      action.icon = getIconWithName(\"trash-line\");\n      action.action = (id: number) => {\n        this.deletionEntry = entry;\n        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;\n        this.openModal('delete-confirmation');\n      };\n      row.actions.push(action); \n      \n      let info = new TableRowAction();\n      info.tooltip = \"Log\";\n      info.icon = getIconWithName('info-standard-line');\n      info.action = () => {\n        this.showEntryAsJson(entry);\n      };\n      row.actions.push(info);\n\n      // Cells\n      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : \"n/a\"});\n      row.cells.push(cell);\n      \n      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ \n        id: entry.id, \n        label: entry.Monat.PadWithZero(), \n        style:{ 'font-weight': '500' },\n        actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), \n        action: () => {\n          if (!this.monthFilterBy) {\n            this.monthFilterBy = entry.Monat;\n            this.groupCell = null;\n            this.updateEntries();\n          } else {\n            this.monthFilterBy = null;\n            this.groupCell = this.header[1];\n            this.updateEntries();\n          }\n        } \n      });\n      row.cells.push(cell);\n      \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`});\n      row.cells.push(cell);\n      \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${entry.Wochenstunden}`});\n      row.cells.push(cell);\n\n      result.push(row);\n    })\n\n    return result;\n  }\n\n  private createHeader() {\n    let header: Array<TableHeader> = [];\n\n    header.push({ label: 'No.' });\n    header.push({ label: 'Jahr' });\n    header.push({ label: 'Monat' });\n    header.push({ label: 'Brutto' });\n    header.push({ label: 'Netto' });\n    header.push({ label: 'AKP' });\n    header.push({ label: 'Kantine' });\n    header.push({ label: 'Stunden/Woche' });\n    this.header = header;\n    \n    if (!this.monthFilterBy) {\n      this.groupCell = header[1];\n    }\n    \n  }\n\n  public toggleNewEntryForm() {\n    this.showAddEntry = !this.showAddEntry;\n    if (this.showAddEntry) {\n      this.addEntryLabel = \"Close Form\";\n      this.addEntryIcon = getIconWithName('times-circle-line');\n    } else {\n      this.addEntryLabel = \"Add Salary\";\n      this.addEntryIcon = getIconWithName('plus-circle-line');\n    }\n  }\n\n  private showSalaryResultWithTimer(message: string) {\n    this.createSalaryLastResult = message;\n    const salaryLastResultTimer = timer(10000);\n    salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');\n  }\n\n  public createSalary(item: Gehalt) {\n    console.log(item);\n    this.api.createEntry<Gehalt>(item).subscribe(\n        res => {\n          var response = <HttpResponse<Gehalt>>res;\n          this.showSalaryResultWithTimer(`POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`);\n\n          if (res.ok) {\n            this.resetNewSalaryItem();\n            this.toggleNewEntryForm();\n            this.updateEntries();\n          }\n        },\n        (err: HttpErrorResponse) => {\n          this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);\n        }\n      );\n  }\n\n  private resetNewSalaryItem() {\n    this.newSalaryEntry.Brutto = null;\n    this.newSalaryEntry.Netto = null;\n    this.newSalaryEntry.Kantine = null;\n    this.newSalaryEntry.AKP = null;\n  }\n\n  public deleteSalaryEntry($event: Gehalt) {\n    if ($event) {\n      // Call the API to delete the entry\n      this.api.setService(\"gehalt\");\n      this.api.deleteEntry<Gehalt>($event.Jahr, $event.Monat).subscribe({\n        next: (res) => {\n          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);\n          this.updateEntries();\n        },\n        error: (err) => {\n          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);\n        }\n      });\n    }\n    this.closeModal('delete-confirmation');\n  }\n\n  private createFooter() {\n    this.footerText = `${this.data.map(d => d.Jahr).Distinct().length} Years (${ this.data.map(d => d.Monat).length} Months)`;\n  }\n\n  openModal(id: string) {\n    this.modalService.open(id);\n  }\n\n  closeModal(id: string) {\n    this.modalService.close(id);\n  }\n}",
+            "sourceCode": "import { CurrencyPipe } from '@angular/common';\nimport { HttpErrorResponse, HttpResponse } from '@angular/common/http';\nimport { Component, OnInit } from '@angular/core';\nimport { getIconWithName } from 'src/app/data/iconFactory';\nimport { ApiService } from 'src/app/services/api.service';\nimport { Gehalt } from 'src/app/services/models/gehalt';\nimport { NavigationService } from 'src/app/services/navigation.service';\nimport { timer } from 'rxjs';\nimport { ModalService } from 'src/app/modalModule';\nimport { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell } from 'src/app/ui';\nimport '../../util/arrayExtensions';\nimport '../../util/numberExtensions';\nimport { environment } from 'src/environments/environment';\nimport { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';\n\n\n\n@Component({\n  selector: 'app-salary',\n  templateUrl: './salary.component.html',\n  styleUrls: ['./salary.component.scss']\n})\nexport class SalaryComponent implements OnInit {\n  public pageTitle = \"Payments\";\n\n  private data: Array<Gehalt>;\n\n  public tableSizeEnum = TableSize;\n  public hideToast: boolean = true;\n\n  public rows: Array<TableRow> = [];\n  public header: Array<TableHeader> = [];\n  //public groupCell: ITableCell;\n  public groupCellIndex: number;\n  public tableSize: TableSize = TableSize.Medium;\n  public footerText: string;\n\n  public showAddEntry: boolean = false;\n  public addEntryLabel: string = \"Add Salary\";\n  public addEntryIcon: string = getIconWithName('plus-circle-line');\n  public createSalaryLastResult: string = '';\n\n  // Month filter\n  public monthFilterBy: number = null;\n\n  // Json Dialog\n  public jsonDetails: string;\n\n  // Delete Confirm\n  public deleteConfirmMessage: string;\n  public deletionEntry: Gehalt;\n\n  // Butttons\n  public yearButtons: Array<Button> = [];\n  public yearFilterMulti: boolean = true;\n\n  public newSalaryEntry = new Gehalt({\n    Arbeitgeber: 'Daimler Truck AG',\n    Wochenstunden: 35,\n    Jahr: new Date().getFullYear(),\n    Monat: new Date().getMonth()\n  });\n\n  constructor(\n    private api: ApiService,\n    private navigationService: NavigationService,\n    private modalService: ModalService,\n    private currencyPipe: CurrencyPipe\n    ) { \n\n    this.navigationService.activeMenu.next(2);\n    this.updateEntries();\n\n  }\n\n  public setSize(size: TableSize) {\n    this.tableSize = size;\n  }\n\n  ngOnInit(): void {\n    \n  }\n\n  private updateEntries() {\n    // Get Data from API\n    this.api.setService(\"gehalt\");\n    this.api.getAllEntries<Gehalt>().subscribe(\n      result => {\n        this.data = result.body;\n        if (environment.mockData) {\n          this.data.map(d => d.Netto = d.Netto * 63 * Math.random());\n          this.data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());\n        }\n\n        if (this.monthFilterBy) {\n          this.data = this.data.filter(d => d.Monat == this.monthFilterBy);\n        }\n        this.data = this.data.SortDescending('id');\n\n        // Map to generic table model\n        this.rows = this.mapToTableModel(this.data);\n      }\n    );\n  }\n\n  public rowClicked(row: TableRow) {\n/*  Maybe future use ... conflicts with icon on-click \n    let id = row.cells.map(r => r.id)[0];\n    this.api.getEntry<Gehalt>(id).subscribe(\n      result => {\n        this.showEntryAsJson(result.filter(r => r.id == id).First());\n      }\n    ); */\n  }\n\n  private showEntryAsJson(entry: Gehalt) {\n    this.jsonDetails = JSON.stringify(entry, undefined, 2);\n    this.openModal('json');\n  }\n\n  private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {\n    this.createHeader();\n    this.createFooter();\n\n    let result = new Array<TableRow>();\n    data.forEach(entry => {\n      let row = new TableRow();\n           \n      // Actions\n      let action = new TableRowAction();\n      action.tooltip = \"Delete\";\n      action.icon = getIconWithName(\"trash-line\");\n      action.action = (id: number) => {\n        this.deletionEntry = entry;\n        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;\n        this.openModal('delete-confirmation');\n      };\n      row.actions.push(action); \n      \n      let info = new TableRowAction();\n      info.tooltip = \"Log\";\n      info.icon = getIconWithName('info-standard-line');\n      info.action = () => {\n        this.showEntryAsJson(entry);\n      };\n      row.actions.push(info);\n\n      // Cells\n      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : \"n/a\"});\n      row.cells.push(cell);\n      \n      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});\n      row.cells.push(cell);\n\n      cell = new StyledTextTableCell({ \n        id: entry.id, \n        label: entry.Monat.PadWithZero(), \n        style:{ 'font-weight': '500' },\n        actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), \n        action: () => {\n          if (!this.monthFilterBy) {\n            this.monthFilterBy = entry.Monat;\n            this.groupCellIndex = null;\n            this.updateEntries();\n          } else {\n            this.monthFilterBy = null;\n            this.groupCellIndex = 1;\n            this.updateEntries();\n          }\n        } \n      });\n      row.cells.push(cell);\n      \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`});\n      row.cells.push(cell);\n      \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`});\n      row.cells.push(cell);\n            \n      cell = new TextTableCell({ id: entry.id, label:`${entry.Wochenstunden}`});\n      row.cells.push(cell);\n\n      result.push(row);\n    })\n\n    return result;\n  }\n\n  private createHeader() {\n    let header: Array<TableHeader> = [];\n\n    header.push({ label: 'No.' });\n    header.push({ label: 'Jahr' });\n    header.push({ label: 'Monat' });\n    header.push({ label: 'Brutto' });\n    header.push({ label: 'Netto' });\n    header.push({ label: 'AKP' });\n    header.push({ label: 'Kantine' });\n    header.push({ label: 'Stunden/Woche' });\n    this.header = header;\n    \n    if (!this.monthFilterBy) {\n      this.groupCellIndex = 1;\n    }\n    \n  }\n\n  public toggleNewEntryForm() {\n    this.showAddEntry = !this.showAddEntry;\n    if (this.showAddEntry) {\n      this.addEntryLabel = \"Close Form\";\n      this.addEntryIcon = getIconWithName('times-circle-line');\n    } else {\n      this.addEntryLabel = \"Add Salary\";\n      this.addEntryIcon = getIconWithName('plus-circle-line');\n    }\n  }\n\n  private showSalaryResultWithTimer(message: string) {\n    this.createSalaryLastResult = message;\n    const salaryLastResultTimer = timer(10000);\n    salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');\n  }\n\n  public createSalary(item: Gehalt) {\n    console.log(item);\n    this.api.createEntry<Gehalt>(item).subscribe(\n        res => {\n          var response = <HttpResponse<Gehalt>>res;\n          this.showSalaryResultWithTimer(`POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`);\n\n          if (res.ok) {\n            this.resetNewSalaryItem();\n            this.toggleNewEntryForm();\n            this.updateEntries();\n          }\n        },\n        (err: HttpErrorResponse) => {\n          this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);\n        }\n      );\n  }\n\n  private resetNewSalaryItem() {\n    this.newSalaryEntry.Brutto = null;\n    this.newSalaryEntry.Netto = null;\n    this.newSalaryEntry.Kantine = null;\n    this.newSalaryEntry.AKP = null;\n  }\n\n  public deleteSalaryEntry($event: Gehalt) {\n    if ($event) {\n      // Call the API to delete the entry\n      this.api.setService(\"gehalt\");\n      this.api.deleteEntry<Gehalt>($event.Jahr, $event.Monat).subscribe({\n        next: (res) => {\n          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);\n          this.updateEntries();\n        },\n        error: (err) => {\n          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);\n        }\n      });\n    }\n    this.closeModal('delete-confirmation');\n  }\n\n  private createFooter() {\n    this.footerText = `${this.data.map(d => d.Jahr).Distinct().length} Years (${ this.data.map(d => d.Monat).length} Months)`;\n  }\n\n  openModal(id: string) {\n    this.modalService.open(id);\n  }\n\n  closeModal(id: string) {\n    this.modalService.close(id);\n  }\n}",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -5448,7 +5448,7 @@
                         "type": "CurrencyPipe"
                     }
                 ],
-                "line": 61,
+                "line": 62,
                 "jsdoctags": [
                     {
                         "name": "api",
@@ -5483,7 +5483,7 @@
             "implements": [
                 "OnInit"
             ],
-            "templateData": "<div class=\"page\">\n    <app-page-header>\n        <div class=\"left\">{{ pageTitle }}</div>\n        <div class=\"right\">\n            <span class=\"status-text\">{{ createSalaryLastResult }}</span>\n            <app-menu-button [label]=\"addEntryLabel\" [icon]=\"addEntryIcon\" iconSize=18 (clickEvent)=\"toggleNewEntryForm()\"></app-menu-button>\n            <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->\n            <div class=\"btn-group btn-group-sm\" style=\"float: right; margin-bottom: .5em;\" role=\"group\" aria-label=\"Table Size\">\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Small ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Small)\">S</button>\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Medium ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Medium)\">M</button>\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Large ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Large)\">L</button>\n            </div>\n        </div>\n    </app-page-header>\n    \n  <!--   <app-inline-button-group [buttons]=\"yearButtons\" [multiSelect]=\"yearFilterMulti\" (selectedButtons)=\"yearFilterChanged($event)\"></app-inline-button-group>  -->\n\n    <app-salary-add-entry *ngIf=\"showAddEntry\" [model]=\"newSalaryEntry\" (newEntry)=\"createSalary($event)\"></app-salary-add-entry>\n    <p></p>\n    <app-table \n        [header]=\"header\" \n        [rows]=\"rows\" \n        [size]=\"tableSize\" \n        [footer]=\"footerText\"\n        collapseGroupsByDefault=true \n        [groupColumn]=\"groupCell\"\n        (rowAction)=\"rowClicked($event)\">\n    </app-table>\n</div>\n\n<jw-modal id=\"json\" class=\"small-modal\">\n    <h3>Salary Data</h3>\n    <app-show-json [content]=\"jsonDetails\"></app-show-json>\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('json');\">\n        Close\n    </button>\n</jw-modal>\n\n<jw-modal id=\"delete-confirmation\" class=\"small-modal\">\n    <h3>Really Delete Entry</h3>\n    <p>{{deleteConfirmMessage}}</p>\n    <button type=\"button\" class=\"btn btn-danger\" (click)=\"deleteSalaryEntry(deletionEntry)\">\n        Delete\n    </button>\n    &nbsp;\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('delete-confirmation');\">\n        Close\n    </button>\n</jw-modal>"
+            "templateData": "<div class=\"page\">\n    <app-page-header>\n        <div class=\"left\">{{ pageTitle }}</div>\n        <div class=\"right\">\n            <span class=\"status-text\">{{ createSalaryLastResult }}</span>\n            <app-menu-button [label]=\"addEntryLabel\" [icon]=\"addEntryIcon\" iconSize=18 (clickEvent)=\"toggleNewEntryForm()\"></app-menu-button>\n            <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->\n            <div class=\"btn-group btn-group-sm\" style=\"float: right; margin-bottom: .5em;\" role=\"group\" aria-label=\"Table Size\">\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Small ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Small)\">S</button>\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Medium ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Medium)\">M</button>\n                <button type=\"button\" class=\"btn\" [ngClass]=\"tableSize == tableSizeEnum.Large ? 'btn-secondary' : 'btn-outline-secondary'\" (click)=\"setSize(tableSizeEnum.Large)\">L</button>\n            </div>\n        </div>\n    </app-page-header>\n    \n  <!--   <app-inline-button-group [buttons]=\"yearButtons\" [multiSelect]=\"yearFilterMulti\" (selectedButtons)=\"yearFilterChanged($event)\"></app-inline-button-group>  -->\n\n    <app-salary-add-entry *ngIf=\"showAddEntry\" [model]=\"newSalaryEntry\" (newEntry)=\"createSalary($event)\"></app-salary-add-entry>\n    <p></p>\n    <app-table \n        [header]=\"header\" \n        [rows]=\"rows\" \n        [size]=\"tableSize\" \n        [footer]=\"footerText\"\n        collapseGroupsByDefault=true \n        [groupColumnIndex]=\"groupCellIndex\"\n        (rowAction)=\"rowClicked($event)\">\n    </app-table>\n</div>\n\n<jw-modal id=\"json\" class=\"small-modal\">\n    <h3>Salary Data</h3>\n    <app-show-json [content]=\"jsonDetails\"></app-show-json>\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('json');\">\n        Close\n    </button>\n</jw-modal>\n\n<jw-modal id=\"delete-confirmation\" class=\"small-modal\">\n    <h3>Really Delete Entry</h3>\n    <p>{{deleteConfirmMessage}}</p>\n    <button type=\"button\" class=\"btn btn-danger\" (click)=\"deleteSalaryEntry(deletionEntry)\">\n        Delete\n    </button>\n    &nbsp;\n    <button type=\"button\" class=\"btn btn-primary\" style=\"float: right;\" (click)=\"closeModal('delete-confirmation');\">\n        Close\n    </button>\n</jw-modal>"
         },
         {
             "name": "SalaryYearTileComponent",
@@ -5800,7 +5800,7 @@
         },
         {
             "name": "TableComponent",
-            "id": "component-TableComponent-ff9a4bf13c28942f7eef050288ae15de",
+            "id": "component-TableComponent-ecf4d7c830e724e0877877dacfedb658",
             "file": "src/app/ui/table/table.component.ts",
             "changeDetection": "ChangeDetectionStrategy.OnPush",
             "encapsulation": [
@@ -5823,19 +5823,19 @@
                 {
                     "name": "collapseGroupsByDefault",
                     "defaultValue": "false",
-                    "line": 36,
+                    "line": 34,
                     "type": "boolean"
                 },
                 {
                     "name": "footer",
                     "defaultValue": "null",
-                    "line": 39,
+                    "line": 37,
                     "type": "string"
                 },
                 {
                     "name": "groupColumnIndex",
                     "defaultValue": "null",
-                    "line": 33,
+                    "line": 31,
                     "type": "number"
                 },
                 {
@@ -5853,13 +5853,13 @@
                 {
                     "name": "size",
                     "defaultValue": "TableSize.Small",
-                    "line": 42,
+                    "line": 40,
                     "type": "TableSize"
                 },
                 {
                     "name": "sortEntry",
                     "defaultValue": "null",
-                    "line": 55,
+                    "line": 53,
                     "type": "SortEntry"
                 }
             ],
@@ -5867,13 +5867,13 @@
                 {
                     "name": "rowAction",
                     "defaultValue": "new EventEmitter<TableRow>()",
-                    "line": 45,
+                    "line": 43,
                     "type": "EventEmitter"
                 },
                 {
                     "name": "sortAction",
                     "defaultValue": "new EventEmitter<SortEntry>()",
-                    "line": 48,
+                    "line": 46,
                     "type": "EventEmitter"
                 }
             ],
@@ -5884,7 +5884,7 @@
                     "type": "Array<string>",
                     "optional": false,
                     "description": "",
-                    "line": 50,
+                    "line": 48,
                     "modifierKind": [
                         112
                     ]
@@ -5895,20 +5895,9 @@
                     "type": "boolean",
                     "optional": false,
                     "description": "",
-                    "line": 51,
+                    "line": 49,
                     "modifierKind": [
                         112
-                    ]
-                },
-                {
-                    "name": "spans",
-                    "defaultValue": "[]",
-                    "type": "Array<TableSpan>",
-                    "optional": false,
-                    "description": "",
-                    "line": 52,
-                    "modifierKind": [
-                        114
                     ]
                 },
                 {
@@ -5925,31 +5914,6 @@
             ],
             "methodsClass": [
                 {
-                    "name": "calculateSpans",
-                    "args": [
-                        {
-                            "name": "input",
-                            "type": "Array<TableHeader>"
-                        }
-                    ],
-                    "optional": false,
-                    "returnType": "Array<TableSpan>",
-                    "typeParameters": [],
-                    "line": 188,
-                    "modifierKind": [
-                        112
-                    ],
-                    "jsdoctags": [
-                        {
-                            "name": "input",
-                            "type": "Array<TableHeader>",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        }
-                    ]
-                },
-                {
                     "name": "callback",
                     "args": [
                         {
@@ -5964,7 +5928,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 180,
+                    "line": 178,
                     "modifierKind": [
                         114
                     ],
@@ -5996,7 +5960,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 184,
+                    "line": 182,
                     "modifierKind": [
                         114
                     ],
@@ -6016,7 +5980,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 75,
+                    "line": 73,
                     "modifierKind": [
                         112
                     ]
@@ -6027,7 +5991,7 @@
                     "optional": false,
                     "returnType": "number",
                     "typeParameters": [],
-                    "line": 71,
+                    "line": 69,
                     "modifierKind": [
                         114
                     ]
@@ -6043,7 +6007,7 @@
                     "optional": false,
                     "returnType": "number",
                     "typeParameters": [],
-                    "line": 127,
+                    "line": 125,
                     "modifierKind": [
                         114
                     ],
@@ -6068,7 +6032,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 166,
+                    "line": 164,
                     "modifierKind": [
                         114
                     ],
@@ -6088,7 +6052,7 @@
                     "optional": false,
                     "returnType": "boolean",
                     "typeParameters": [],
-                    "line": 176,
+                    "line": 174,
                     "modifierKind": [
                         114
                     ]
@@ -6104,7 +6068,7 @@
                     "optional": false,
                     "returnType": "boolean",
                     "typeParameters": [],
-                    "line": 67,
+                    "line": 65,
                     "modifierKind": [
                         114
                     ],
@@ -6124,7 +6088,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 63
+                    "line": 61
                 },
                 {
                     "name": "ngOnInit",
@@ -6132,7 +6096,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 60
+                    "line": 58
                 },
                 {
                     "name": "rowEvent",
@@ -6145,7 +6109,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 162,
+                    "line": 160,
                     "modifierKind": [
                         114
                     ],
@@ -6170,7 +6134,7 @@
                     "optional": false,
                     "returnType": "void",
                     "typeParameters": [],
-                    "line": 137,
+                    "line": 135,
                     "modifierKind": [
                         114
                     ],
@@ -6190,7 +6154,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewEncapsulation } from '@angular/core';\nimport { ITableCell } from '../models/table/ITableCell';\nimport { TableRow } from '../models/table/tableRow';\nimport { TableRowAction } from '../models/table/tableRowAction';\nimport { TableSize } from '../models/table/tableSize';\nimport { GroupRow } from '../models/table/groupRow';\nimport '../../util/arrayExtensions';\nimport { TableHeader } from '../models/table/tableHeader';\nimport { SortEntry } from '../models/table/sortEntry';\nimport { NumberTableCell } from '../models/table/numberTableCell';\nimport { Dictionary } from 'src/app/util/dictionary';\nimport { TableSpan } from '../models/table/tableSpan';\n\n@Component({\n  selector: 'app-table',\n  templateUrl: './table.component.html',\n  styleUrls: ['./table.component.scss'],\n  changeDetection: ChangeDetectionStrategy.OnPush,\n  encapsulation: ViewEncapsulation.None\n})\nexport class TableComponent implements OnInit, OnChanges {\n  public tableSizeEnum = TableSize;\n\n  @Input()\n  rows: Array<TableRow> = [];\n  \n  @Input()\n  header: Array<TableHeader> = [];\n\n  //@Input()\n  //groupColumn: TableHeader = null;\n  @Input()\n  groupColumnIndex: number = null;\n\n  @Input()\n  collapseGroupsByDefault: boolean = false;\n\n  @Input()\n  footer: string = null;\n\n  @Input()\n  size: TableSize = TableSize.Small;\n\n  @Output()\n  rowAction = new EventEmitter<TableRow>();\n\n  @Output()\n  sortAction = new EventEmitter<SortEntry>();\n\n  private excludeGroupsInTable: Array<string> = [];\n  private firstLoad: boolean = true;\n  public spans: Array<TableSpan> = [];\n\n  @Input()\n  public sortEntry: SortEntry = null;\n\n  // TODO: Add \"collapse all groups\" button in group row \n  constructor() { }\n\n  ngOnInit(): void {\n  }\n\n  ngOnChanges() {\n    this.createGroups();\n  }\n\n  public isGroupRow(row: TableRow) {\n    return row instanceof GroupRow;\n  }\n\n  public getNoOfColumns(): number {\n    return this.header.length + (this.hasActions() ? 1 : 0);\n  }\n\n  private createGroups() {\n    if (this.groupColumnIndex) {\n\n      let colIndex = this.groupColumnIndex; // this.header.indexOf(this.groupColumn);\n      if (colIndex != -1) {\n\n        // Get all non-Group Rows\n        let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));\n        // Get the groups: Distinct column content\n        let labels = filterableRows.map(r => r.cells[colIndex].label).Distinct();\n\n        // Handle Auto-Group\n        if (this.firstLoad && this.collapseGroupsByDefault) { \n          this.excludeGroupsInTable = [];\n          labels.forEach(l => this.excludeGroupsInTable.push(l));\n          this.firstLoad = false;\n        }\n\n        // Create each Group and add its data\n        let result = new Array<TableRow>();\n        labels.forEach(group => {\n          let isCollapsed = this.excludeGroupsInTable.includes(group);\n          // Get Data Rows for current group\n          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);\n          // Create GroupRow\n          let groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });\n\n          //---sum\n          for (var i = 0; i < this.header.length ; i++) {\n            if (this.header[i].summarizeWhenGrouped && i != colIndex) {\n              let numberCells = groupData.map(g => g.cells[i]).filter(c => c instanceof NumberTableCell);\n              var sum = 0;\n              numberCells.forEach(c => c.numericValue ?  sum += c.numericValue : c );\n              groupRow.summarizedData.push(sum);\n            } else {\n              groupRow.summarizedData.push(null);\n            }\n          }\n          //-------\n          result.push(groupRow);\n          // Set Hidden Property for data rows\n          for (var i = 0; i < groupData.length ; i++) {\n            groupData[i].hidden = isCollapsed;\n            result.push(groupData[i]);\n          }\n        })\n        this.rows = result;\n      }\n    }\n    this.spans = this.calculateSpans(this.header);\n  }\n\n  public getTotalForColumn(index: number): number {\n    var result = 0;\n    this.rows.filter(row => row instanceof GroupRow).forEach((row: GroupRow) => {\n      if (row.summarizedData) {\n        result += row.summarizedData[index];\n      }\n    });\n    return result;\n  }\n\n  public sort(column: TableHeader) {\n    let defaultItem = new SortEntry({\n      direction: 'asc',\n      column: column    \n    });\n\n    if (this.sortEntry != null) {\n      if (this.sortEntry.column.label === column.label) {\n        // Sort same column\n        if (this.sortEntry.direction === 'desc') {\n          // Sort deactivation\n          this.sortEntry = null;\n        } else {\n          // Switch direction\n          this.sortEntry.direction = 'desc';\n        }\n      } else {\n        this.sortEntry = defaultItem;\n      }\n    } else {\n      this.sortEntry = defaultItem;\n    }\n    this.sortAction.emit(this.sortEntry);\n  }\n\n  public rowEvent(row: TableRow) {\n    this.rowAction.emit(row);\n  }\n\n  public groupRowClick(row: GroupRow) {\n    if (!this.excludeGroupsInTable.includes(row.groupLabel)) {\n      this.excludeGroupsInTable.push(row.groupLabel);\n    } else {\n      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel), 1);\n    }\n    row.isCollapsed = !row.isCollapsed;\n    this.createGroups();\n  }\n  \n  public hasActions(): boolean {\n    return this.rows.some(r => r.actions.length > 0);\n  }\n\n  public callback(id: number, $event: TableRowAction) {\n    $event.action(id);\n  }\n\n  public cellAction(cell: ITableCell) {\n    cell.action();\n  }\n\n  private calculateSpans(input: Array<TableHeader>): Array<TableSpan> {\n    var start = 0;\n    let spans: Array<TableSpan> = [];\n    for (let i = 1; i < input.length; i++) {\n        const item = input[i];\n        if (item.summarizeWhenGrouped) {\n            if (i - start > 1) {\n              spans.push({\n                columnId: start == 0 ? 0 : i,\n                columnsToSpan: i - start\n              })\n                //spans.push(i - start); // prev. colspan\n            }\n            spans.push({\n              columnId: i,\n              columnsToSpan: 1\n            }); // current colspan\n            start = i;\n        }\n    }\n\n    if (input.length - start > 0) \n      //spans.push(input.length - start - 1);\n      spans.push({\n        columnId: null,\n        columnsToSpan: input.length - start - 1\n      })\n    return spans;\n  }\n}",
+            "sourceCode": "import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output, ViewEncapsulation } from '@angular/core';\nimport { ITableCell } from '../models/table/ITableCell';\nimport { TableRow } from '../models/table/tableRow';\nimport { TableRowAction } from '../models/table/tableRowAction';\nimport { TableSize } from '../models/table/tableSize';\nimport { GroupRow } from '../models/table/groupRow';\nimport '../../util/arrayExtensions';\nimport { TableHeader } from '../models/table/tableHeader';\nimport { SortEntry } from '../models/table/sortEntry';\nimport { NumberTableCell } from '../models/table/numberTableCell';\nimport { Dictionary } from 'src/app/util/dictionary';\nimport { TableSpan } from '../models/table/tableSpan';\n\n@Component({\n  selector: 'app-table',\n  templateUrl: './table.component.html',\n  styleUrls: ['./table.component.scss'],\n  changeDetection: ChangeDetectionStrategy.OnPush,\n  encapsulation: ViewEncapsulation.None\n})\nexport class TableComponent implements OnInit, OnChanges {\n  public tableSizeEnum = TableSize;\n\n  @Input()\n  rows: Array<TableRow> = [];\n  \n  @Input()\n  header: Array<TableHeader> = [];\n\n  @Input()\n  groupColumnIndex: number = null;\n\n  @Input()\n  collapseGroupsByDefault: boolean = false;\n\n  @Input()\n  footer: string = null;\n\n  @Input()\n  size: TableSize = TableSize.Small;\n\n  @Output()\n  rowAction = new EventEmitter<TableRow>();\n\n  @Output()\n  sortAction = new EventEmitter<SortEntry>();\n\n  private excludeGroupsInTable: Array<string> = [];\n  private firstLoad: boolean = true;\n  //public spans: Array<TableSpan> = [];\n\n  @Input()\n  public sortEntry: SortEntry = null;\n\n  // TODO: Add \"collapse all groups\" button in group row \n  constructor() { }\n\n  ngOnInit(): void {\n  }\n\n  ngOnChanges() {\n    this.createGroups();\n  }\n\n  public isGroupRow(row: TableRow) {\n    return row instanceof GroupRow;\n  }\n\n  public getNoOfColumns(): number {\n    return this.header.length + (this.hasActions() ? 1 : 0);\n  }\n\n  private createGroups() {\n    if (this.groupColumnIndex) {\n\n      let colIndex = this.groupColumnIndex; // this.header.indexOf(this.groupColumn);\n      if (colIndex != -1) {\n\n        // Get all non-Group Rows\n        let filterableRows = this.rows.filter(r => !(r instanceof GroupRow));\n        // Get the groups: Distinct column content\n        let labels = filterableRows.map(r => r.cells[colIndex].label).Distinct();\n\n        // Handle Auto-Group\n        if (this.firstLoad && this.collapseGroupsByDefault) { \n          this.excludeGroupsInTable = [];\n          labels.forEach(l => this.excludeGroupsInTable.push(l));\n          this.firstLoad = false;\n        }\n\n        // Create each Group and add its data\n        let result = new Array<TableRow>();\n        labels.forEach(group => {\n          let isCollapsed = this.excludeGroupsInTable.includes(group);\n          // Get Data Rows for current group\n          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);\n          // Create GroupRow\n          let groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });\n\n          //---sum\n          for (var i = 0; i < this.header.length ; i++) {\n            if (this.header[i].summarizeWhenGrouped && i != colIndex) {\n              let numberCells = groupData.map(g => g.cells[i]).filter(c => c instanceof NumberTableCell);\n              var sum = 0;\n              numberCells.forEach(c => c.numericValue ?  sum += c.numericValue : c );\n              groupRow.summarizedData.push(sum);\n            } else {\n              groupRow.summarizedData.push(null);\n            }\n          }\n          //-------\n          result.push(groupRow);\n          // Set Hidden Property for data rows\n          for (var i = 0; i < groupData.length ; i++) {\n            groupData[i].hidden = isCollapsed;\n            result.push(groupData[i]);\n          }\n        })\n        this.rows = result;\n      }\n    }\n    //this.spans = this.calculateSpans(this.header);\n  }\n\n  public getTotalForColumn(index: number): number {\n    var result = 0;\n    this.rows.filter(row => row instanceof GroupRow).forEach((row: GroupRow) => {\n      if (row.summarizedData) {\n        result += row.summarizedData[index];\n      }\n    });\n    return result;\n  }\n\n  public sort(column: TableHeader) {\n    let defaultItem = new SortEntry({\n      direction: 'asc',\n      column: column    \n    });\n\n    if (this.sortEntry != null) {\n      if (this.sortEntry.column.label === column.label) {\n        // Sort same column\n        if (this.sortEntry.direction === 'desc') {\n          // Sort deactivation\n          this.sortEntry = null;\n        } else {\n          // Switch direction\n          this.sortEntry.direction = 'desc';\n        }\n      } else {\n        this.sortEntry = defaultItem;\n      }\n    } else {\n      this.sortEntry = defaultItem;\n    }\n    this.sortAction.emit(this.sortEntry);\n  }\n\n  public rowEvent(row: TableRow) {\n    this.rowAction.emit(row);\n  }\n\n  public groupRowClick(row: GroupRow) {\n    if (!this.excludeGroupsInTable.includes(row.groupLabel)) {\n      this.excludeGroupsInTable.push(row.groupLabel);\n    } else {\n      this.excludeGroupsInTable.splice(this.excludeGroupsInTable.indexOf(row.groupLabel), 1);\n    }\n    row.isCollapsed = !row.isCollapsed;\n    this.createGroups();\n  }\n  \n  public hasActions(): boolean {\n    return this.rows.some(r => r.actions.length > 0);\n  }\n\n  public callback(id: number, $event: TableRowAction) {\n    $event.action(id);\n  }\n\n  public cellAction(cell: ITableCell) {\n    cell.action();\n  }\n\n/*   private calculateSpans(input: Array<TableHeader>): Array<TableSpan> {\n    var start = 0;\n    let spans: Array<TableSpan> = [];\n    for (let i = 1; i < input.length; i++) {\n        const item = input[i];\n        if (item.summarizeWhenGrouped) {\n            if (i - start > 1) {\n              spans.push({\n                columnId: start == 0 ? 0 : i,\n                columnsToSpan: i - start\n              })\n                //spans.push(i - start); // prev. colspan\n            }\n            spans.push({\n              columnId: i,\n              columnsToSpan: 1\n            }); // current colspan\n            start = i;\n        }\n    }\n\n    if (input.length - start > 0) \n      //spans.push(input.length - start - 1);\n      spans.push({\n        columnId: null,\n        columnsToSpan: input.length - start - 1\n      })\n    return spans;\n  } */\n}",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -6203,13 +6167,13 @@
                 "name": "constructor",
                 "description": "",
                 "args": [],
-                "line": 55
+                "line": 53
             },
             "implements": [
                 "OnInit",
                 "OnChanges"
             ],
-            "templateData": "<table class=\"table\" [ngClass]=\"size == tableSizeEnum.Medium ? 'medium' : size == tableSizeEnum.Large ? 'large' : 'small'\">\n    <thead>\n        <tr class=\"table-header\">\n            <th *ngFor=\"let item of header\" scope=\"col\">\n                {{ item.label }}\n                <span style=\"margin-left: 0.4rem; cursor: pointer;\">\n                    <svg *ngIf=\"(item.isSortable && sortEntry == null) || (item.isSortable && sortEntry != null && sortEntry.direction == 'asc') || (item.isSortable && sortEntry != null && sortEntry.column.label !== item.label)\" (click)=\"sort(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path [style]=\"sortEntry != null && sortEntry.column.label === item.label ? {'fill': '#0067A7' } : {'fill': '#909090'} \" d=\"M27.66,15.61,18,6,8.34,15.61A1,1,0,1,0,9.75,17L17,9.81V28.94a1,1,0,1,0,2,0V9.81L26.25,17a1,1,0,0,0,1.41-1.42Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                    <svg *ngIf=\"item.isSortable && sortEntry != null && sortEntry.column.label === item.label && sortEntry.direction == 'desc'\" (click)=\"sort(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path fill=\"#0067A7\" transform=\"rotate(180 18 18)\" d=\"M27.66,15.61,18,6,8.34,15.61A1,1,0,1,0,9.75,17L17,9.81V28.94a1,1,0,1,0,2,0V9.81L26.25,17a1,1,0,0,0,1.41-1.42Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                </span>\n                <span *ngIf=\"item.isGroupable\" style=\"float: right; cursor: pointer;\">\n                    <svg (click)=\"group(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path d=\"M15,32H11a1,1,0,0,1-1-1V27a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1v4A1,1,0,0,1,15,32Zm-3-2h2V28H12Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <path d=\"M15,16H11a1,1,0,0,0-1,1v1.2H5.8V12H7a1,1,0,0,0,1-1V7A1,1,0,0,0,7,6H3A1,1,0,0,0,2,7v4a1,1,0,0,0,1,1H4.2V29.8h6.36a.8.8,0,0,0,0-1.6H5.8V19.8H10V21a1,1,0,0,0,1,1h4a1,1,0,0,0,1-1V17A1,1,0,0,0,15,16ZM4,8H6v2H4ZM14,20H12V18h2Z\" class=\"clr-i-outline clr-i-outline-path-2\"></path>\n                        <path d=\"M34,9a1,1,0,0,0-1-1H10v2H33A1,1,0,0,0,34,9Z\" class=\"clr-i-outline clr-i-outline-path-3\"></path>\n                        <path d=\"M33,18H18v2H33a1,1,0,0,0,0-2Z\" class=\"clr-i-outline clr-i-outline-path-4\"></path>\n                        <path d=\"M33,28H18v2H33a1,1,0,0,0,0-2Z\" class=\"clr-i-outline clr-i-outline-path-5\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                </span>\n            </th>\n            <th *ngIf=\"hasActions()\">Actions</th>\n        </tr>\n    </thead>\n    <tbody>\n        <ng-container *ngFor=\"let row of rows; let i = index\">\n            <tr *ngIf=\"!isGroupRow(row) && !row.hidden\" class=\"table-row\" (click)=\"rowEvent(row)\" [ngClass]=\"i % 2 == 0 ? 'even-row' : ''\">\n                <td *ngFor=\"let cell of row.cells\" scope=\"row\" [ngStyle]=\"cell.style\">{{ cell.label ? cell.label : cell.numericValue ? cell.numericValue : '' }}\n                    <img *ngIf=\"cell.actionIcon\" class=\"action-icon\" [src]=\"cell.actionIcon\" (click)=\"cellAction(cell)\" />\n                </td>\n                <td *ngIf=\"hasActions()\" >\n                    <img *ngFor=\"let action of row.actions\" class=\"action-icon\" [src]=\"action.icon\" (click)=\"callback(i, action)\" />\n                </td>\n            </tr>\n            <tr *ngIf=\"isGroupRow(row)\" class=\"table-group\" (click)=\"groupRowClick(row)\">\n                <!-- <ng-container *ngFor=\"let col of header; let j = index\">\n                    <td *ngIf=\"j == 0\">\n                        <svg *ngIf=\"row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(90 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        <svg *ngIf=\"!row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(180 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        {{ row.groupLabel }}<span *ngIf=\"row.isCollapsed\"> ({{ row.itemCount }})</span>\n                    </td>\n                    <td *ngIf=\"j != 0\">\n                        <span *ngIf=\"row.summarizedData[j]\" style=\"color: #909090; font-weight: 500;\">&sum; {{ row.summarizedData[j].toFixed(2) }}</span>\n                    </td>\n                </ng-container> -->\n\n                <ng-container *ngFor=\"let span of spans; let j = index\">\n                    <td *ngIf=\"j == 0\" [attr.colspan]=\"span.columnsToSpan\">\n                        <svg *ngIf=\"row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(90 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        <svg *ngIf=\"!row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(180 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        {{ row.groupLabel }}<span *ngIf=\"row.isCollapsed\"> ({{ row.itemCount }})</span>\n                    </td>\n                    <td *ngIf=\"j != 0\" [attr.colspan]=\"span.columnsToSpan\">\n                        <span *ngIf=\"span.columnId != null && row.summarizedData[span.columnId]\" style=\"color: #909090; font-weight: 500;\">&sum; {{ row.summarizedData[span.columnId].toFixed(2) }}</span>\n                    </td>\n                </ng-container>\n                <td *ngIf=\"hasActions()\">\n                </td>\n            </tr>\n        </ng-container>\n    </tbody>\n    <tfoot *ngIf=\"footer\">\n        <tr style=\"background-color: rgb(240, 243, 245);\">\n            <!-- <td [attr.colspan]=\"header.length\">{{ footer }}</td> -->\n            <!-- <ng-container *ngFor=\"let col of header; let j = index\">\n                <td *ngIf=\"j == 0\">{{ footer }}</td>\n                <td *ngIf=\"j != 0\">\n                    <span *ngIf=\"col.summarizeWhenGrouped\" style=\"color: #909090; font-weight: 500;\">&sum; {{ getTotalForColumn(j).toFixed(2) }}</span>\n\n                </td>\n            </ng-container> -->\n\n            <ng-container *ngFor=\"let span of spans; let j = index\">\n                <td *ngIf=\"j == 0\" [attr.colspan]=\"span.columnsToSpan\">{{ footer }}</td>\n                <td *ngIf=\"j != 0\" [attr.colspan]=\"span.columnsToSpan\">\n                    <span *ngIf=\"span.columnId != null && header[span.columnId].summarizeWhenGrouped\" style=\"color: #909090; font-weight: 500;\">&sum; {{ getTotalForColumn(span.columnId).toFixed(2) }}</span>\n                </td>\n            </ng-container>\n            <td *ngIf=\"hasActions()\"></td>\n        </tr>\n    </tfoot>\n</table>"
+            "templateData": "<table class=\"table\" [ngClass]=\"size == tableSizeEnum.Medium ? 'medium' : size == tableSizeEnum.Large ? 'large' : 'small'\">\n    <thead>\n        <tr class=\"table-header\">\n            <th *ngFor=\"let item of header\" scope=\"col\">\n                {{ item.label }}\n                <span style=\"margin-left: 0.4rem; cursor: pointer;\">\n                    <svg *ngIf=\"(item.isSortable && sortEntry == null) || (item.isSortable && sortEntry != null && sortEntry.direction == 'asc') || (item.isSortable && sortEntry != null && sortEntry.column.label !== item.label)\" (click)=\"sort(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path [style]=\"sortEntry != null && sortEntry.column.label === item.label ? {'fill': '#0067A7' } : {'fill': '#909090'} \" d=\"M27.66,15.61,18,6,8.34,15.61A1,1,0,1,0,9.75,17L17,9.81V28.94a1,1,0,1,0,2,0V9.81L26.25,17a1,1,0,0,0,1.41-1.42Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                    <svg *ngIf=\"item.isSortable && sortEntry != null && sortEntry.column.label === item.label && sortEntry.direction == 'desc'\" (click)=\"sort(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path fill=\"#0067A7\" transform=\"rotate(180 18 18)\" d=\"M27.66,15.61,18,6,8.34,15.61A1,1,0,1,0,9.75,17L17,9.81V28.94a1,1,0,1,0,2,0V9.81L26.25,17a1,1,0,0,0,1.41-1.42Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                </span>\n                <span *ngIf=\"item.isGroupable\" style=\"float: right; cursor: pointer;\">\n                    <svg (click)=\"group(item)\" version=\"1.1\" width=\"14\" height=\"14\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                        <path d=\"M15,32H11a1,1,0,0,1-1-1V27a1,1,0,0,1,1-1h4a1,1,0,0,1,1,1v4A1,1,0,0,1,15,32Zm-3-2h2V28H12Z\" class=\"clr-i-outline clr-i-outline-path-1\"></path>\n                        <path d=\"M15,16H11a1,1,0,0,0-1,1v1.2H5.8V12H7a1,1,0,0,0,1-1V7A1,1,0,0,0,7,6H3A1,1,0,0,0,2,7v4a1,1,0,0,0,1,1H4.2V29.8h6.36a.8.8,0,0,0,0-1.6H5.8V19.8H10V21a1,1,0,0,0,1,1h4a1,1,0,0,0,1-1V17A1,1,0,0,0,15,16ZM4,8H6v2H4ZM14,20H12V18h2Z\" class=\"clr-i-outline clr-i-outline-path-2\"></path>\n                        <path d=\"M34,9a1,1,0,0,0-1-1H10v2H33A1,1,0,0,0,34,9Z\" class=\"clr-i-outline clr-i-outline-path-3\"></path>\n                        <path d=\"M33,18H18v2H33a1,1,0,0,0,0-2Z\" class=\"clr-i-outline clr-i-outline-path-4\"></path>\n                        <path d=\"M33,28H18v2H33a1,1,0,0,0,0-2Z\" class=\"clr-i-outline clr-i-outline-path-5\"></path>\n                        <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                    </svg>\n                </span>\n            </th>\n            <th *ngIf=\"hasActions()\">Actions</th>\n        </tr>\n    </thead>\n    <tbody>\n        <ng-container *ngFor=\"let row of rows; let i = index\">\n            <tr *ngIf=\"!isGroupRow(row) && !row.hidden\" class=\"table-row\" (click)=\"rowEvent(row)\" [ngClass]=\"i % 2 == 0 ? 'even-row' : ''\">\n                <td *ngFor=\"let cell of row.cells\" scope=\"row\" [ngStyle]=\"cell.style\">{{ cell.label ? cell.label : cell.numericValue ? cell.numericValue : '' }}\n                    <img *ngIf=\"cell.actionIcon\" class=\"action-icon\" [src]=\"cell.actionIcon\" (click)=\"cellAction(cell)\" />\n                </td>\n                <td *ngIf=\"hasActions()\" >\n                    <img *ngFor=\"let action of row.actions\" class=\"action-icon\" [src]=\"action.icon\" (click)=\"callback(i, action)\" />\n                </td>\n            </tr>\n            <tr *ngIf=\"isGroupRow(row)\" class=\"table-group\" (click)=\"groupRowClick(row)\">\n                <ng-container *ngFor=\"let col of header; let j = index\">\n                    <td *ngIf=\"j == 0\">\n                        <svg *ngIf=\"row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(90 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        <svg *ngIf=\"!row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(180 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        {{ row.groupLabel }}<span *ngIf=\"row.isCollapsed\"> ({{ row.itemCount }})</span>\n                    </td>\n                    <td *ngIf=\"j != 0\">\n                        <span *ngIf=\"row.summarizedData[j]\" style=\"color: #909090; font-weight: 500;\">&sum; {{ row.summarizedData[j].toFixed(2) }}</span>\n                    </td>\n                </ng-container>\n\n<!--    Test with spans:                <ng-container *ngFor=\"let span of spans; let j = index\">\n                    <td *ngIf=\"j == 0\" [attr.colspan]=\"span.columnsToSpan\">\n                        <svg *ngIf=\"row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(90 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        <svg *ngIf=\"!row.isCollapsed\" class=\"icon\" version=\"1.1\" width=\"18\" height=\"18\"  viewBox=\"0 0 36 36\" preserveAspectRatio=\"xMidYMid meet\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n                            <path transform=\"rotate(180 18 18)\" class=\"clr-i-outline clr-i-outline-path-1\" d=\"M29.52,22.52,18,10.6,6.48,22.52a1.7,1.7,0,0,0,2.45,2.36L18,15.49l9.08,9.39a1.7,1.7,0,0,0,2.45-2.36Z\"></path>\n                            <rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" fill-opacity=\"0\"/>\n                        </svg>\n                        {{ row.groupLabel }}<span *ngIf=\"row.isCollapsed\"> ({{ row.itemCount }})</span>\n                    </td>\n                    <td *ngIf=\"j != 0\" [attr.colspan]=\"span.columnsToSpan\">\n                        <span *ngIf=\"span.columnId != null && row.summarizedData[span.columnId]\" style=\"color: #909090; font-weight: 500;\">&sum; {{ row.summarizedData[span.columnId].toFixed(2) }}</span>\n                    </td>\n                </ng-container> -->\n                <td *ngIf=\"hasActions()\">\n                </td>\n            </tr>\n        </ng-container>\n    </tbody>\n    <tfoot *ngIf=\"footer\">\n        <tr style=\"background-color: rgb(240, 243, 245);\">\n            <!-- <td [attr.colspan]=\"header.length\">{{ footer }}</td> -->\n            <ng-container *ngFor=\"let col of header; let j = index\">\n                <td *ngIf=\"j == 0\">{{ footer }}</td>\n                <td *ngIf=\"j != 0\">\n                    <span *ngIf=\"col.summarizeWhenGrouped\" style=\"color: #909090; font-weight: 500;\">&sum; {{ getTotalForColumn(j).toFixed(2) }}</span>\n\n                </td>\n            </ng-container>\n\n            <!-- Test with spans:  <ng-container *ngFor=\"let span of spans; let j = index\">\n                <td *ngIf=\"j == 0\" [attr.colspan]=\"span.columnsToSpan\">{{ footer }}</td>\n                <td *ngIf=\"j != 0\" [attr.colspan]=\"span.columnsToSpan\">\n                    <span *ngIf=\"span.columnId != null && header[span.columnId].summarizeWhenGrouped\" style=\"color: #909090; font-weight: 500;\">&sum; {{ getTotalForColumn(span.columnId).toFixed(2) }}</span>\n                </td>\n            </ng-container> -->\n            <td *ngIf=\"hasActions()\"></td>\n        </tr>\n    </tfoot>\n</table>"
         }
     ],
     "modules": [
@@ -6518,7 +6482,7 @@
                 "subtype": "variable",
                 "file": "src/stories/table.stories.ts",
                 "type": "Array<TableHeader>",
-                "defaultValue": "[\n    { label: 'No.' },\n    { label: 'Name', isSortable: true },\n    { label: 'Kategorie', isGroupable: true },\n    { label: 'Adresse', isGroupable: true, isSortable: true },\n    { label: 'Hausnummer', isSortable: true, summarizeWhenGrouped: false },\n    { label: 'Gehalt', isSortable: true, summarizeWhenGrouped: true }\n]"
+                "defaultValue": "[\n    { label: 'No.' },\n    { label: 'Name', isSortable: true },\n    { label: 'Kategorie', isGroupable: true },\n    { label: 'Adresse', isGroupable: true, isSortable: true },\n    { label: 'Hausnummer', isSortable: true },\n    { label: 'Gehalt', isSortable: true, summarizeWhenGrouped: true }\n]"
             },
             {
                 "name": "Red",
@@ -6571,6 +6535,14 @@
                 "name": "Template",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
+                "file": "src/stories/inline-button-group.stories.ts",
+                "type": "Story<InlineButtonGroupComponent>",
+                "defaultValue": "(args) => ({\n    props: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
                 "file": "src/stories/navigation-bar.stories.ts",
                 "type": "Story<NavigationBarComponent>",
                 "defaultValue": "(args) => ({\n    props: args,\n})"
@@ -6581,7 +6553,7 @@
                 "subtype": "variable",
                 "file": "src/stories/table.stories.ts",
                 "type": "Story<TableComponent>",
-                "defaultValue": "(args) => ({\n    props: args,\n})"
+                "defaultValue": "(args) => ({\n    props: args\n})"
             }
         ],
         "functions": [
@@ -6729,7 +6701,7 @@
                     "subtype": "variable",
                     "file": "src/stories/table.stories.ts",
                     "type": "Array<TableHeader>",
-                    "defaultValue": "[\n    { label: 'No.' },\n    { label: 'Name', isSortable: true },\n    { label: 'Kategorie', isGroupable: true },\n    { label: 'Adresse', isGroupable: true, isSortable: true },\n    { label: 'Hausnummer', isSortable: true, summarizeWhenGrouped: false },\n    { label: 'Gehalt', isSortable: true, summarizeWhenGrouped: true }\n]"
+                    "defaultValue": "[\n    { label: 'No.' },\n    { label: 'Name', isSortable: true },\n    { label: 'Kategorie', isGroupable: true },\n    { label: 'Adresse', isGroupable: true, isSortable: true },\n    { label: 'Hausnummer', isSortable: true },\n    { label: 'Gehalt', isSortable: true, summarizeWhenGrouped: true }\n]"
                 },
                 {
                     "name": "row",
@@ -6761,7 +6733,7 @@
                     "subtype": "variable",
                     "file": "src/stories/table.stories.ts",
                     "type": "Story<TableComponent>",
-                    "defaultValue": "(args) => ({\n    props: args,\n})"
+                    "defaultValue": "(args) => ({\n    props: args\n})"
                 }
             ],
             "src/environments/environment.prod.ts": [
@@ -6792,6 +6764,16 @@
                     "file": "src/app/data/iconFactory.ts",
                     "type": "",
                     "defaultValue": "(name: string): string => {\n    switch (name) {\n        case 'plus-circle-line':\n            return '../assets/icons/plus-circle-line.svg';\n\n        case 'info-standard-line':\n            return '../assets/icons/info-standard-line.svg';\n\n        case 'home-line':\n            return '../assets/icons/home-line.svg';\n\n        case 'trash-line':\n            return \"../assets/icons/trash-line.svg\";\n            \n        case 'wallet-line':\n            return '../assets/icons/wallet-line.svg';\n        \n        case 'shield-line':\n            return '../assets/icons/shield-line.svg';\n            \n        case 'cog-line':\n            return '../assets/icons/cog-line.svg';\n\n        case 'times-circle-line':\n            return '../assets/icons/times-circle-line.svg';\n\n        case 'bar-chart-line':\n            return '../assets/icons/bar-chart-line.svg';\n        \n        case 'filter-line':\n            return '../assets/icons/filter-line.svg';\n\n        case 'filter-solid':\n            return '../assets/icons/filter-solid.svg';\n\n        case 'folder-line':\n            return '../assets/icons/folder-line.svg';\n\n        case 'folder-open-line':\n            return '../assets/icons/folder-open-line.svg';\n        \n        case 'briefcase-line':\n            return '../assets/icons/briefcase-line.svg';\n        \n        case 'pencil-line':\n            return '../assets/icons/pencil-line.svg';\n        \n        case 'slider-line':\n            return '../assets/icons/slider-line.svg';\n    \n        case 'user-line':\n            return '../assets/icons/user-line.svg';\n\n        default:\n            break;\n    }\n}"
+                }
+            ],
+            "src/stories/inline-button-group.stories.ts": [
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/inline-button-group.stories.ts",
+                    "type": "Story<InlineButtonGroupComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
                 }
             ]
         },
@@ -7287,7 +7269,7 @@
                 "linktype": "component",
                 "name": "TableComponent",
                 "coveragePercent": 0,
-                "coverageCount": "0/28",
+                "coverageCount": "0/26",
                 "status": "low"
             },
             {
@@ -7416,6 +7398,16 @@
             },
             {
                 "filePath": "src/stories/badge.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/inline-button-group.stories.ts",
                 "type": "variable",
                 "linktype": "miscellaneous",
                 "linksubtype": "variable",

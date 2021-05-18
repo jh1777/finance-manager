@@ -23,6 +23,9 @@ export class InlineButtonGroupComponent implements OnInit {
   }
 
   public buttonClicked(button: Button) {
+    if (!this.multiSelect) {
+      this.buttons.filter(b => b != button).forEach(b => b.isSelected = false);
+    }
     button.isSelected = !button.isSelected;
     this.selectedButtons.emit(this.buttons.filter(b => b.isSelected));
   }
