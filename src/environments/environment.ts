@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  apiUrl: "http://zbox:4100/api",
+  apiUrl: "http://192.168.178.129:4100/api",
   mockData: false
 };
 
