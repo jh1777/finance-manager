@@ -25,7 +25,7 @@ export class InsuranceComponent implements OnInit {
 
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
-  public groupCell: ITableCell;
+  public groupCellIndex: number;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
 
@@ -147,7 +147,7 @@ export class InsuranceComponent implements OnInit {
     header.push({ label: 'Datum' });
     header.push({ label: 'Erstellt' });
     this.header = header;
-    this.groupCell = this.header[1];
+    this.groupCellIndex = 1;
   }
 
   public toggleNewEntryForm() {

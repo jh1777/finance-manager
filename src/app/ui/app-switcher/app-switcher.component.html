@@ -1,8 +1,0 @@
-<div *ngIf="show" [@inOutAnimation] class="app-switch-container">
-    <ng-container *ngFor="let item of routes">
-        <div class="app-switch-item" [class]="[item.data && item.data.style && item.data.style == 'grey' ? 'grey' : 'none']" (click)="itemClicked(item)">
-            <img src="../assets/icons/briefcase-line.svg" size=40 style="filter: invert(1);"/>
-            {{ item.data.label }}
-        </div>
-    </ng-container>
-</div>

@@ -9,7 +9,7 @@ export class ActionNavigationItem extends INavigationItem {
     toActionItem = () => {
       return this;
     }
-    action?: () => void; 
+    onClick?: () => void; 
 
     constructor(init?: Partial<ActionNavigationItem>) {
       super(init);

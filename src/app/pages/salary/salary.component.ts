@@ -30,7 +30,8 @@ export class SalaryComponent implements OnInit {
 
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
-  public groupCell: ITableCell;
+  //public groupCell: ITableCell;
+  public groupCellIndex: number;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
 
@@ -159,11 +160,11 @@ export class SalaryComponent implements OnInit {
         action: () => {
           if (!this.monthFilterBy) {
             this.monthFilterBy = entry.Monat;
-            this.groupCell = null;
+            this.groupCellIndex = null;
             this.updateEntries();
           } else {
             this.monthFilterBy = null;
-            this.groupCell = this.header[1];
+            this.groupCellIndex = 1;
             this.updateEntries();
           }
         } 
@@ -205,7 +206,7 @@ export class SalaryComponent implements OnInit {
     this.header = header;
     
     if (!this.monthFilterBy) {
-      this.groupCell = header[1];
+      this.groupCellIndex = 1;
     }
     
   }

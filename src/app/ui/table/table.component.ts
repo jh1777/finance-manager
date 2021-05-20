@@ -28,13 +28,13 @@ export class TableComponent implements OnInit, OnChanges {
   header: Array<TableHeader> = [];
 
   @Input()
-  groupColumn: TableHeader = null;
+  groupColumnIndex: number = null;
 
   @Input()
   collapseGroupsByDefault: boolean = false;
 
   @Input()
-  footer: string;
+  footer: string = null;
 
   @Input()
   size: TableSize = TableSize.Small;
@@ -47,7 +47,7 @@ export class TableComponent implements OnInit, OnChanges {
 
   private excludeGroupsInTable: Array<string> = [];
   private firstLoad: boolean = true;
-  public spans: Array<TableSpan> = [];
+  //public spans: Array<TableSpan> = [];
 
   @Input()
   public sortEntry: SortEntry = null;
@@ -71,9 +71,9 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private createGroups() {
-    if (this.groupColumn) {
+    if (this.groupColumnIndex) {
 
-      let colIndex = this.header.indexOf(this.groupColumn);
+      let colIndex = this.groupColumnIndex; // this.header.indexOf(this.groupColumn);
       if (colIndex != -1) {
 
         // Get all non-Group Rows
@@ -119,7 +119,7 @@ export class TableComponent implements OnInit, OnChanges {
         this.rows = result;
       }
     }
-    this.spans = this.calculateSpans(this.header);
+    //this.spans = this.calculateSpans(this.header);
   }
 
   public getTotalForColumn(index: number): number {
@@ -183,7 +183,7 @@ export class TableComponent implements OnInit, OnChanges {
     cell.action();
   }
 
-  private calculateSpans(input: Array<TableHeader>): Array<TableSpan> {
+/*   private calculateSpans(input: Array<TableHeader>): Array<TableSpan> {
     var start = 0;
     let spans: Array<TableSpan> = [];
     for (let i = 1; i < input.length; i++) {
@@ -211,5 +211,5 @@ export class TableComponent implements OnInit, OnChanges {
         columnsToSpan: input.length - start - 1
       })
     return spans;
-  }
+  } */
 }

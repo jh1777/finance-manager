@@ -1,7 +1,7 @@
 <app-navigation-bar 
     [items]="items" 
     [selected]="selectedTab" 
-    (selectionEvent)="selectItem($event)" 
+    (onClick)="selectItem($event)" 
     size="medium"
     darkmode=true>
 </app-navigation-bar>
