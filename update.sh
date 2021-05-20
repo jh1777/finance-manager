@@ -2,8 +2,8 @@
 
 # OLD:: pkill -f "ng serve --port 4567"
 
-docker stop finance-manager
-docker rm finance-manager
+docker stop finance-manager-container
+docker rm finance-manager-container
 git pull
 ng build --prod
 docker build -t finance-manager .
