@@ -8,6 +8,7 @@ import { BadgeComponent } from './badge/badge.component';
 import { MenuButtonComponent } from './menu-button/menu-button.component';
 import { InlineButtonGroupComponent } from './inline-button-group/inline-button-group.component';
 import { SubNavigationComponent } from './sub-navigation/sub-navigation.component';
+import { StateProgressComponent } from './state-progress/state-progress.component';
 
 export { NavigationBarComponent } from './navigation-bar/navigation-bar.component';
 export { TableComponent } from './table/table.component';
@@ -17,6 +18,7 @@ export { BadgeComponent } from './badge/badge.component';
 export { MenuButtonComponent } from './menu-button/menu-button.component';
 export { InlineButtonGroupComponent } from './inline-button-group/inline-button-group.component';
 export { SubNavigationComponent } from './sub-navigation/sub-navigation.component';
+export { StateProgressComponent } from './state-progress/state-progress.component';
 
 @NgModule({
     declarations: [
@@ -27,7 +29,8 @@ export { SubNavigationComponent } from './sub-navigation/sub-navigation.componen
       BadgeComponent,
       MenuButtonComponent,
       InlineButtonGroupComponent,
-      SubNavigationComponent
+      SubNavigationComponent,
+      StateProgressComponent
     ],
   imports: [
     CommonModule
@@ -40,7 +43,8 @@ export { SubNavigationComponent } from './sub-navigation/sub-navigation.componen
     BadgeComponent,
     MenuButtonComponent,
     InlineButtonGroupComponent,
-    SubNavigationComponent
+    SubNavigationComponent,
+    StateProgressComponent
   ]
 })
 export class UiModule { }

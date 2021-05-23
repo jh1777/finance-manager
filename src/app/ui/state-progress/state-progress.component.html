@@ -1,0 +1,18 @@
+<div class="state-progress-container" [class.medium]="size == 'M'" [class.small]="size == 'S'" [class.large]="size == 'L'">
+    <ng-container *ngFor="let step of states; let i = index;">
+        <div class="state-progress-item" (click)="handleStepClick(step)" (mouseover)="handleStepHover(step)">
+            <clr-icon *ngIf="!isNumberState(i) && step.state == StateEnum.SKIPPED" shape="success-standard"  [attr.size]="getIconSize()" class="grey"></clr-icon>
+            <clr-icon *ngIf="!isNumberState(i) && step.state == StateEnum.SUCCESS" shape="success-standard"  [attr.size]="getIconSize()" class="is-success is-solid"></clr-icon>
+            <clr-icon *ngIf="!isNumberState(i) && step.state == StateEnum.FAILED" shape="error-standard"  [attr.size]="getIconSize()" class="is-error is-solid"></clr-icon>
+            <clr-icon *ngIf="!isNumberState(i) && step.state == StateEnum.WARNING" shape="error-standard"  [attr.size]="getIconSize()" class="is-warning is-solid"></clr-icon>
+            <clr-icon *ngIf="!isNumberState(i) && step.state == StateEnum.NONE" shape="circle" [attr.size]="getIconSize()" class="grey"></clr-icon>
+            <span *ngIf="!isNumberState(i) && step.state == StateEnum.IN_PROGRESS" class="spinner spinner-sm state-progress-spinner"></span>
+
+            <span *ngIf="isNumberState(i)" class="state-progress-number" [ngStyle]="{ 'border-color': colorClassForNumberState(step.state), 'background-color': bgColorClassForNumberState(step.state) }">
+                {{ step.value }}
+            </span>
+
+            <div *ngIf="i < states.length - 1" class="state-progress-line"><hr/></div>
+        </div>
+    </ng-container>
+</div>

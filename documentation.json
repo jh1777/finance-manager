@@ -1071,6 +1071,75 @@
             "hostListeners": []
         },
         {
+            "name": "DefaultStateItem",
+            "id": "class-DefaultStateItem-fa2bad48fec3302828c501969d507a3f",
+            "file": "src/app/ui/state-progress/model/defaultStateItem.ts",
+            "type": "class",
+            "sourceCode": "import { StateItem } from \"./stateItem\";\n\nexport class DefaultStateItem extends StateItem {\n    constructor(init?: Partial<DefaultStateItem>) {\n        super(init);\n    }\n}",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "init",
+                        "type": "Partial<DefaultStateItem>",
+                        "optional": true
+                    }
+                ],
+                "line": 3,
+                "jsdoctags": [
+                    {
+                        "name": "init",
+                        "type": "Partial<DefaultStateItem>",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "description",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 6,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                },
+                {
+                    "name": "label",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 5,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                },
+                {
+                    "name": "state",
+                    "defaultValue": "State.NONE",
+                    "type": "State",
+                    "optional": false,
+                    "description": "",
+                    "line": 4,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "extends": "StateItem",
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
             "name": "Describer",
             "id": "class-Describer-df999471078d1c3ff3d77791a4099274",
             "file": "src/app/util/objectDescriber.ts",
@@ -1695,6 +1764,82 @@
             "hostListeners": []
         },
         {
+            "name": "NumberStateItem",
+            "id": "class-NumberStateItem-6f5aec929a733e11f1d324c490e73e18",
+            "file": "src/app/ui/state-progress/model/numberStateItem.ts",
+            "type": "class",
+            "sourceCode": "import { StateItem } from \"./stateItem\";\n\nexport class NumberStateItem extends StateItem {\n    value: number;\n    constructor(init?: Partial<NumberStateItem>) {\n        super(init);\n        Object.assign(this, init);\n    }\n}",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "init",
+                        "type": "Partial<NumberStateItem>",
+                        "optional": true
+                    }
+                ],
+                "line": 4,
+                "jsdoctags": [
+                    {
+                        "name": "init",
+                        "type": "Partial<NumberStateItem>",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "value",
+                    "type": "number",
+                    "optional": false,
+                    "description": "",
+                    "line": 4
+                },
+                {
+                    "name": "description",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 6,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                },
+                {
+                    "name": "label",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 5,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                },
+                {
+                    "name": "state",
+                    "defaultValue": "State.NONE",
+                    "type": "State",
+                    "optional": false,
+                    "description": "",
+                    "line": 4,
+                    "inheritance": {
+                        "file": "StateItem"
+                    }
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "extends": "StateItem",
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
             "name": "NumberTableCell",
             "id": "class-NumberTableCell-686767380acc9016ec0aa4f251c53a64",
             "file": "src/app/ui/models/table/numberTableCell.ts",
@@ -1818,6 +1963,65 @@
                 {
                     "name": "direction",
                     "type": "\"asc\" | \"desc\"",
+                    "optional": false,
+                    "description": "",
+                    "line": 4
+                }
+            ],
+            "methods": [],
+            "indexSignatures": [],
+            "inputsClass": [],
+            "outputsClass": [],
+            "hostBindings": [],
+            "hostListeners": []
+        },
+        {
+            "name": "StateItem",
+            "id": "class-StateItem-143b5d78bc715d56ccf599a7fa045432",
+            "file": "src/app/ui/state-progress/model/stateItem.ts",
+            "type": "class",
+            "sourceCode": "import { State } from \"./state\";\n\nexport abstract class StateItem {\n    state: State = State.NONE;\n    label: string;\n    description: string;\n\n    constructor(init?: Partial<StateItem>) {\n        Object.assign(this, init);\n    }\n}",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [
+                    {
+                        "name": "init",
+                        "type": "Partial<StateItem>",
+                        "optional": true
+                    }
+                ],
+                "line": 6,
+                "jsdoctags": [
+                    {
+                        "name": "init",
+                        "type": "Partial<StateItem>",
+                        "optional": true,
+                        "tagName": {
+                            "text": "param"
+                        }
+                    }
+                ]
+            },
+            "properties": [
+                {
+                    "name": "description",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 6
+                },
+                {
+                    "name": "label",
+                    "type": "string",
+                    "optional": false,
+                    "description": "",
+                    "line": 5
+                },
+                {
+                    "name": "state",
+                    "defaultValue": "State.NONE",
+                    "type": "State",
                     "optional": false,
                     "description": "",
                     "line": 4
@@ -3302,7 +3506,7 @@
         },
         {
             "name": "InlineButtonGroupComponent",
-            "id": "component-InlineButtonGroupComponent-bfded3d891f9e841d11f83638a5a2618",
+            "id": "component-InlineButtonGroupComponent-b7d7ee1a561ec425b40f9d116406d1ac",
             "file": "src/app/ui/inline-button-group/inline-button-group.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -3380,7 +3584,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';\nimport { Button } from '../models/inline-button-group/button';\n\n@Component({\n  selector: 'app-inline-button-group',\n  templateUrl: './inline-button-group.component.html',\n  styleUrls: ['./inline-button-group.component.scss']\n})\nexport class InlineButtonGroupComponent implements OnInit {\n\n  @Input()\n  buttons: Array<Button>;\n\n  @Input()\n  multiSelect: boolean = false;\n\n  @Output()\n  selectedButtons = new EventEmitter<Array<Button>>();\n\n  constructor() { }\n\n  ngOnInit(): void {\n  }\n\n  public buttonClicked(button: Button) {\n    button.isSelected = !button.isSelected;\n    this.selectedButtons.emit(this.buttons.filter(b => b.isSelected));\n  }\n\n}\n",
+            "sourceCode": "import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';\nimport { Button } from '../models/inline-button-group/button';\n\n@Component({\n  selector: 'app-inline-button-group',\n  templateUrl: './inline-button-group.component.html',\n  styleUrls: ['./inline-button-group.component.scss']\n})\nexport class InlineButtonGroupComponent implements OnInit {\n\n  @Input()\n  buttons: Array<Button>;\n\n  @Input()\n  multiSelect: boolean = false;\n\n  @Output()\n  selectedButtons = new EventEmitter<Array<Button>>();\n\n  constructor() { }\n\n  ngOnInit(): void {\n  }\n\n  public buttonClicked(button: Button) {\n    if (!this.multiSelect) {\n      this.buttons.filter(b => b != button).forEach(b => b.isSelected = false);\n    }\n    button.isSelected = !button.isSelected;\n    this.selectedButtons.emit(this.buttons.filter(b => b.isSelected));\n  }\n\n}\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -5665,6 +5869,289 @@
             "templateData": "<div style=\"padding: .5em;\">\n    <pre>{{ content }}</pre>\n</div>"
         },
         {
+            "name": "StateProgressComponent",
+            "id": "component-StateProgressComponent-01f11d38f3f13f860d73e6ae87a56cd6",
+            "file": "src/app/ui/state-progress/state-progress.component.ts",
+            "changeDetection": "ChangeDetectionStrategy.OnPush",
+            "encapsulation": [],
+            "entryComponents": [],
+            "inputs": [],
+            "outputs": [],
+            "providers": [],
+            "selector": "app-state-progress",
+            "styleUrls": [
+                "./state-progress.component.scss"
+            ],
+            "styles": [],
+            "templateUrl": [
+                "./state-progress.component.html"
+            ],
+            "viewProviders": [],
+            "inputsClass": [
+                {
+                    "name": "size",
+                    "defaultValue": "'S'",
+                    "description": "<p>State Progress Size in categories<br>Basesize (size of one <code>StateItem</code>):</p>\n<ul>\n<li>S: 20px  </li>\n<li>M: 25px  </li>\n<li>L: 30px  </li>\n</ul>\n",
+                    "line": 35,
+                    "type": "\"M\" | \"S\" | \"L\""
+                },
+                {
+                    "name": "states",
+                    "description": "<p>List of StateItems to ne shown as Progress Component<br>This can be of type <code>DefaultStateItem</code> or <code>NumberStateItem</code></p>\n",
+                    "line": 24,
+                    "type": "Array<StateItem>"
+                }
+            ],
+            "outputsClass": [
+                {
+                    "name": "onClick",
+                    "defaultValue": "new EventEmitter<StateItem>()",
+                    "line": 38,
+                    "type": "EventEmitter"
+                },
+                {
+                    "name": "onMouseOver",
+                    "defaultValue": "new EventEmitter<StateItem>()",
+                    "line": 41,
+                    "type": "EventEmitter"
+                }
+            ],
+            "propertiesClass": [
+                {
+                    "name": "StateEnum",
+                    "defaultValue": "State",
+                    "type": "",
+                    "optional": false,
+                    "description": "<p>Internally used Enum helper to use in Template</p>\n",
+                    "line": 17
+                }
+            ],
+            "methodsClass": [
+                {
+                    "name": "bgColorClassForNumberState",
+                    "args": [
+                        {
+                            "name": "state",
+                            "type": "State"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 111,
+                    "description": "<p>Returns the background color for a <code>NumberStateItem</code> based on its state<br><em>(used in template only)</em></p>\n",
+                    "jsdoctags": [
+                        {
+                            "name": {
+                                "pos": 2441,
+                                "end": 2446,
+                                "flags": 0,
+                                "escapedText": "state"
+                            },
+                            "type": "State",
+                            "tagName": {
+                                "pos": 2435,
+                                "end": 2440,
+                                "flags": 0,
+                                "escapedText": "param"
+                            },
+                            "comment": "<p>State (Enum)</p>\n"
+                        },
+                        {
+                            "tagName": {
+                                "pos": 2466,
+                                "end": 2473,
+                                "flags": 0,
+                                "escapedText": "returns"
+                            },
+                            "comment": "<p>string</p>\n"
+                        }
+                    ]
+                },
+                {
+                    "name": "colorClassForNumberState",
+                    "args": [
+                        {
+                            "name": "state",
+                            "type": "State"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "string",
+                    "typeParameters": [],
+                    "line": 91,
+                    "description": "<p>Returns the foreground color for a <code>NumberStateItem</code> based on its state<br><em>(used in template only)</em></p>\n",
+                    "jsdoctags": [
+                        {
+                            "name": {
+                                "pos": 1983,
+                                "end": 1988,
+                                "flags": 0,
+                                "escapedText": "state"
+                            },
+                            "type": "State",
+                            "tagName": {
+                                "pos": 1977,
+                                "end": 1982,
+                                "flags": 0,
+                                "escapedText": "param"
+                            },
+                            "comment": "<p>State (Enum)</p>\n"
+                        },
+                        {
+                            "tagName": {
+                                "pos": 2008,
+                                "end": 2015,
+                                "flags": 0,
+                                "escapedText": "returns"
+                            },
+                            "comment": "<p>string</p>\n"
+                        }
+                    ]
+                },
+                {
+                    "name": "getIconSize",
+                    "args": [],
+                    "optional": false,
+                    "returnType": "number",
+                    "typeParameters": [],
+                    "line": 46
+                },
+                {
+                    "name": "handleStepClick",
+                    "args": [
+                        {
+                            "name": "item",
+                            "type": "StateItem"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 63,
+                    "description": "<p>Handles a click on one <code>StateItem</code></p>\n",
+                    "modifierKind": [
+                        114
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": {
+                                "pos": 1339,
+                                "end": 1343,
+                                "flags": 0,
+                                "escapedText": "item"
+                            },
+                            "type": "StateItem",
+                            "tagName": {
+                                "pos": 1333,
+                                "end": 1338,
+                                "flags": 0,
+                                "escapedText": "param"
+                            },
+                            "comment": "<p>StateItem</p>\n"
+                        }
+                    ]
+                },
+                {
+                    "name": "handleStepHover",
+                    "args": [
+                        {
+                            "name": "item",
+                            "type": "StateItem"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "void",
+                    "typeParameters": [],
+                    "line": 71,
+                    "description": "<p>Handles the mouse over event on one <code>StateItem</code> </p>\n",
+                    "modifierKind": [
+                        114
+                    ],
+                    "jsdoctags": [
+                        {
+                            "name": {
+                                "pos": 1510,
+                                "end": 1514,
+                                "flags": 0,
+                                "escapedText": "item"
+                            },
+                            "type": "StateItem",
+                            "tagName": {
+                                "pos": 1504,
+                                "end": 1509,
+                                "flags": 0,
+                                "escapedText": "param"
+                            },
+                            "comment": "<p>StateItem</p>\n"
+                        }
+                    ]
+                },
+                {
+                    "name": "isNumberState",
+                    "args": [
+                        {
+                            "name": "index",
+                            "type": "number"
+                        }
+                    ],
+                    "optional": false,
+                    "returnType": "boolean",
+                    "typeParameters": [],
+                    "line": 81,
+                    "description": "<p>Is this State Item a <code>NumberStateItem</code><br>(used in template only)</p>\n",
+                    "jsdoctags": [
+                        {
+                            "name": {
+                                "pos": 1708,
+                                "end": 1713,
+                                "flags": 0,
+                                "escapedText": "index"
+                            },
+                            "type": "number",
+                            "tagName": {
+                                "pos": 1702,
+                                "end": 1707,
+                                "flags": 0,
+                                "escapedText": "param"
+                            },
+                            "comment": "<p>number</p>\n"
+                        },
+                        {
+                            "tagName": {
+                                "pos": 1727,
+                                "end": 1734,
+                                "flags": 0,
+                                "escapedText": "returns"
+                            },
+                            "comment": "<p>boolean</p>\n"
+                        }
+                    ]
+                }
+            ],
+            "hostBindings": [],
+            "hostListeners": [],
+            "description": "",
+            "rawdescription": "",
+            "type": "component",
+            "sourceCode": "import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';\nimport { NumberStateItem } from './model/numberStateItem';\nimport { State } from './model/state';\nimport { StateItem } from './model/stateItem';\n\n@Component({\n  selector: 'app-state-progress',\n  templateUrl: './state-progress.component.html',\n  styleUrls: ['./state-progress.component.scss'],\n  changeDetection: ChangeDetectionStrategy.OnPush\n})\nexport class StateProgressComponent {\n\n  /**\n   * Internally used Enum helper to use in Template\n   */\n  StateEnum = State;\n\n  /**\n   * List of StateItems to ne shown as Progress Component   \n   * This can be of type `DefaultStateItem` or `NumberStateItem`\n   */\n  @Input()\n  states: Array<StateItem>;\n\n  /**\n   * State Progress Size in categories   \n   * Basesize (size of one `StateItem`):\n   * - S: 20px  \n   * - M: 25px  \n   * - L: 30px  \n   * \n   */\n  @Input()\n  size: 'M' | 'S' | 'L' = 'S';\n\n  @Output()\n  onClick = new EventEmitter<StateItem>();\n\n  @Output()\n  onMouseOver = new EventEmitter<StateItem>();\n\n  constructor() { \n  }\n\n  getIconSize(): number {\n    switch (this.size) {\n      case 'M':\n        return 25;\n      case 'L':\n        return 30;\n      case 'S':\n        return 20;\n      default:\n        return 0;\n    }\n  }\n\n  /**\n   * Handles a click on one `StateItem`\n   * @param item StateItem\n   */\n  public handleStepClick(item: StateItem) {\n    this.onClick.emit(item);\n  }\n\n  /**\n   * Handles the mouse over event on one `StateItem` \n   * @param item StateItem\n   */\n  public handleStepHover(item: StateItem) {\n    this.onMouseOver.emit(item);\n  } \n\n  /**\n   * Is this State Item a `NumberStateItem`   \n   * (used in template only)\n   * @param index number\n   * @returns boolean\n   */\n  isNumberState(index: number): boolean {\n    return this.states[index] instanceof NumberStateItem;\n  }\n\n  /**\n   * Returns the foreground color for a `NumberStateItem` based on its state   \n   * *(used in template only)*\n   * @param state State (Enum)\n   * @returns string\n   */\n  colorClassForNumberState(state: State): string {\n    switch (state) {\n      case State.FAILED:\n        return '#F20D0D';\n      case State.SUCCESS:\n        return '#57CC33';\n      case State.WARNING:\n        return '#E6A91A';\n      default:\n        break;\n    }\n    return '';\n  }\n\n  /**\n   * Returns the background color for a `NumberStateItem` based on its state   \n   * *(used in template only)*\n   * @param state State (Enum)\n   * @returns string\n   */\n  bgColorClassForNumberState(state: State): string {\n    switch (state) {\n      case State.FAILED:\n        return '#FBB9B9';\n      case State.SUCCESS:\n        return '#D1F1C7';\n      case State.WARNING:\n        return '#F3D58F';\n      default:\n        break;\n    }\n    return '';\n  }\n}",
+            "assetsDirs": [],
+            "styleUrlsData": [
+                {
+                    "data": ".state-progress-container {\n\n    &.small {\n        --basesize: 20px;\n        --linewidth: 10px;\n        --numpadding: 5px;\n        --numfont: .55rem;\n    }\n    \n    &.medium {\n        --basesize: 25px;\n        --linewidth: 15px;\n        --numpadding: 7px;\n        --numfont: .6rem;\n    }\n\n    &.large {\n        --basesize: 30px;\n        --linewidth: 20px;\n        --numpadding: 8px;\n        --numfont: .8rem;\n    }\n \n    display: inline-grid;\n    grid-template-columns: repeat(6, calc(var(--basesize) + var(--linewidth)));\n    grid-template-rows: var(--basesize);\n    column-gap: 0px;\n    justify-items: stretch;\n    align-items: stretch;\n\n    .state-progress-item {\n        grid-row: 0;\n        display: flex;\n        cursor: pointer;\n    \n        .state-progress-line {\n            align-items: center;\n            display: inline-flex;\n            text-align: center;\n\n            > hr {\n                border-top: 1px solid #c0c0c0;\n                width: calc(var(--linewidth) - 2px); \n            }\n        }\n\n        .state-progress-spinner {\n            width: calc(var(--basesize) - 2px);\n            height: calc(var(--basesize) - 2px);\n        }\n\n        .state-progress-number {\n            border: 1px solid grey;\n            border-radius: var(--basesize);\n            padding: 3px;\n            padding-right: var(--numpadding); \n            padding-left: var(--numpadding); \n            margin: 1px;\n            display: flex;\n            align-items: center;\n            text-align: center;\n            font-size: var(--numfont);\n            color: black;\n        }\n\n        .grey {\n            color:#c0c0c0;\n        }\n    }\n}",
+                    "styleUrl": "./state-progress.component.scss"
+                }
+            ],
+            "stylesData": "",
+            "constructorObj": {
+                "name": "constructor",
+                "description": "",
+                "args": [],
+                "line": 41
+            },
+            "templateData": "<div class=\"state-progress-container\" [class.medium]=\"size == 'M'\" [class.small]=\"size == 'S'\" [class.large]=\"size == 'L'\">\n    <ng-container *ngFor=\"let step of states; let i = index;\">\n        <div class=\"state-progress-item\" (click)=\"handleStepClick(step)\" (mouseover)=\"handleStepHover(step)\">\n            <clr-icon *ngIf=\"!isNumberState(i) && step.state == StateEnum.SKIPPED\" shape=\"success-standard\"  [attr.size]=\"getIconSize()\" class=\"grey\"></clr-icon>\n            <clr-icon *ngIf=\"!isNumberState(i) && step.state == StateEnum.SUCCESS\" shape=\"success-standard\"  [attr.size]=\"getIconSize()\" class=\"is-success is-solid\"></clr-icon>\n            <clr-icon *ngIf=\"!isNumberState(i) && step.state == StateEnum.FAILED\" shape=\"error-standard\"  [attr.size]=\"getIconSize()\" class=\"is-error is-solid\"></clr-icon>\n            <clr-icon *ngIf=\"!isNumberState(i) && step.state == StateEnum.WARNING\" shape=\"error-standard\"  [attr.size]=\"getIconSize()\" class=\"is-warning is-solid\"></clr-icon>\n            <clr-icon *ngIf=\"!isNumberState(i) && step.state == StateEnum.NONE\" shape=\"circle\" [attr.size]=\"getIconSize()\" class=\"grey\"></clr-icon>\n            <span *ngIf=\"!isNumberState(i) && step.state == StateEnum.IN_PROGRESS\" class=\"spinner spinner-sm state-progress-spinner\"></span>\n\n            <span *ngIf=\"isNumberState(i)\" class=\"state-progress-number\" [ngStyle]=\"{ 'border-color': colorClassForNumberState(step.state), 'background-color': bgColorClassForNumberState(step.state) }\">\n                {{ step.value }}\n            </span>\n\n            <div *ngIf=\"i < states.length - 1\" class=\"state-progress-line\"><hr/></div>\n        </div>\n    </ng-container>\n</div>"
+        },
+        {
             "name": "SubNavigationComponent",
             "id": "component-SubNavigationComponent-70b1dd02c06207638466b2330d70bfbd",
             "file": "src/app/ui/sub-navigation/sub-navigation.component.ts",
@@ -6343,6 +6830,9 @@
                             "name": "ShowJsonComponent"
                         },
                         {
+                            "name": "StateProgressComponent"
+                        },
+                        {
                             "name": "SubNavigationComponent"
                         },
                         {
@@ -6374,6 +6864,9 @@
                         },
                         {
                             "name": "ShowJsonComponent"
+                        },
+                        {
+                            "name": "StateProgressComponent"
                         },
                         {
                             "name": "SubNavigationComponent"
@@ -6416,7 +6909,47 @@
                 "name": "Default",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
+                "file": "src/stories/menu-button.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/inline-button-group.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
                 "file": "src/stories/navigation-bar.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/page-header.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/show-json.stories.ts",
+                "type": "",
+                "defaultValue": "Template.bind({})"
+            },
+            {
+                "name": "Default",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/state-progress.stories.ts",
                 "type": "",
                 "defaultValue": "Template.bind({})"
             },
@@ -6434,7 +6967,7 @@
                 "subtype": "variable",
                 "file": "src/environments/environment.prod.ts",
                 "type": "object",
-                "defaultValue": "{\n  production: true,\n  apiUrl: \"http://zbox:4100/api\"\n}"
+                "defaultValue": "{\n  production: true,\n  apiUrl: \"http://192.168.178.129:4100/api\",\n  mockData: false\n}"
             },
             {
                 "name": "environment",
@@ -6442,7 +6975,7 @@
                 "subtype": "variable",
                 "file": "src/environments/environment.ts",
                 "type": "object",
-                "defaultValue": "{\n  production: false,\n  apiUrl: \"http://zbox:4100/api\",\n  mockData: false\n}"
+                "defaultValue": "{\n  production: false,\n  apiUrl: \"http://192.168.178.129:4100/api\",\n  mockData: false\n}"
             },
             {
                 "name": "FilledGreen",
@@ -6535,6 +7068,14 @@
                 "name": "Template",
                 "ctype": "miscellaneous",
                 "subtype": "variable",
+                "file": "src/stories/menu-button.stories.ts",
+                "type": "Story<MenuButtonComponent>",
+                "defaultValue": "(args) => ({\n    props: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
                 "file": "src/stories/inline-button-group.stories.ts",
                 "type": "Story<InlineButtonGroupComponent>",
                 "defaultValue": "(args) => ({\n    props: args\n})"
@@ -6546,6 +7087,30 @@
                 "file": "src/stories/navigation-bar.stories.ts",
                 "type": "Story<NavigationBarComponent>",
                 "defaultValue": "(args) => ({\n    props: args,\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/page-header.stories.ts",
+                "type": "Story<PageHeaderComponent>",
+                "defaultValue": "(args) => ({\n    props: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/show-json.stories.ts",
+                "type": "Story<ShowJsonComponent>",
+                "defaultValue": "(args) => ({\n    props: args\n})"
+            },
+            {
+                "name": "Template",
+                "ctype": "miscellaneous",
+                "subtype": "variable",
+                "file": "src/stories/state-progress.stories.ts",
+                "type": "Story<StateProgressComponent>",
+                "defaultValue": "(args) => ({\n    props: args\n})"
             },
             {
                 "name": "Template",
@@ -6581,6 +7146,33 @@
         ],
         "typealiases": [],
         "enumerations": [
+            {
+                "name": "State",
+                "childs": [
+                    {
+                        "name": "NONE"
+                    },
+                    {
+                        "name": "FAILED"
+                    },
+                    {
+                        "name": "SUCCESS"
+                    },
+                    {
+                        "name": "IN_PROGRESS"
+                    },
+                    {
+                        "name": "SKIPPED"
+                    },
+                    {
+                        "name": "WARNING"
+                    }
+                ],
+                "ctype": "miscellaneous",
+                "subtype": "enum",
+                "description": "",
+                "file": "src/app/ui/state-progress/model/state.ts"
+            },
             {
                 "name": "TableSize",
                 "childs": [
@@ -6668,6 +7260,42 @@
                     "defaultValue": "(args) => ({\n    props: args,\n})"
                 }
             ],
+            "src/stories/menu-button.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/menu-button.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/menu-button.stories.ts",
+                    "type": "Story<MenuButtonComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
+                }
+            ],
+            "src/stories/inline-button-group.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/inline-button-group.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/inline-button-group.stories.ts",
+                    "type": "Story<InlineButtonGroupComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
+                }
+            ],
             "src/stories/navigation-bar.stories.ts": [
                 {
                     "name": "Default",
@@ -6684,6 +7312,60 @@
                     "file": "src/stories/navigation-bar.stories.ts",
                     "type": "Story<NavigationBarComponent>",
                     "defaultValue": "(args) => ({\n    props: args,\n})"
+                }
+            ],
+            "src/stories/page-header.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/page-header.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/page-header.stories.ts",
+                    "type": "Story<PageHeaderComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
+                }
+            ],
+            "src/stories/show-json.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/show-json.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/show-json.stories.ts",
+                    "type": "Story<ShowJsonComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
+                }
+            ],
+            "src/stories/state-progress.stories.ts": [
+                {
+                    "name": "Default",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/state-progress.stories.ts",
+                    "type": "",
+                    "defaultValue": "Template.bind({})"
+                },
+                {
+                    "name": "Template",
+                    "ctype": "miscellaneous",
+                    "subtype": "variable",
+                    "file": "src/stories/state-progress.stories.ts",
+                    "type": "Story<StateProgressComponent>",
+                    "defaultValue": "(args) => ({\n    props: args\n})"
                 }
             ],
             "src/stories/table.stories.ts": [
@@ -6743,7 +7425,7 @@
                     "subtype": "variable",
                     "file": "src/environments/environment.prod.ts",
                     "type": "object",
-                    "defaultValue": "{\n  production: true,\n  apiUrl: \"http://zbox:4100/api\"\n}"
+                    "defaultValue": "{\n  production: true,\n  apiUrl: \"http://192.168.178.129:4100/api\",\n  mockData: false\n}"
                 }
             ],
             "src/environments/environment.ts": [
@@ -6753,7 +7435,7 @@
                     "subtype": "variable",
                     "file": "src/environments/environment.ts",
                     "type": "object",
-                    "defaultValue": "{\n  production: false,\n  apiUrl: \"http://zbox:4100/api\",\n  mockData: false\n}"
+                    "defaultValue": "{\n  production: false,\n  apiUrl: \"http://192.168.178.129:4100/api\",\n  mockData: false\n}"
                 }
             ],
             "src/app/data/iconFactory.ts": [
@@ -6764,16 +7446,6 @@
                     "file": "src/app/data/iconFactory.ts",
                     "type": "",
                     "defaultValue": "(name: string): string => {\n    switch (name) {\n        case 'plus-circle-line':\n            return '../assets/icons/plus-circle-line.svg';\n\n        case 'info-standard-line':\n            return '../assets/icons/info-standard-line.svg';\n\n        case 'home-line':\n            return '../assets/icons/home-line.svg';\n\n        case 'trash-line':\n            return \"../assets/icons/trash-line.svg\";\n            \n        case 'wallet-line':\n            return '../assets/icons/wallet-line.svg';\n        \n        case 'shield-line':\n            return '../assets/icons/shield-line.svg';\n            \n        case 'cog-line':\n            return '../assets/icons/cog-line.svg';\n\n        case 'times-circle-line':\n            return '../assets/icons/times-circle-line.svg';\n\n        case 'bar-chart-line':\n            return '../assets/icons/bar-chart-line.svg';\n        \n        case 'filter-line':\n            return '../assets/icons/filter-line.svg';\n\n        case 'filter-solid':\n            return '../assets/icons/filter-solid.svg';\n\n        case 'folder-line':\n            return '../assets/icons/folder-line.svg';\n\n        case 'folder-open-line':\n            return '../assets/icons/folder-open-line.svg';\n        \n        case 'briefcase-line':\n            return '../assets/icons/briefcase-line.svg';\n        \n        case 'pencil-line':\n            return '../assets/icons/pencil-line.svg';\n        \n        case 'slider-line':\n            return '../assets/icons/slider-line.svg';\n    \n        case 'user-line':\n            return '../assets/icons/user-line.svg';\n\n        default:\n            break;\n    }\n}"
-                }
-            ],
-            "src/stories/inline-button-group.stories.ts": [
-                {
-                    "name": "Template",
-                    "ctype": "miscellaneous",
-                    "subtype": "variable",
-                    "file": "src/stories/inline-button-group.stories.ts",
-                    "type": "Story<InlineButtonGroupComponent>",
-                    "defaultValue": "(args) => ({\n    props: args\n})"
                 }
             ]
         },
@@ -6803,6 +7475,35 @@
             ]
         },
         "groupedEnumerations": {
+            "src/app/ui/state-progress/model/state.ts": [
+                {
+                    "name": "State",
+                    "childs": [
+                        {
+                            "name": "NONE"
+                        },
+                        {
+                            "name": "FAILED"
+                        },
+                        {
+                            "name": "SUCCESS"
+                        },
+                        {
+                            "name": "IN_PROGRESS"
+                        },
+                        {
+                            "name": "SKIPPED"
+                        },
+                        {
+                            "name": "WARNING"
+                        }
+                    ],
+                    "ctype": "miscellaneous",
+                    "subtype": "enum",
+                    "description": "",
+                    "file": "src/app/ui/state-progress/model/state.ts"
+                }
+            ],
             "src/app/ui/models/table/tableSize.ts": [
                 {
                     "name": "TableSize",
@@ -6863,7 +7564,7 @@
         ]
     },
     "coverage": {
-        "count": 0,
+        "count": 1,
         "status": "low",
         "files": [
             {
@@ -7255,6 +7956,42 @@
                 "status": "low"
             },
             {
+                "filePath": "src/app/ui/state-progress/model/defaultStateItem.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "DefaultStateItem",
+                "coveragePercent": 0,
+                "coverageCount": "0/5",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/ui/state-progress/model/numberStateItem.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "NumberStateItem",
+                "coveragePercent": 0,
+                "coverageCount": "0/6",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/ui/state-progress/model/stateItem.ts",
+                "type": "class",
+                "linktype": "classe",
+                "name": "StateItem",
+                "coveragePercent": 0,
+                "coverageCount": "0/5",
+                "status": "low"
+            },
+            {
+                "filePath": "src/app/ui/state-progress/state-progress.component.ts",
+                "type": "component",
+                "linktype": "component",
+                "name": "StateProgressComponent",
+                "coveragePercent": 61,
+                "coverageCount": "8/13",
+                "status": "good"
+            },
+            {
                 "filePath": "src/app/ui/sub-navigation/sub-navigation.component.ts",
                 "type": "component",
                 "linktype": "component",
@@ -7411,6 +8148,36 @@
                 "type": "variable",
                 "linktype": "miscellaneous",
                 "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/inline-button-group.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/menu-button.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/menu-button.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
                 "name": "Template",
                 "coveragePercent": 0,
                 "coverageCount": "0/1",
@@ -7428,6 +8195,66 @@
             },
             {
                 "filePath": "src/stories/navigation-bar.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/page-header.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/page-header.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/show-json.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/show-json.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Template",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/state-progress.stories.ts",
+                "type": "variable",
+                "linktype": "miscellaneous",
+                "linksubtype": "variable",
+                "name": "Default",
+                "coveragePercent": 0,
+                "coverageCount": "0/1",
+                "status": "low"
+            },
+            {
+                "filePath": "src/stories/state-progress.stories.ts",
                 "type": "variable",
                 "linktype": "miscellaneous",
                 "linksubtype": "variable",
