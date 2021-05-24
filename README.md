@@ -1,38 +1,26 @@
 # Finance Manager
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.6.
+Angular UI to locally document your finances like salary, insurances or regular expenses.
 
-## ToDo
+## Versions  
 
-- Table: add row click support
-- Modal: https://stackoverflow.com/questions/64392594/how-to-open-a-bootstrap-modal-window-from-other-component-in-angular-8
-- Try: Bootstrap Toast
+Angular: 11.2.7
+Bootstrap: 4.6.0
+Chart.js: 2.9.4
+Storybook: 6.2.9
 
-# BuiltIn Stuff
+## Run
 
-## Development server
+### Docker
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+```bash
+ng build --prod
+docker build -t finance-manager .
+docker run --name finance-manager-container -d -p 4567:80 finance-manager
+```
 
-## Code scaffolding
+### Angular CLI
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+App: `npm run start`  
 
-## Build
-
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
-
-## To Check
-https://indepth.dev/posts/1041/how-to-build-a-component-library-with-angular-and-storybook
+Storybook: `npm run storybook`  
