@@ -4,10 +4,10 @@ Angular UI to locally document your finances like salary, insurances or regular 
 
 ## Versions  
 
-Angular: 11.2.7
-Bootstrap: 4.6.0
-Chart.js: 2.9.4
-Storybook: 6.2.9
+- Angular: 11.2.7
+- Bootstrap: 4.6.0
+- Chart.js: 2.9.4
+- Storybook: 6.2.9
 
 ## Run
 
