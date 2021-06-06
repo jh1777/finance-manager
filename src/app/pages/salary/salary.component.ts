@@ -7,7 +7,7 @@ import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
-import { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell } from 'src/app/ui';
+import { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell, NumberTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
 import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
@@ -171,16 +171,16 @@ export class SalaryComponent implements OnInit {
       });
       row.cells.push(cell);
       
-      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`});
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`, numericValue: entry.Brutto });
       row.cells.push(cell);
       
-      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`});
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`, numericValue: entry.Netto });
       row.cells.push(cell);
             
-      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`});
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`, numericValue: entry.AKP });
       row.cells.push(cell);
             
-      cell = new TextTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`});
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`, numericValue: entry.Kantine });
       row.cells.push(cell);
             
       cell = new TextTableCell({ id: entry.id, label:`${entry.Wochenstunden}`});
@@ -198,10 +198,10 @@ export class SalaryComponent implements OnInit {
     header.push({ label: 'No.' });
     header.push({ label: 'Jahr' });
     header.push({ label: 'Monat' });
-    header.push({ label: 'Brutto' });
-    header.push({ label: 'Netto' });
-    header.push({ label: 'AKP' });
-    header.push({ label: 'Kantine' });
+    header.push({ label: 'Brutto', summarizeWhenGrouped: true });
+    header.push({ label: 'Netto', summarizeWhenGrouped: true });
+    header.push({ label: 'AKP', summarizeWhenGrouped: true });
+    header.push({ label: 'Kantine', summarizeWhenGrouped: true });
     header.push({ label: 'Stunden/Woche' });
     this.header = header;
     
