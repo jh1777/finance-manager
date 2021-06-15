@@ -63,6 +63,14 @@ export class NavigationService {
     result.push(expenses);
 
     // 5
+    let pension = new LinkNavigationItem({
+      label: 'Pension',
+      icon: getIconWithName('coin-bag'),
+      link: "/pension"
+    });
+    result.push(pension);
+
+    // 6
     let settings = new LinkNavigationItem({
       label: '',
       icon: getIconWithName('cog-line'),

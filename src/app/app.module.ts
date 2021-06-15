@@ -20,6 +20,7 @@ import { SalaryChartComponent } from './components/salary-chart/salary-chart.com
 import { InsuranceComponent } from './pages/insurance/insurance.component';
 import { InsuranceAddEntryComponent } from './components/insurance-add-entry/insurance-add-entry.component';
 import { ExpensesComponent } from './pages/expenses/expenses.component';
+import { PensionComponent } from './pages/pension/pension.component';
 registerLocaleData(localeDe);
 
 
@@ -33,7 +34,8 @@ registerLocaleData(localeDe);
     SalaryChartComponent,
     InsuranceComponent,
     InsuranceAddEntryComponent,
-    ExpensesComponent
+    ExpensesComponent,
+    PensionComponent
   ],
   imports: [
     BrowserModule,

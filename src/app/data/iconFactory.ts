@@ -51,6 +51,8 @@ export const getIconWithName = (name: string): string => {
         case 'user-line':
             return '../assets/icons/user-line.svg';
 
+        case 'coin-bag':
+            return '../assets/icons/coin-bag-line.svg';
         default:
             break;
     }

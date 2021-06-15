@@ -89,15 +89,6 @@
           </div>
 
           <div class="form-group col-md-6">
-            <label for="person"><strong>Person</strong></label>
-            <select class="form-control" id="person" required [(ngModel)]="changeEntry.Person" name="Person" #person="ngModel">
-                <option *ngFor="let c of persons"> {{ c }}</option>
-            </select>
-            <div [hidden]="person.valid || person.pristine" class="alert alert-danger">
-                Person is required</div>
-          </div>
-
-          <div class="form-group col-md-6">
             <label for="intervall"><strong>Intervall</strong></label>
             <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall" #intervall="ngModel">
                 <option>Monat</option>

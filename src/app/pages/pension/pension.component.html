@@ -1,0 +1,130 @@
+<div class="page">
+    <app-page-header>
+        <div class="left">{{ pageTitle }}</div>
+        <div class="right">
+            <span class="status-text">{{ lastResult }}</span>
+
+            <ng-container *ngFor="let p of persons">
+                <app-menu-button *ngIf="currentPerson != p" [label]="personButtonLabel(p)" [icon]="personIcon"
+                    iconSize=18 (clickEvent)="changeUser(p)"></app-menu-button>
+            </ng-container>
+            <app-menu-button label="New Pension" [icon]="addEntryIcon" iconSize=18 (clickEvent)="newEntry()">
+            </app-menu-button>
+        </div>
+    </app-page-header>
+    <p></p>
+    <app-table [header]="header" [rows]="rows" [size]="tableSize" [footer]="footerText" collapseGroupsByDefault=true
+        [groupColumnIndex]="groupCell" [sortEntry]="currentSortEntry" (sortAction)="sortColumn($event)">
+    </app-table>
+</div>
+
+<jw-modal id="delete-confirmation" class="small-modal">
+    <h3>Really Delete Entry</h3>
+    <p>{{deleteConfirmMessage}}</p>
+    <button type="button" class="btn btn-danger" (click)="deleteEntry(deletionEntry)">Delete</button>
+    &nbsp;
+    <button type="button" class="btn btn-primary" style="float: right;"
+        (click)="closeModal('delete-confirmation');">Cancel</button>
+</jw-modal>
+
+<jw-modal id="change-value" class="small-modal">
+    <h4>Change value</h4>
+    <p>{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 30%;">
+                <strong>Monatsbetrag</strong>
+            </td>
+            <td>
+                <input type="number" id="value-monthly" name="Monatsbetrag" required
+                    [(ngModel)]="changeEntry.Monatsbetrag" />
+            </td>
+        </tr>
+        <tr>
+            <td style="width: 30%;">
+                <strong>Einmalzahlung</strong>
+            </td>
+            <td>
+                <input type="number" id="value-onetime" name="Einmalzahlung" required
+                    [(ngModel)]="changeEntry.Einmalzahlung" />
+            </td>
+        </tr>
+    </table>
+    <p></p>
+    <button type="button" class="btn btn-danger" (click)="change()">Change</button>
+    &nbsp;
+    <button type="button" class="btn btn-primary" style="float: right;"
+        (click)="closeModal('change-value');">Cancel</button>
+</jw-modal>
+
+<jw-modal id="change-entry" class="small-modal">
+    <h4>{{ changeEntry.id ? 'Change' :'Create'}} pension record</h4>
+    <br/>
+    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+
+    <form (ngSubmit)="changeOrCreateEntry()" #absicherungForm="ngForm">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="name"><strong>Name/Bezeichnung</strong></label>
+                <input type="text" class="form-control" id="name" required [(ngModel)]="changeEntry.Name" name="Name"
+                    #name="ngModel">
+                <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
+                    Name is required</div>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="art"><strong>Art</strong></label>
+                <select class="form-control" id="art" required [(ngModel)]="changeEntry.Art" name="Art"
+                    #art="ngModel">
+                    <option *ngFor="let t of types"> {{ t }}</option>
+                </select>
+                <div [hidden]="art.valid || art.pristine" class="alert alert-danger">
+                    Art is required</div>
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="versicherung">Versicherung</label>
+                <input type="text" class="form-control" id="versicherung" [(ngModel)]="changeEntry.Versicherung" name="Versicherung"
+                    #versicherung="ngModel">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="versicherungsnummer">Versicherungsnummer</label>
+                <input type="text" class="form-control" id="versicherungsnummer" [(ngModel)]="changeEntry.Versicherungsnummer" name="Versicherungsnummer"
+                    #versicherungsnummer="ngModel">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="monatsbetrag">Monatsbetrag</label>
+                <input type="number" class="form-control" id="monatsbetrag"
+                    [(ngModel)]="changeEntry.Monatsbetrag" name="Monatsbetrag" #monatsbetrag="ngModel">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="einmalzahlung">Einmalzahlung</label>
+                <input type="number" class="form-control" id="einmalzahlung"
+                    [(ngModel)]="changeEntry.Einmalzahlung" name="Einmalzahlung" #einmalzahlung="ngModel">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="faelligkeit">Fälligkeit</label>
+                <input type="date" class="form-control" id="faelligkeit" [(ngModel)]="changeEntry.Faelligkeit" name="Faelligkeit" 
+                    #faelligkeit="ngModel">
+            </div>
+
+            <div class="form-group col-md-12">
+                <label for="kommentar">Kommentar</label>
+                <input type="text" class="form-control" id="kommentar" [(ngModel)]="changeEntry.Kommentar"
+                    name="Kommentar" #beschreibung="ngModel">
+            </div>
+
+            
+
+        </div>
+        <button type="button" class="btn btn-secondary" style="float: right;"
+            (click)="closeModal('change-entry');">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!absicherungForm.form.valid">{{ changeEntry.id ?
+            'Change' :'Create'}}</button>&nbsp;
+    </form>
+</jw-modal>
