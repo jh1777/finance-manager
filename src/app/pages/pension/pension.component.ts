@@ -53,7 +53,7 @@ export class PensionComponent implements OnInit {
   });
   //
 
-  public types: Array<string> = ['Rente', 'Berufsunfähigkeit'];
+  public types: Array<string> = ['Rente', 'Berufsunfähigkeit', 'Todesfallsumme', 'Invalidität'];
 
   constructor(
     private api: ApiService,
@@ -99,16 +99,17 @@ export class PensionComponent implements OnInit {
 
     header.push({ label: 'No.' });
     header.push({ label: 'Name', isSortable: true });
-    header.push({ label: 'Art', isGroupable: true });
     header.push({ label: 'Versicherung' });
     header.push({ label: 'Versicherungsnummer' });
     header.push({ label: 'Monatsbetrag', summarizeWhenGrouped: true });
     header.push({ label: 'Einmalzahlung', summarizeWhenGrouped: true });
+    header.push({ label: 'Todesfallsumme', summarizeWhenGrouped: true });
+    header.push({ label: 'Berufsunfähigkeit', summarizeWhenGrouped: true });
     header.push({ label: 'Fälligkeit' });
     header.push({ label: 'Kommentar' });
 
     this.header = header;
-    this.groupCell = 2;
+    this.groupCell = 8;
   }
 
   /**
@@ -145,7 +146,6 @@ export class PensionComponent implements OnInit {
       // Cells
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a" }));
       row.cells.push(new StyledTextTableCell({ id: entry.id, label: entry.Name, style: { 'font-weight': '500' } }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Art }));
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.Versicherung }));
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.Versicherungsnummer }));
 
@@ -165,6 +165,22 @@ export class PensionComponent implements OnInit {
       };
       cell2.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell2);
+
+      let cell3 = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Todesfallsumme), numericValue: entry.Todesfallsumme });
+      cell3.action = () => {
+        this.changeEntry = entry;
+        this.openModal('change-value');
+      };
+      cell3.actionIcon = getIconWithName("slider-line");
+      row.cells.push(cell3);
+
+      let cell4 = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Berufsunfaehigkeit), numericValue: entry.Berufsunfaehigkeit });
+      cell4.action = () => {
+        this.changeEntry = entry;
+        this.openModal('change-value');
+      };
+      cell4.actionIcon = getIconWithName("slider-line");
+      row.cells.push(cell4);
 
       row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Faelligkeit) }));
       row.cells.push(new TextTableCell({ id: entry.id, label: entry.Kommentar }));

@@ -50,6 +50,15 @@
                     [(ngModel)]="changeEntry.Einmalzahlung" />
             </td>
         </tr>
+        <tr>
+            <td style="width: 30%;">
+                <strong>Todesfallsumme</strong>
+            </td>
+            <td>
+                <input type="number" id="value-d" name="Todesfallsumme" required
+                    [(ngModel)]="changeEntry.Todesfallsumme" />
+            </td>
+        </tr>
     </table>
     <p></p>
     <button type="button" class="btn btn-danger" (click)="change()">Change</button>
@@ -74,16 +83,6 @@
             </div>
 
             <div class="form-group col-md-6">
-                <label for="art"><strong>Art</strong></label>
-                <select class="form-control" id="art" required [(ngModel)]="changeEntry.Art" name="Art"
-                    #art="ngModel">
-                    <option *ngFor="let t of types"> {{ t }}</option>
-                </select>
-                <div [hidden]="art.valid || art.pristine" class="alert alert-danger">
-                    Art is required</div>
-            </div>
-
-            <div class="form-group col-md-6">
                 <label for="versicherung">Versicherung</label>
                 <input type="text" class="form-control" id="versicherung" [(ngModel)]="changeEntry.Versicherung" name="Versicherung"
                     #versicherung="ngModel">
@@ -105,6 +104,12 @@
                 <label for="einmalzahlung">Einmalzahlung</label>
                 <input type="number" class="form-control" id="einmalzahlung"
                     [(ngModel)]="changeEntry.Einmalzahlung" name="Einmalzahlung" #einmalzahlung="ngModel">
+            </div>
+
+            <div class="form-group col-md-6">
+                <label for="todesfallsumme">Todesfallsumme</label>
+                <input type="number" class="form-control" id="todesfallsumme"
+                    [(ngModel)]="changeEntry.Todesfallsumme" name="Todesfallsumme" #todesfallsumme="ngModel">
             </div>
 
             <div class="form-group col-md-6">

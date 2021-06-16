@@ -6,9 +6,10 @@ export class Absicherung implements IName {
     Erstellt: string;
     Bearbeitet: string;
     Person: string;
-    Art: string;
     Versicherung: string;
     Versicherungsnummer: string;
+    Berufsunfaehigkeit?: number;
+    Todesfallsumme?: number;
     Monatsbetrag?: number;
     Einmalzahlung?: number;
     Faelligkeit: string;
