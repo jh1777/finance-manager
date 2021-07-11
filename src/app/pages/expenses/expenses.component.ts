@@ -7,13 +7,11 @@ import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
 import { Ausgabe } from 'src/app/services/models/ausgabe';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { TableRow, ITableCell, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
-import { GroupRow } from 'src/app/ui/models/table/groupRow';
+import { TableRow, TableSize, TextTableCell, TableRowAction, TableHeader } from 'src/app/ui';
 import { NumberTableCell } from 'src/app/ui/models/table/numberTableCell';
 import { SortEntry } from 'src/app/ui/models/table/sortEntry';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import '../../util/dateExtensions';
-
 
 @Component({
   selector: 'app-expenses',
@@ -62,7 +60,7 @@ export class ExpensesComponent implements OnInit {
   ) {
     this.navigationService.activeMenu.next(4);
 
-    this.api.setService("ausgaben");
+    this.api.setService("expenses");
     this.loadData();
 
   }
@@ -200,14 +198,14 @@ export class ExpensesComponent implements OnInit {
   public deleteEntry($event: Ausgabe) {
     if ($event) {
       // Call the API to delete the entry
-      this.api.setService("ausgaben");
-      this.api.deleteEntryById<Ausgabe>($event.id).subscribe({
+      this.api.setService("expenses");
+      this.api.deleteEntryById<Ausgabe>($event._id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
           this.loadData();
         },
         error: (err) => {
-          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+          this.showResultWithTimer(`Item ${$event._id} Deletion Failed: ${err}`);
         }
       });
     }
@@ -256,7 +254,7 @@ export class ExpensesComponent implements OnInit {
       Ende: newItem.Start
     }
 
-    this.changeItem(this.changeEntry.id, changedData);
+    this.changeItem(this.changeEntry._id, changedData);
     this.createItem(newItem);
     this.closeModal('change-value');
   }
@@ -266,9 +264,9 @@ export class ExpensesComponent implements OnInit {
    * @param id number Item id to change
    * @param item Partial<Ausgabe>
    */
-  private changeItem(id: number, item: Partial<Ausgabe>, reload: boolean = false) {
+  private changeItem(id: string, item: Partial<Ausgabe>, reload: boolean = false) {
     item.Bearbeitet = new Date().toPreferredStringFormat();
-    this.api.setService("ausgaben");
+    this.api.setService("expenses");
     this.api.changeEntry<Partial<Ausgabe>>(id, item).subscribe(
         res => {
           var response = <HttpResponse<Partial<Ausgabe>>>res;
@@ -293,7 +291,7 @@ export class ExpensesComponent implements OnInit {
     item.Bearbeitet = new Date().toPreferredStringFormat();
     item.Person = this.currentPerson;
 
-    this.api.setService("ausgaben");
+    this.api.setService("expenses");
     this.api.createEntry<Ausgabe>(item).subscribe(
         res => {
           var response = <HttpResponse<Ausgabe>>res;
@@ -310,8 +308,8 @@ export class ExpensesComponent implements OnInit {
   }
 
   public changeOrCreateEntry() {
-    if (this.changeEntry.id) {
-      this.changeItem(this.changeEntry.id, this.changeEntry,true);
+    if (this.changeEntry._id) {
+      this.changeItem(this.changeEntry._id, this.changeEntry,true);
     } else {
       // New Entry
       this.createItem(this.changeEntry);

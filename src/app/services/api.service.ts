@@ -43,7 +43,16 @@ export class ApiService {
       );
   }
 
-  getEntry<T extends HasId>(id: number): Observable<T[]> {
+  getEntry<T>(id: string): Observable<HttpResponse<T>> {
+    var url = `${this.url}/${id}`;
+    var result = this.httpClient.get<T>(url, { headers: this.httpOptions, observe: 'response' })
+      .pipe(
+        retry(1),
+        catchError(this.errorHandler)
+      );
+
+    return result;
+    /*
     return this.httpClient.get<T[]>(
       this.url, { observe: 'response' })
       .pipe(
@@ -51,19 +60,10 @@ export class ApiService {
         retry(1),
         catchError(this.errorHandler)
       );
+      */
   }
 
-  deleteEntry<T>(year: number, month: number): Observable<HttpResponse<T>> {
-    var removeUrl = `${this.url}/${year}/${month}`;
-    var result = this.httpClient.delete<T>(removeUrl, { headers: this.httpOptions, observe: 'response' })
-      .pipe(
-        catchError(this.errorHandler)
-      );
-
-    return result;
-  }
-
-  deleteEntryById<T>(id: number): Observable<HttpResponse<T>> {
+  deleteEntryById<T>(id: string): Observable<HttpResponse<T>> {
     var removeUrl = `${this.url}/${id}`;
     var result = this.httpClient.delete<T>(removeUrl, { headers: this.httpOptions, observe: 'response' })
       .pipe(
@@ -81,7 +81,7 @@ export class ApiService {
     return result;
   }
 
-  changeEntry<T>(id: number, model: T): Observable<HttpResponse<T>> {
+  changeEntry<T>(id: string, model: T): Observable<HttpResponse<T>> {
     var url = `${this.url}/${id}`;
     var result = this.httpClient.put<T>(url, model, { headers: this.httpOptions, observe: 'response' })
       .pipe(

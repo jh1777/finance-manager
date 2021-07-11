@@ -1,5 +1,6 @@
 export class Gehalt {
   id: number;
+  _id?: string;
   Monat: number;
   Jahr: number;
   Brutto: number;

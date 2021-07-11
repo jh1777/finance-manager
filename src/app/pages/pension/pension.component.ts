@@ -64,7 +64,7 @@ export class PensionComponent implements OnInit {
   ) {
 
     this.navigationService.activeMenu.next(5);
-    this.api.setService("absicherung");
+    this.api.setService("pensions");
     this.loadData();
 
   }
@@ -215,14 +215,14 @@ export class PensionComponent implements OnInit {
   public deleteEntry($event: Absicherung) {
     if ($event) {
       // Call the API to delete the entry
-      this.api.setService("absicherung");
-      this.api.deleteEntryById<Absicherung>($event.id).subscribe({
+      this.api.setService("pensions");
+      this.api.deleteEntryById<Absicherung>($event._id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
           this.loadData();
         },
         error: (err) => {
-          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+          this.showResultWithTimer(`Item ${$event._id} Deletion Failed: ${err}`);
         }
       });
     }
@@ -240,7 +240,7 @@ export class PensionComponent implements OnInit {
       Einmalzahlung: this.changeEntry.Einmalzahlung
     }
 
-    this.changeItem(this.changeEntry.id, changedData, true);
+    this.changeItem(this.changeEntry._id, changedData, true);
     this.closeModal('change-value');
   }
 
@@ -249,13 +249,13 @@ export class PensionComponent implements OnInit {
    * @param id number Item id to change
    * @param item Partial<Ausgabe>
    */
-  private changeItem(id: number, item: Partial<Absicherung>, reload: boolean = false) {
+  private changeItem(id: string, item: Partial<Absicherung>, reload: boolean = false) {
     item.Bearbeitet = new Date().toPreferredStringFormat();
-    this.api.setService("absicherung");
+    this.api.setService("pensions");
     this.api.changeEntry<Partial<Absicherung>>(id, item).subscribe(
         res => {
           var response = <HttpResponse<Partial<Absicherung>>>res;
-          this.showResultWithTimer(`PUT Absicherung item: ${this.changeEntry.Name}/${this.changeEntry.id}: HTTP Code ${response.status}`);
+          this.showResultWithTimer(`PUT Absicherung item: ${this.changeEntry.Name}/${this.changeEntry._id}: HTTP Code ${response.status}`);
           if (reload) {
             this.loadData();
           }
@@ -283,7 +283,7 @@ export class PensionComponent implements OnInit {
     item.Bearbeitet = new Date().toPreferredStringFormat();
     item.Person = this.currentPerson;
 
-    this.api.setService("absicherung");
+    this.api.setService("pensions");
     this.api.createEntry<Absicherung>(item).subscribe(
         res => {
           var response = <HttpResponse<Absicherung>>res;
@@ -301,8 +301,8 @@ export class PensionComponent implements OnInit {
 
 
   public changeOrCreateEntry() {
-    if (this.changeEntry.id) {
-      this.changeItem(this.changeEntry.id, this.changeEntry,true);
+    if (this.changeEntry._id) {
+      this.changeItem(this.changeEntry._id, this.changeEntry,true);
     } else {
       // New Entry
       this.createItem(this.changeEntry);

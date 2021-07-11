@@ -8,6 +8,7 @@ export class Ausgabe implements IName {
     Kategorie?: string;
     Tag?: string;
     id?: number;
+    _id?: string;
     Start: string;
     Ende: string;
     Erstellt: string;

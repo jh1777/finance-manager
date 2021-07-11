@@ -2,6 +2,7 @@ import { IName } from "./interfaces/IName"
 import { IDatum } from './interfaces/IDatum';
 export class Versicherung implements IName, IDatum {
     id: number;
+    _id?: string;
     Name: string;
     Rueckkaufswert: number;
     AusgabenId?: number;

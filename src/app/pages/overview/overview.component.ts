@@ -55,7 +55,7 @@ export class OverviewComponent implements OnInit {
   private loadData() {
     let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
     // Get Data from API
-    this.api.setService("gehalt");
+    this.api.setService("salary");
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         let data = result.body;

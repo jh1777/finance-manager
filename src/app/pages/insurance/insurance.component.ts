@@ -62,7 +62,7 @@ export class InsuranceComponent implements OnInit {
 
 
   private getData() {
-    this.api.setService("versicherungen");
+    this.api.setService("insurances");
     this.api.getAllEntries<Versicherung>().subscribe({
       next: (result) => {
         this.data = result.body.SortDescending('Datum');
@@ -164,7 +164,7 @@ export class InsuranceComponent implements OnInit {
   public createInsurance(item: Versicherung) {
 
     console.log("Create Item: Versicherung: ", item);
-    this.api.setService("versicherungen");
+    this.api.setService("insurances");
     this.api.createEntry<Versicherung>(item).subscribe(
         res => {
           var response = <HttpResponse<Versicherung>>res;
@@ -197,14 +197,14 @@ export class InsuranceComponent implements OnInit {
   public deleteEntry($event: Versicherung) {
     if ($event) {
       // Call the API to delete the entry
-      this.api.setService("versicherungen");
-      this.api.deleteEntryById<Versicherung>($event.id).subscribe({
+      this.api.setService("insurances");
+      this.api.deleteEntryById<Versicherung>($event._id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);
           this.getData();
         },
         error: (err) => {
-          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+          this.showResultWithTimer(`Item ${$event._id} Deletion Failed: ${err}`);
         }
       });
     }
