@@ -9,6 +9,9 @@ export class Versicherung implements IName, IDatum {
     Datum: string;
     Erstellt: string;
 
+    _created?: string;
+    _modified?: string;
+    
     constructor(init?: Partial<Versicherung>) {
         Object.assign(this, init);
     }

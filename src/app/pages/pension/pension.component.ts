@@ -126,7 +126,7 @@ export class PensionComponent implements OnInit {
       let action = new TableRowAction();
       action.tooltip = "Change";
       action.icon = getIconWithName("pencil-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.changeEntry = entry;
         this.openModal('change-entry');
       };
@@ -136,21 +136,21 @@ export class PensionComponent implements OnInit {
       action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Name}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action);
 
       // Cells
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a" }));
-      row.cells.push(new StyledTextTableCell({ id: entry.id, label: entry.Name, style: { 'font-weight': '500' } }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Versicherung }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Versicherungsnummer }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry._id ? `${entry._id}` : "n/a" }));
+      row.cells.push(new StyledTextTableCell({ id: entry._id, label: entry.Name, style: { 'font-weight': '500' } }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Versicherung }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Versicherungsnummer }));
 
       // Cells
-      let cell = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Monatsbetrag), numericValue: entry.Monatsbetrag });
+      let cell = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Monatsbetrag), numericValue: entry.Monatsbetrag });
       cell.action = () => {
         this.changeEntry = entry;
         this.openModal('change-value');
@@ -158,7 +158,7 @@ export class PensionComponent implements OnInit {
       cell.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell);
 
-      let cell2 = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Einmalzahlung), numericValue: entry.Einmalzahlung });
+      let cell2 = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Einmalzahlung), numericValue: entry.Einmalzahlung });
       cell2.action = () => {
         this.changeEntry = entry;
         this.openModal('change-value');
@@ -166,7 +166,7 @@ export class PensionComponent implements OnInit {
       cell2.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell2);
 
-      let cell3 = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Todesfallsumme), numericValue: entry.Todesfallsumme });
+      let cell3 = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Todesfallsumme), numericValue: entry.Todesfallsumme });
       cell3.action = () => {
         this.changeEntry = entry;
         this.openModal('change-value');
@@ -174,7 +174,7 @@ export class PensionComponent implements OnInit {
       cell3.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell3);
 
-      let cell4 = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Berufsunfaehigkeit), numericValue: entry.Berufsunfaehigkeit });
+      let cell4 = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Berufsunfaehigkeit), numericValue: entry.Berufsunfaehigkeit });
       cell4.action = () => {
         this.changeEntry = entry;
         this.openModal('change-value');
@@ -182,8 +182,8 @@ export class PensionComponent implements OnInit {
       cell4.actionIcon = getIconWithName("slider-line");
       row.cells.push(cell4);
 
-      row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Faelligkeit) }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Kommentar }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: this.datePipe.transform(entry.Faelligkeit) }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Kommentar }));
       result.push(row);
     });
 

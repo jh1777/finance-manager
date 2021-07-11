@@ -12,6 +12,9 @@ export class Gehalt {
   Arbeitgeber: string;
   Wochenstunden: number;
 
+  _created?: string;
+  _modified?: string;
+  
   constructor(init?: Partial<Gehalt>) {
     Object.assign(this, init);
   }

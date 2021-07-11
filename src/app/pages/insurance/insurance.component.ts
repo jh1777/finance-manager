@@ -89,9 +89,9 @@ export class InsuranceComponent implements OnInit {
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}/${entry.Datum}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Name}/${entry.Datum}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
@@ -100,22 +100,22 @@ export class InsuranceComponent implements OnInit {
       let prev = this.getPreviousEntry(entry);
       let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;
       // Cells
-      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
+      let cell = new TextTableCell({ id: entry._id, label: entry._id ? `${entry._id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });
+      cell = new StyledTextTableCell({ id: entry._id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });
       row.cells.push(cell);
 
-      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
+      cell = new TextTableCell({ id: entry._id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });
+      cell = new StyledTextTableCell({ id: entry._id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry._id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Erstellt, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry._id, label:`${ this.datePipe.transform(entry._created, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
       result.push(row);

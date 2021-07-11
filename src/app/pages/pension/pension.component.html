@@ -29,7 +29,7 @@
 
 <jw-modal id="change-value" class="small-modal">
     <h4>Change value</h4>
-    <p>{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+    <p>{{ changeEntry.Name }} (id: {{ changeEntry._id }})</p>
 
     <table style="width: 100%;">
         <tr>
@@ -68,9 +68,9 @@
 </jw-modal>
 
 <jw-modal id="change-entry" class="small-modal">
-    <h4>{{ changeEntry.id ? 'Change' :'Create'}} pension record</h4>
+    <h4>{{ changeEntry._id ? 'Change' :'Create'}} pension record</h4>
     <br/>
-    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+    <p *ngIf="changeEntry._id">{{ changeEntry.Name }} (id: {{ changeEntry._id }})</p>
 
     <form (ngSubmit)="changeOrCreateEntry()" #absicherungForm="ngForm">
         <div class="form-row">
@@ -129,7 +129,7 @@
         </div>
         <button type="button" class="btn btn-secondary" style="float: right;"
             (click)="closeModal('change-entry');">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!absicherungForm.form.valid">{{ changeEntry.id ?
+        <button type="submit" class="btn btn-primary" [disabled]="!absicherungForm.form.valid">{{ changeEntry._id ?
             'Change' :'Create'}}</button>&nbsp;
     </form>
 </jw-modal>

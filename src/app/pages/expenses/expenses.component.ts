@@ -111,7 +111,7 @@ export class ExpensesComponent implements OnInit {
       let action = new TableRowAction();
       action.tooltip = "Change";
       action.icon = getIconWithName("pencil-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.changeEntry = entry;
         this.changeEntry.Start = this.datePipe.transform(this.changeEntry.Start, 'yyyy-MM-dd');
         this.openModal('change-entry');
@@ -122,21 +122,21 @@ export class ExpensesComponent implements OnInit {
       action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}, Created=${ this.datePipe.transform(entry.Erstellt) }?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Name}, Created=${ this.datePipe.transform(entry.Erstellt) }?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
 
       // Cells
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"}));
-      row.cells.push(new StyledTextTableCell({ id: entry.id, label: entry.Name, style: {'font-weight':'500'} }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Kategorie }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Intervall }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry._id ? `${entry._id}` : "n/a"}));
+      row.cells.push(new StyledTextTableCell({ id: entry._id, label: entry.Name, style: {'font-weight':'500'} }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Kategorie }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Intervall }));
 
       // Cells
-      let cell = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.Betrag), numericValue: entry.Betrag });
+      let cell = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Betrag), numericValue: entry.Betrag });
       cell.action = () => {
         this.changeEntry = entry;
         this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
@@ -152,10 +152,10 @@ export class ExpensesComponent implements OnInit {
       } else if (entry.Intervall == 'Quartal') {
         monthly = monthly / 3;
       }
-      row.cells.push(new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(monthly), numericValue: monthly }));
+      row.cells.push(new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(monthly), numericValue: monthly }));
 
-      row.cells.push(new TextTableCell({ id: entry.id, label: entry.Beschreibung }));
-      row.cells.push(new TextTableCell({ id: entry.id, label: this.datePipe.transform(entry.Start) }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: entry.Beschreibung }));
+      row.cells.push(new TextTableCell({ id: entry._id, label: this.datePipe.transform(entry.Start) }));
 
       result.push(row);
     });

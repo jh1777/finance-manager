@@ -130,9 +130,9 @@ export class SalaryComponent implements OnInit {
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
@@ -146,14 +146,14 @@ export class SalaryComponent implements OnInit {
       row.actions.push(info);
 
       // Cells
-      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
+      let cell = new TextTableCell({ id: entry._id, label: entry._id ? `${entry._id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});
+      cell = new StyledTextTableCell({ id: entry._id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});
       row.cells.push(cell);
 
       cell = new StyledTextTableCell({ 
-        id: entry.id, 
+        id: entry._id, 
         label: entry.Monat.PadWithZero(), 
         style:{ 'font-weight': '500' },
         actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), 
@@ -171,19 +171,19 @@ export class SalaryComponent implements OnInit {
       });
       row.cells.push(cell);
       
-      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Brutto)}`, numericValue: entry.Brutto });
+      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Brutto)}`, numericValue: entry.Brutto });
       row.cells.push(cell);
       
-      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Netto)}`, numericValue: entry.Netto });
+      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Netto)}`, numericValue: entry.Netto });
       row.cells.push(cell);
             
-      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.AKP)}`, numericValue: entry.AKP });
+      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.AKP)}`, numericValue: entry.AKP });
       row.cells.push(cell);
             
-      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.Kantine)}`, numericValue: entry.Kantine });
+      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Kantine)}`, numericValue: entry.Kantine });
       row.cells.push(cell);
             
-      cell = new TextTableCell({ id: entry.id, label:`${entry.Wochenstunden}`});
+      cell = new TextTableCell({ id: entry._id, label:`${entry.Wochenstunden}`});
       row.cells.push(cell);
 
       result.push(row);

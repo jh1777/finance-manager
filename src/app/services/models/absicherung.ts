@@ -16,6 +16,9 @@ export class Absicherung implements IName {
     Faelligkeit: string;
     Kommentar: string;
 
+    _created?: string;
+    _modified?: string;
+
     constructor(init?: Partial<Absicherung>) {
         Object.assign(this, init);
     }

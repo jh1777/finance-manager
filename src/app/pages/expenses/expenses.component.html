@@ -36,7 +36,7 @@
 
 <jw-modal id="change-value" class="small-modal">
     <h4>Change expense value</h4>
-    <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry._id }})</p>
 
     <table style="width: 100%;">
         <tr>
@@ -66,8 +66,8 @@
 </jw-modal>
 
 <jw-modal id="change-entry" class="small-modal">
-    <h4>{{ changeEntry.id ? 'Change' :'Create'}} expense record</h4>
-    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <h4>{{ changeEntry._id ? 'Change' :'Create'}} expense record</h4>
+    <p *ngIf="changeEntry._id">{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry._id }})</p>
 
     <form (ngSubmit)="changeOrCreateEntry()" #ausgabeForm="ngForm">
         <div class="form-row">
@@ -127,6 +127,6 @@
     
         </div>
         <button type="button" class="btn btn-secondary" style="float: right;" (click)="closeModal('change-entry');">Cancel</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!ausgabeForm.form.valid">{{ changeEntry.id ? 'Change' :'Create'}}</button>&nbsp;
+        <button type="submit" class="btn btn-primary" [disabled]="!ausgabeForm.form.valid">{{ changeEntry._id ? 'Change' :'Create'}}</button>&nbsp;
     </form>
 </jw-modal>

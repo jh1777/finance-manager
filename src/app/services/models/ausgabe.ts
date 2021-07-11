@@ -15,6 +15,9 @@ export class Ausgabe implements IName {
     Bearbeitet: string;
     Person: string;
 
+    _created?: string;
+    _modified?: string;
+
     constructor(init?: Partial<Ausgabe>) {
         Object.assign(this, init);
     }
