@@ -284,9 +284,9 @@ export class PensionComponent implements OnInit {
     item.Person = this.currentPerson;
 
     this.api.setService("pensions");
-    this.api.createEntry<Absicherung>(item).subscribe(
+    this.api.createEntry<Absicherung>([item]).subscribe(
         res => {
-          var response = <HttpResponse<Absicherung>>res;
+          var response = <HttpResponse<Array<Absicherung>>>res;
           this.showResultWithTimer(`POST Absicherung item: ${item.Name}: HTTP Code ${response.status}`);
 
           if (res.ok) {

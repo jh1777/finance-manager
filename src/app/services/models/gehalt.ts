@@ -14,6 +14,7 @@ export class Gehalt {
 
   _created?: string;
   _modified?: string;
+  _sortKey: number;
   
   constructor(init?: Partial<Gehalt>) {
     Object.assign(this, init);

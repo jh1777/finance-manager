@@ -165,9 +165,9 @@ export class InsuranceComponent implements OnInit {
 
     console.log("Create Item: Versicherung: ", item);
     this.api.setService("insurances");
-    this.api.createEntry<Versicherung>(item).subscribe(
+    this.api.createEntry<Versicherung>([item]).subscribe(
         res => {
-          var response = <HttpResponse<Versicherung>>res;
+          var response = <HttpResponse<Array<Versicherung>>>res;
           this.showResultWithTimer(`POST Versicherung item: ${item.Name}/${item.Datum}: HTTP Code ${response.status}`);
 
           if (res.ok) {

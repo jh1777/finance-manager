@@ -5,13 +5,14 @@ import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
 import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { timer } from 'rxjs';
+import { pipe, timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
 import { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell, NumberTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
 import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
+import { tap } from 'rxjs/operators';
 
 
 
@@ -87,6 +88,7 @@ export class SalaryComponent implements OnInit {
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         this.data = result.body;
+        
         if (environment.mockData) {
           this.data.map(d => d.Netto = d.Netto * 63 * Math.random());
           this.data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
@@ -95,7 +97,7 @@ export class SalaryComponent implements OnInit {
         if (this.monthFilterBy) {
           this.data = this.data.filter(d => d.Monat == this.monthFilterBy);
         }
-        this.data = this.data.SortDescending('id');
+        this.data = this.data.SortDescending('_sortKey');
 
         // Map to generic table model
         this.rows = this.mapToTableModel(this.data);
@@ -230,9 +232,9 @@ export class SalaryComponent implements OnInit {
 
   public createSalary(item: Gehalt) {
     console.log(item);
-    this.api.createEntry<Gehalt>(item).subscribe(
+    this.api.createEntry<Gehalt>([item]).subscribe(
         res => {
-          var response = <HttpResponse<Gehalt>>res;
+          var response = <HttpResponse<Array<Gehalt>>>res;
           this.showSalaryResultWithTimer(`POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`);
 
           if (res.ok) {

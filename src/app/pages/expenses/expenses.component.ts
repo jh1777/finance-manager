@@ -292,9 +292,9 @@ export class ExpensesComponent implements OnInit {
     item.Person = this.currentPerson;
 
     this.api.setService("expenses");
-    this.api.createEntry<Ausgabe>(item).subscribe(
+    this.api.createEntry<Ausgabe>([item]).subscribe(
         res => {
-          var response = <HttpResponse<Ausgabe>>res;
+          var response = <HttpResponse<Array<Ausgabe>>>res;
           this.showResultWithTimer(`POST Ausgabe item: ${item.Name}/${item.Betrag}: HTTP Code ${response.status}`);
 
           if (res.ok) {

@@ -52,15 +52,6 @@ export class ApiService {
       );
 
     return result;
-    /*
-    return this.httpClient.get<T[]>(
-      this.url, { observe: 'response' })
-      .pipe(
-        map(entries => entries.body.filter(entry => entry.id === id)),
-        retry(1),
-        catchError(this.errorHandler)
-      );
-      */
   }
 
   deleteEntryById<T>(id: string): Observable<HttpResponse<T>> {
@@ -73,8 +64,8 @@ export class ApiService {
     return result;
   }
 
-  createEntry<T>(model: T): Observable<HttpResponse<T>> {
-    var result = this.httpClient.post<T>(this.url, model, { headers: this.httpOptions, observe: 'response' })
+  createEntry<T>(model: Array<T>): Observable<HttpResponse<Array<T>>> {
+    var result = this.httpClient.post<Array<T>>(this.url, model, { headers: this.httpOptions, observe: 'response' })
       .pipe(
         catchError(this.errorHandler)
       );
