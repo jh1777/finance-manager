@@ -1,16 +1,14 @@
 import { IName } from "./interfaces/IName" 
-import { IDatum } from './interfaces/IDatum';
-export class Versicherung implements IName, IDatum {
+export class Versicherung implements IName {
     id: number;
     _id?: string;
     Name: string;
     Rueckkaufswert: number;
     AusgabenId?: number;
-    Datum: string;
-    Erstellt: string;
+    Datum: Date;
 
-    _created?: string;
-    _modified?: string;
+    _modified?: Date;
+    _created?: Date;
     
     constructor(init?: Partial<Versicherung>) {
         Object.assign(this, init);

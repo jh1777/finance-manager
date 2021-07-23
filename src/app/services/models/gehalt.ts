@@ -12,8 +12,8 @@ export class Gehalt {
   Arbeitgeber: string;
   Wochenstunden: number;
 
-  _created?: string;
-  _modified?: string;
+  _created?: Date;
+  _modified?: Date;
   _sortKey: number;
   
   constructor(init?: Partial<Gehalt>) {

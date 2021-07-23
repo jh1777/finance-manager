@@ -7,16 +7,14 @@ export class Ausgabe implements IName {
     Intervall: 'Monat' | 'Jahr' | 'Quartal' = 'Monat'
     Kategorie?: string;
     Tag?: string;
-    id?: number;
     _id?: string;
-    Start: string;
-    Ende: string;
-    Erstellt: string;
-    Bearbeitet: string;
+
     Person: string;
 
-    _created?: string;
-    _modified?: string;
+    _modified?: Date;
+    _created?: Date;
+    Start?: Date;
+    Ende?: Date;
 
     constructor(init?: Partial<Ausgabe>) {
         Object.assign(this, init);

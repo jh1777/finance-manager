@@ -218,7 +218,7 @@ export class PensionComponent implements OnInit {
       this.api.setService("pensions");
       this.api.deleteEntryById<Absicherung>($event._id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name} Deletion: HTTP Code ${res.status} ${res.statusText}`);
           this.loadData();
         },
         error: (err) => {
@@ -250,7 +250,7 @@ export class PensionComponent implements OnInit {
    * @param item Partial<Ausgabe>
    */
   private changeItem(id: string, item: Partial<Absicherung>, reload: boolean = false) {
-    item.Bearbeitet = new Date().toPreferredStringFormat();
+
     this.api.setService("pensions");
     this.api.changeEntry<Partial<Absicherung>>(id, item).subscribe(
         res => {
@@ -279,8 +279,10 @@ export class PensionComponent implements OnInit {
    * @param item Ausgabe
    */
    private createItem(item: Absicherung) {
-    item.Erstellt = new Date().toPreferredStringFormat();
-    item.Bearbeitet = new Date().toPreferredStringFormat();
+     if (item.Faelligkeit) {
+       item.Faelligkeit = new Date(item.Faelligkeit);
+     }
+
     item.Person = this.currentPerson;
 
     this.api.setService("pensions");

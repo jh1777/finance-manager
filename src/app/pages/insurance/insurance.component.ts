@@ -37,7 +37,7 @@ export class InsuranceComponent implements OnInit {
   public addEntryLabel: string = "Add Insurance";
   public addEntryIcon: string = getIconWithName('plus-circle-line');
   public newInsuranceEntry = new Versicherung({
-    Erstellt: this.datePipe.transform(new Date(), 'yyyy-MM-dd')
+    _created: new Date()
   });
   public createEntryLastResult: string = '';
  
@@ -162,7 +162,9 @@ export class InsuranceComponent implements OnInit {
   }
 
   public createInsurance(item: Versicherung) {
-
+    if (item.Datum) {
+      item.Datum = new Date(item.Datum);
+    }
     console.log("Create Item: Versicherung: ", item);
     this.api.setService("insurances");
     this.api.createEntry<Versicherung>([item]).subscribe(

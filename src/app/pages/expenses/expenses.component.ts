@@ -92,7 +92,7 @@ export class ExpensesComponent implements OnInit {
   }
   public newExpenseEntry() {
     this.changeEntry = new Ausgabe();
-    this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    this.changeEntry.Start = new Date(); // this.datePipe.transform(new Date(), 'yyyy-MM-dd');
     this.changeEntry.Person = this.currentPerson;
     this.openModal('change-entry');
   }
@@ -113,7 +113,7 @@ export class ExpensesComponent implements OnInit {
       action.icon = getIconWithName("pencil-line");
       action.action = (id: string) => {
         this.changeEntry = entry;
-        this.changeEntry.Start = this.datePipe.transform(this.changeEntry.Start, 'yyyy-MM-dd');
+        this.changeEntry.Start = new Date(); // this.datePipe.transform(this.changeEntry.Start, 'yyyy-MM-dd');
         this.openModal('change-entry');
       };
       row.actions.push(action); 
@@ -124,7 +124,7 @@ export class ExpensesComponent implements OnInit {
       action.icon = getIconWithName("trash-line");
       action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Name}, Created=${ this.datePipe.transform(entry.Erstellt) }?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Name}, Created=${ this.datePipe.transform(entry._created) }?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
@@ -139,7 +139,7 @@ export class ExpensesComponent implements OnInit {
       let cell = new NumberTableCell({ id: entry._id, label: this.currencyPipe.transform(entry.Betrag), numericValue: entry.Betrag });
       cell.action = () => {
         this.changeEntry = entry;
-        this.changeEntry.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+        this.changeEntry.Start = new Date(); //this.datePipe.transform(new Date(), 'yyyy-MM-dd');
         this.openModal('change-value');
       };
       cell.actionIcon = getIconWithName("slider-line");
@@ -201,7 +201,7 @@ export class ExpensesComponent implements OnInit {
       this.api.setService("expenses");
       this.api.deleteEntryById<Ausgabe>($event._id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event.Erstellt} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event._id}: ${$event.Name}/${$event._created} Deletion: HTTP Code ${res.status} ${res.statusText}`);
           this.loadData();
         },
         error: (err) => {
@@ -227,8 +227,8 @@ export class ExpensesComponent implements OnInit {
    */
   private mapToNewEntry(entry: Ausgabe): Ausgabe {
     let result = new Ausgabe({
-      Bearbeitet: new Date().toPreferredStringFormat(),
-      Erstellt: new Date().toPreferredStringFormat(),
+      //Bearbeitet: new Date().toPreferredStringFormat(),
+      //Erstellt: new Date().toPreferredStringFormat(),
       Beschreibung: entry.Beschreibung,
       Betrag: entry.Betrag,
       Start: entry.Start,
@@ -246,8 +246,8 @@ export class ExpensesComponent implements OnInit {
   public change() {
     // Create newly mapped item
     let newItem = this.mapToNewEntry(this.changeEntry);
-    if (!newItem.Start || newItem.Start == '') 
-      newItem.Start = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    if (!newItem.Start || newItem.Start == null) 
+      newItem.Start = new Date(); //this.datePipe.transform(new Date(), 'yyyy-MM-dd');
     
     // Create change partial item
     let changedData: Partial<Ausgabe> = {
@@ -265,7 +265,7 @@ export class ExpensesComponent implements OnInit {
    * @param item Partial<Ausgabe>
    */
   private changeItem(id: string, item: Partial<Ausgabe>, reload: boolean = false) {
-    item.Bearbeitet = new Date().toPreferredStringFormat();
+    //item.Bearbeitet = new Date().toPreferredStringFormat();
     this.api.setService("expenses");
     this.api.changeEntry<Partial<Ausgabe>>(id, item).subscribe(
         res => {
@@ -287,10 +287,15 @@ export class ExpensesComponent implements OnInit {
    * @param item Ausgabe
    */
   private createItem(item: Ausgabe) {
-    item.Erstellt = new Date().toPreferredStringFormat();
-    item.Bearbeitet = new Date().toPreferredStringFormat();
+    //item.Erstellt = new Date().toPreferredStringFormat();
+    //item.Bearbeitet = new Date().toPreferredStringFormat();
     item.Person = this.currentPerson;
-
+    if (item.Start) {
+      item.Start = new Date(item.Start);
+    }
+    if (item.Ende) {
+      item.Ende = new Date(item.Ende);
+    }
     this.api.setService("expenses");
     this.api.createEntry<Ausgabe>([item]).subscribe(
         res => {
