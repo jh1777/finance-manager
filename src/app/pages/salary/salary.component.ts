@@ -84,7 +84,7 @@ export class SalaryComponent implements OnInit {
 
   private updateEntries() {
     // Get Data from API
-    this.api.setService("salary");
+    this.api.setService("salaries");
     this.api.getAllEntries<Gehalt>().subscribe(
       result => {
         this.data = result.body;
@@ -259,7 +259,7 @@ export class SalaryComponent implements OnInit {
   public deleteSalaryEntry($event: Gehalt) {
     if ($event) {
       // Call the API to delete the entry
-      this.api.setService("salary");
+      this.api.setService("salaries");
       this.api.deleteEntryById<Gehalt>($event._id).subscribe({
         next: (res) => {
           this.showSalaryResultWithTimer(`Item ${$event._id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);

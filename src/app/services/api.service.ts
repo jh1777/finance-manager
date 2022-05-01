@@ -9,7 +9,7 @@ import { catchError, map, retry } from "rxjs/operators";
 })
 export class ApiService {
 
-  private service: string = "gehalt";
+  private service: string = "salaries";
   private url = `${environment.apiUrl}/${this.service}`;
   
   constructor(private httpClient: HttpClient) { }
