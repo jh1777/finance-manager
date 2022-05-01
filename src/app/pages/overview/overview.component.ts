@@ -5,7 +5,6 @@ import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
-import { Gehalt } from 'src/app/services/models/gehalt';
 import { SalaryCalc } from 'src/app/services/models/salaryCalc';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
@@ -78,7 +77,7 @@ export class OverviewComponent  {
     let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
     // Get Data from API
     this.api.setService("salary");
-    this.api.getAllEntries<Gehalt>().subscribe(
+    this.api.getAllEntries<Salary>().subscribe(
       result => {
         let data = result.body;
         if (environment.mockData) {
@@ -124,10 +123,10 @@ export class OverviewComponent  {
     this.openModal('year-chart');
   }
 
-  public openSalaryChart(data: Array<Gehalt>) {
-    this.x = data.map(d => `${ d.Jahr }/${ d.Monat.PadWithZero() }`);
-    let yearDataBrutto = data.map(d => d.Brutto);
-    let yearDataNetto = data.map(d => d.Netto);
+  public openSalaryChart(data: Array<Salary>) {
+    this.x = data.map(d => `${ d.jahr }/${ d.monat.PadWithZero() }`);
+    let yearDataBrutto = data.map(d => d.brutto);
+    let yearDataNetto = data.map(d => d.netto);
     this.y = new Array<ChartDataSets>();
     this.y.push({
       data: yearDataBrutto,
