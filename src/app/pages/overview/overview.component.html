@@ -19,7 +19,13 @@
 
 
     <div class="row row-cols-1 row-cols-md-3">
-        <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]" [percent]="diffs[year]" (details)="openSalaryChart($event)"></app-salary-year-tile>
+        <app-salary-year-tile 
+            *ngFor="let year of years" 
+            [year]="year" 
+            [data]="data[year]" 
+            [percent]="diffs[year]" 
+            (details)="openSalaryChart($event)"
+        ></app-salary-year-tile>
     </div>
 
 </div>

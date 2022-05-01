@@ -15,7 +15,7 @@ import { HttpClient, HttpHeaders, HttpResponse, HttpResponseBase } from '@angula
 
 export const FINANCE_API_BACKEND_BASE_URL = new InjectionToken<string>('FINANCE_API_BACKEND_BASE_URL');
 
-export interface IFinanceApiBackend {
+export interface IFinanceApiService {
     /**
      * @param name (optional) 
      * @return Success
@@ -85,7 +85,8 @@ export interface IFinanceApiBackend {
      */
     pensionsDELETE(id: string): Observable<void>;
     /**
-     * @return Success
+     * Gets a specific Salary item.
+     * @return Returns a Salary item
      */
     salariesGET(id: string): Observable<Salary>;
     /**
@@ -97,6 +98,10 @@ export interface IFinanceApiBackend {
      * @return Success
      */
     salariesDELETE(id: string): Observable<void>;
+    /**
+     * @return Success
+     */
+    lastyears(years: number): Observable<Salary[]>;
     /**
      * @param year (optional) 
      * @param month (optional) 
@@ -113,7 +118,7 @@ export interface IFinanceApiBackend {
 @Injectable({
     providedIn: 'root'
 })
-export class FinanceApiBackend implements IFinanceApiBackend {
+export class FinanceApiService implements IFinanceApiService {
     private http: HttpClient;
     private baseUrl: string;
     protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
@@ -1145,7 +1150,8 @@ export class FinanceApiBackend implements IFinanceApiBackend {
     }
 
     /**
-     * @return Success
+     * Gets a specific Salary item.
+     * @return Returns a Salary item
      */
     salariesGET(id: string): Observable<Salary> {
         let url_ = this.baseUrl + "/salaries/{id}";
@@ -1158,7 +1164,7 @@ export class FinanceApiBackend implements IFinanceApiBackend {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Accept": "text/plain"
+                "Accept": "application/json"
             })
         };
 
@@ -1195,14 +1201,14 @@ export class FinanceApiBackend implements IFinanceApiBackend {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item is not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an Error or an empty was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1343,6 +1349,81 @@ export class FinanceApiBackend implements IFinanceApiBackend {
             }));
         }
         return _observableOf<void>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
+    lastyears(years: number): Observable<Salary[]> {
+        let url_ = this.baseUrl + "/salaries/lastyears/{years}";
+        if (years === undefined || years === null)
+            throw new Error("The parameter 'years' must be defined.");
+        url_ = url_.replace("{years}", encodeURIComponent("" + years));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "application/json"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processLastyears(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processLastyears(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<Salary[]>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<Salary[]>;
+        }));
+    }
+
+    protected processLastyears(response: HttpResponseBase): Observable<Salary[]> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(Salary.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return _observableOf(result200);
+            }));
+        } else if (status === 404) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result404: any = null;
+            let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result404 = ProblemDetails.fromJS(resultData404);
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            }));
+        } else if (status === 400) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            let result400: any = null;
+            let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result400 = ProblemDetails.fromJS(resultData400);
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf<Salary[]>(null as any);
     }
 
     /**

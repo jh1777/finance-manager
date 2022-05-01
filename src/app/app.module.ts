@@ -22,6 +22,9 @@ import { InsuranceAddEntryComponent } from './components/insurance-add-entry/ins
 import { ExpensesComponent } from './pages/expenses/expenses.component';
 import { PensionComponent } from './pages/pension/pension.component';
 registerLocaleData(localeDe);
+import { from } from 'rxjs';
+import { FinanceApiService, FINANCE_API_BACKEND_BASE_URL } from 'src/services/finance-api.service';
+import { environment } from 'src/environments/environment';
 
 
 @NgModule({
@@ -50,6 +53,11 @@ registerLocaleData(localeDe);
   providers: [
     CurrencyPipe,
     DatePipe,
+    FinanceApiService,
+    {
+      provide: FINANCE_API_BACKEND_BASE_URL,
+      useValue: environment.apiUrl,
+    },
     {
       provide: LOCALE_ID,
       useValue: 'de' // 'de-DE' for Germany, 'fr-FR' for France ...
