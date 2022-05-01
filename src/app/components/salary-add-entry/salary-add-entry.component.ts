@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Gehalt } from 'src/app/services/models/gehalt';
+import { Salary } from 'src/services/finance-api.service';
 
 @Component({
   selector: 'app-salary-add-entry',
@@ -9,10 +9,10 @@ import { Gehalt } from 'src/app/services/models/gehalt';
 export class SalaryAddEntryComponent implements OnInit {
 
   @Input()
-  model: Gehalt;
+  model: Salary;
 
   @Output()
-  newEntry = new EventEmitter<Gehalt>();
+  newEntry = new EventEmitter<Salary>();
 
   constructor() { }
 

@@ -88,31 +88,38 @@ export interface IFinanceApiService {
      * Gets a specific Salary item.
      * @return Returns a Salary item
      */
-    salariesGET(id: string): Observable<Salary>;
+    getSalaryById(id: string): Observable<Salary>;
     /**
-     * @param body (optional) 
+     * Updates an existing Salary item
+     * @param id Id of item to update
+     * @param body (optional) New Salary content
      * @return Success
      */
-    salariesPUT(id: string, body: Salary | undefined): Observable<void>;
+    updateSalary(id: string, body: Salary | undefined): Observable<void>;
     /**
+     * Deleted an existing Salary item
+     * @param id Id of item to delete
      * @return Success
      */
-    salariesDELETE(id: string): Observable<void>;
+    deleteSalary(id: string): Observable<DeleteResult>;
     /**
-     * @return Success
+     * Gets Salary items from past n years until today
+     * @return Returns a List of Salary items
      */
-    lastyears(years: number): Observable<Salary[]>;
+    getSalaryLastNYears(years: number): Observable<Salary[]>;
     /**
+     * Gets Salary items
      * @param year (optional) 
      * @param month (optional) 
-     * @return Success
+     * @return Returns a List of Salary items
      */
-    salariesAll(year: number | undefined, month: number | undefined): Observable<Salary[]>;
+    getSalary(year: number | undefined, month: number | undefined): Observable<Salary[]>;
     /**
+     * Creates a new Salary item
      * @param body (optional) 
-     * @return Created
+     * @return Returns new Salary item
      */
-    salariesPOST(body: Salary | undefined): Observable<void>;
+    createSalary(body: Salary | undefined): Observable<Salary>;
 }
 
 @Injectable({
@@ -1153,7 +1160,7 @@ export class FinanceApiService implements IFinanceApiService {
      * Gets a specific Salary item.
      * @return Returns a Salary item
      */
-    salariesGET(id: string): Observable<Salary> {
+    getSalaryById(id: string): Observable<Salary> {
         let url_ = this.baseUrl + "/salaries/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1164,16 +1171,16 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Accept": "application/json"
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processSalariesGET(response_);
+            return this.processGetSalaryById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processSalariesGET(response_ as any);
+                    return this.processGetSalaryById(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Salary>;
                 }
@@ -1182,7 +1189,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processSalariesGET(response: HttpResponseBase): Observable<Salary> {
+    protected processGetSalaryById(response: HttpResponseBase): Observable<Salary> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1208,7 +1215,7 @@ export class FinanceApiService implements IFinanceApiService {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("If there was an Error or an empty was specified", status, _responseText, _headers, result400);
+            return throwException("If there was an error or an empty id was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1219,10 +1226,12 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * @param body (optional) 
+     * Updates an existing Salary item
+     * @param id Id of item to update
+     * @param body (optional) New Salary content
      * @return Success
      */
-    salariesPUT(id: string, body: Salary | undefined): Observable<void> {
+    updateSalary(id: string, body: Salary | undefined): Observable<void> {
         let url_ = this.baseUrl + "/salaries/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1241,11 +1250,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processSalariesPUT(response_);
+            return this.processUpdateSalary(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processSalariesPUT(response_ as any);
+                    return this.processUpdateSalary(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<void>;
                 }
@@ -1254,7 +1263,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processSalariesPUT(response: HttpResponseBase): Observable<void> {
+    protected processUpdateSalary(response: HttpResponseBase): Observable<void> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1270,14 +1279,18 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the Salary was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return _observableOf<void>(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1288,9 +1301,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Deleted an existing Salary item
+     * @param id Id of item to delete
      * @return Success
      */
-    salariesDELETE(id: string): Observable<void> {
+    deleteSalary(id: string): Observable<DeleteResult> {
         let url_ = this.baseUrl + "/salaries/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1301,24 +1316,25 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processSalariesDELETE(response_);
+            return this.processDeleteSalary(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processSalariesDELETE(response_ as any);
+                    return this.processDeleteSalary(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<DeleteResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<DeleteResult>;
         }));
     }
 
-    protected processSalariesDELETE(response: HttpResponseBase): Observable<void> {
+    protected processDeleteSalary(response: HttpResponseBase): Observable<DeleteResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1327,34 +1343,42 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the Salary was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
+            }));
+        } else if (status === 201) {
+            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
+            return throwException("Returns the DeleteResult", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<DeleteResult>(null as any);
     }
 
     /**
-     * @return Success
+     * Gets Salary items from past n years until today
+     * @return Returns a List of Salary items
      */
-    lastyears(years: number): Observable<Salary[]> {
+    getSalaryLastNYears(years: number): Observable<Salary[]> {
         let url_ = this.baseUrl + "/salaries/lastyears/{years}";
         if (years === undefined || years === null)
             throw new Error("The parameter 'years' must be defined.");
@@ -1365,16 +1389,16 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
-                "Accept": "application/json"
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processLastyears(response_);
+            return this.processGetSalaryLastNYears(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processLastyears(response_ as any);
+                    return this.processGetSalaryLastNYears(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Salary[]>;
                 }
@@ -1383,7 +1407,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processLastyears(response: HttpResponseBase): Observable<Salary[]> {
+    protected processGetSalaryLastNYears(response: HttpResponseBase): Observable<Salary[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1409,14 +1433,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If no items are not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1427,11 +1451,12 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Gets Salary items
      * @param year (optional) 
      * @param month (optional) 
-     * @return Success
+     * @return Returns a List of Salary items
      */
-    salariesAll(year: number | undefined, month: number | undefined): Observable<Salary[]> {
+    getSalary(year: number | undefined, month: number | undefined): Observable<Salary[]> {
         let url_ = this.baseUrl + "/salaries";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1446,11 +1471,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processSalariesAll(response_);
+            return this.processGetSalary(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processSalariesAll(response_ as any);
+                    return this.processGetSalary(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Salary[]>;
                 }
@@ -1459,7 +1484,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processSalariesAll(response: HttpResponseBase): Observable<Salary[]> {
+    protected processGetSalary(response: HttpResponseBase): Observable<Salary[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1485,14 +1510,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If no items are not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1503,10 +1528,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Creates a new Salary item
      * @param body (optional) 
-     * @return Created
+     * @return Returns new Salary item
      */
-    salariesPOST(body: Salary | undefined): Observable<void> {
+    createSalary(body: Salary | undefined): Observable<Salary> {
         let url_ = this.baseUrl + "/salaries";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -1518,24 +1544,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processSalariesPOST(response_);
+            return this.processCreateSalary(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processSalariesPOST(response_ as any);
+                    return this.processCreateSalary(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<Salary>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<Salary>;
         }));
     }
 
-    protected processSalariesPOST(response: HttpResponseBase): Observable<void> {
+    protected processCreateSalary(response: HttpResponseBase): Observable<Salary> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1544,29 +1571,72 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = Salary.fromJS(resultData201);
+            return _observableOf(result201);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status === 409) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result409: any = null;
             let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result409 = ProblemDetails.fromJS(resultData409);
-            return throwException("Conflict", status, _responseText, _headers, result409);
+            return throwException("If the Salary item already exists", status, _responseText, _headers, result409);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<Salary>(null as any);
     }
+}
+
+export class DeleteResult implements IDeleteResult {
+    readonly deletedCount?: number;
+    readonly isAcknowledged?: boolean;
+
+    constructor(data?: IDeleteResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).deletedCount = _data["deletedCount"];
+            (<any>this).isAcknowledged = _data["isAcknowledged"];
+        }
+    }
+
+    static fromJS(data: any): DeleteResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new DeleteResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["deletedCount"] = this.deletedCount;
+        data["isAcknowledged"] = this.isAcknowledged;
+        return data;
+    }
+}
+
+export interface IDeleteResult {
+    deletedCount?: number;
+    isAcknowledged?: boolean;
 }
 
 export class Expense implements IExpense {

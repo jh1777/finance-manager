@@ -52,7 +52,7 @@ export class OverviewComponent  {
 
   private loadDataV2() {
     //let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
-    this.financeApi.lastyears(this._numberOfYears + 1).subscribe(
+    this.financeApi.getSalaryLastNYears(this._numberOfYears + 1).subscribe(
       result => {
         let data = result;
         if (environment.mockData) {

@@ -21,7 +21,7 @@ import { FinanceApiService, Salary } from 'src/services/finance-api.service';
   templateUrl: './salary.component.html',
   styleUrls: ['./salary.component.scss']
 })
-export class SalaryComponent implements OnInit {
+export class SalaryComponent {
   public pageTitle = "Payments";
 
   private data: Array<Salary>;
@@ -72,20 +72,15 @@ export class SalaryComponent implements OnInit {
 
     this.navigationService.activeMenu.next(2);
     this.updateEntriesV2();
-
   }
 
   public setSize(size: TableSize) {
     this.tableSize = size;
   }
 
-  ngOnInit(): void {
-    
-  }
-
   private updateEntriesV2() {
 
-    this.financeApi.salariesAll(null, null).subscribe(
+    this.financeApi.getSalary(null, null).subscribe(
       result => {
         this.data = result.SortDescending('jahr');
         
@@ -233,7 +228,19 @@ export class SalaryComponent implements OnInit {
   }
 
   public createSalary(item: Salary) {
-    console.log(item);
+    this.financeApi.createSalary(item).subscribe(
+      res => {
+        this.showSalaryResultWithTimer(`POST Salary Eintrag ${item.jahr}/${item.monat}: Result=${JSON.stringify(res)}`);
+        this.resetNewSalaryItem();
+        this.toggleNewEntryForm();
+        this.updateEntriesV2();
+        
+      },
+      (err: HttpErrorResponse) => {
+        this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
+      }
+    );
+    /*
     this.api.createEntry<Salary>([item]).subscribe(
         res => {
           var response = <HttpResponse<Array<Salary>>>res;
@@ -249,6 +256,8 @@ export class SalaryComponent implements OnInit {
           this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
         }
       );
+      */
+
   }
 
   private resetNewSalaryItem() {
@@ -260,6 +269,16 @@ export class SalaryComponent implements OnInit {
 
   public deleteSalaryEntry($event: Salary) {
     if ($event) {
+      this.financeApi.deleteSalary($event.id).subscribe({
+        next: (res) => {
+          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.jahr}/${$event.monat}: Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
+          this.updateEntriesV2();
+        },
+        error: (err) => {
+          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
+        }
+      });
+      /*
       // Call the API to delete the entry
       this.api.setService("salaries");
       this.api.deleteEntryById<Salary>($event.id).subscribe({
@@ -271,6 +290,7 @@ export class SalaryComponent implements OnInit {
           this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
       });
+      */
     }
     this.closeModal('delete-confirmation');
   }
