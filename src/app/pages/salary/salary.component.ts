@@ -3,7 +3,6 @@ import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ApiService } from 'src/app/services/api.service';
-import { Gehalt } from 'src/app/services/models/gehalt';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { pipe, timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
@@ -13,6 +12,7 @@ import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { tap } from 'rxjs/operators';
+import { FinanceApiService, Salary } from 'src/services/finance-api.service';
 
 
 
@@ -24,7 +24,7 @@ import { tap } from 'rxjs/operators';
 export class SalaryComponent implements OnInit {
   public pageTitle = "Payments";
 
-  private data: Array<Gehalt>;
+  private data: Array<Salary>;
 
   public tableSizeEnum = TableSize;
   public hideToast: boolean = true;
@@ -49,28 +49,29 @@ export class SalaryComponent implements OnInit {
 
   // Delete Confirm
   public deleteConfirmMessage: string;
-  public deletionEntry: Gehalt;
+  public deletionEntry: Salary;
 
   // Butttons
   public yearButtons: Array<Button> = [];
   public yearFilterMulti: boolean = true;
 
-  public newSalaryEntry = new Gehalt({
-    Arbeitgeber: 'Daimler Truck AG',
-    Wochenstunden: 35,
-    Jahr: new Date().getFullYear(),
-    Monat: new Date().getMonth()
+  public newSalaryEntry = new Salary({
+    arbeitgeber: 'Daimler Truck AG',
+    wochenstunden: 35,
+    jahr: new Date().getFullYear(),
+    monat: new Date().getMonth()
   });
 
   constructor(
     private api: ApiService,
     private navigationService: NavigationService,
     private modalService: ModalService,
+    private financeApi: FinanceApiService,
     private currencyPipe: CurrencyPipe
     ) { 
 
     this.navigationService.activeMenu.next(2);
-    this.updateEntries();
+    this.updateEntriesV2();
 
   }
 
@@ -82,45 +83,46 @@ export class SalaryComponent implements OnInit {
     
   }
 
-  private updateEntries() {
-    // Get Data from API
-    this.api.setService("salaries");
-    this.api.getAllEntries<Gehalt>().subscribe(
+  private updateEntriesV2() {
+
+    this.financeApi.salariesAll(null, null).subscribe(
       result => {
-        this.data = result.body;
+        this.data = result.SortDescending('jahr');
         
         if (environment.mockData) {
-          this.data.map(d => d.Netto = d.Netto * 63 * Math.random());
-          this.data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
+          this.data.map(d => d.netto = d.netto * 63 * Math.random());
+          this.data.map(d => d.brutto  = d.brutto * 24 * Math.random());
         }
 
         if (this.monthFilterBy) {
-          this.data = this.data.filter(d => d.Monat == this.monthFilterBy);
+          this.data = this.data.filter(d => d.monat == this.monthFilterBy);
         }
-        this.data = this.data.SortDescending('_sortKey');
+        //this.data = this.data.SortDescending('_sortKey');
 
         // Map to generic table model
         this.rows = this.mapToTableModel(this.data);
       }
     );
+    
   }
+
 
   public rowClicked(row: TableRow) {
 /*  Maybe future use ... conflicts with icon on-click 
     let id = row.cells.map(r => r.id)[0];
-    this.api.getEntry<Gehalt>(id).subscribe(
+    this.api.getEntry<Salary>(id).subscribe(
       result => {
         this.showEntryAsJson(result.filter(r => r.id == id).First());
       }
     ); */
   }
 
-  private showEntryAsJson(entry: Gehalt) {
+  private showEntryAsJson(entry: Salary) {
     this.jsonDetails = JSON.stringify(entry, undefined, 2);
     this.openModal('json');
   }
 
-  private mapToTableModel(data: Array<Gehalt>): Array<TableRow> {
+  private mapToTableModel(data: Array<Salary>): Array<TableRow> {
     this.createHeader();
     this.createFooter();
 
@@ -134,7 +136,7 @@ export class SalaryComponent implements OnInit {
       action.icon = getIconWithName("trash-line");
       action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry._id}: ${entry.Jahr}/${entry.Monat.PadWithZero()}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.jahr}/${entry.monat.PadWithZero()}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
@@ -148,44 +150,44 @@ export class SalaryComponent implements OnInit {
       row.actions.push(info);
 
       // Cells
-      let cell = new TextTableCell({ id: entry._id, label: entry._id ? `${entry._id}` : "n/a"});
+      let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new StyledTextTableCell({ id: entry._id, label:`${entry.Jahr}`, style:{ 'font-weight': '500' }});
+      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.jahr}`, style:{ 'font-weight': '500' }});
       row.cells.push(cell);
 
       cell = new StyledTextTableCell({ 
-        id: entry._id, 
-        label: entry.Monat.PadWithZero(), 
+        id: entry.id, 
+        label: entry.monat.PadWithZero(), 
         style:{ 'font-weight': '500' },
         actionIcon: this.monthFilterBy ? getIconWithName('filter-solid'): getIconWithName('filter-line'), 
         action: () => {
           if (!this.monthFilterBy) {
-            this.monthFilterBy = entry.Monat;
+            this.monthFilterBy = entry.monat;
             this.groupCellIndex = null;
-            this.updateEntries();
+            this.updateEntriesV2();
           } else {
             this.monthFilterBy = null;
             this.groupCellIndex = 1;
-            this.updateEntries();
+            this.updateEntriesV2();
           }
         } 
       });
       row.cells.push(cell);
       
-      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Brutto)}`, numericValue: entry.Brutto });
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.brutto)}`, numericValue: entry.brutto });
       row.cells.push(cell);
       
-      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Netto)}`, numericValue: entry.Netto });
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.netto)}`, numericValue: entry.netto });
       row.cells.push(cell);
             
-      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.AKP)}`, numericValue: entry.AKP });
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.akp)}`, numericValue: entry.akp });
       row.cells.push(cell);
             
-      cell = new NumberTableCell({ id: entry._id, label:`${this.currencyPipe.transform(entry.Kantine)}`, numericValue: entry.Kantine });
+      cell = new NumberTableCell({ id: entry.id, label:`${this.currencyPipe.transform(entry.kantine)}`, numericValue: entry.kantine });
       row.cells.push(cell);
             
-      cell = new TextTableCell({ id: entry._id, label:`${entry.Wochenstunden}`});
+      cell = new TextTableCell({ id: entry.id, label:`${entry.wochenstunden}`});
       row.cells.push(cell);
 
       result.push(row);
@@ -230,17 +232,17 @@ export class SalaryComponent implements OnInit {
     salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');
   }
 
-  public createSalary(item: Gehalt) {
+  public createSalary(item: Salary) {
     console.log(item);
-    this.api.createEntry<Gehalt>([item]).subscribe(
+    this.api.createEntry<Salary>([item]).subscribe(
         res => {
-          var response = <HttpResponse<Array<Gehalt>>>res;
-          this.showSalaryResultWithTimer(`POST Gehalt Eintrag ${item.Jahr}/${item.Monat}: HTTP Code ${response.status}`);
+          var response = <HttpResponse<Array<Salary>>>res;
+          this.showSalaryResultWithTimer(`POST Salary Eintrag ${item.jahr}/${item.monat}: HTTP Code ${response.status}`);
 
           if (res.ok) {
             this.resetNewSalaryItem();
             this.toggleNewEntryForm();
-            this.updateEntries();
+            this.updateEntriesV2();
           }
         },
         (err: HttpErrorResponse) => {
@@ -250,23 +252,23 @@ export class SalaryComponent implements OnInit {
   }
 
   private resetNewSalaryItem() {
-    this.newSalaryEntry.Brutto = null;
-    this.newSalaryEntry.Netto = null;
-    this.newSalaryEntry.Kantine = null;
-    this.newSalaryEntry.AKP = null;
+    this.newSalaryEntry.brutto = null;
+    this.newSalaryEntry.netto = null;
+    this.newSalaryEntry.kantine = null;
+    this.newSalaryEntry.akp = null;
   }
 
-  public deleteSalaryEntry($event: Gehalt) {
+  public deleteSalaryEntry($event: Salary) {
     if ($event) {
       // Call the API to delete the entry
       this.api.setService("salaries");
-      this.api.deleteEntryById<Gehalt>($event._id).subscribe({
+      this.api.deleteEntryById<Salary>($event.id).subscribe({
         next: (res) => {
-          this.showSalaryResultWithTimer(`Item ${$event._id}: ${$event.Jahr}/${$event.Monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
-          this.updateEntries();
+          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.jahr}/${$event.monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.updateEntriesV2();
         },
         error: (err) => {
-          this.showSalaryResultWithTimer(`Item ${$event._id} Deletion Failed: ${err}`);
+          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
       });
     }
@@ -274,7 +276,7 @@ export class SalaryComponent implements OnInit {
   }
 
   private createFooter() {
-    this.footerText = `${this.data.map(d => d.Jahr).Distinct().length} Years (${ this.data.map(d => d.Monat).length} Months)`;
+    this.footerText = `${this.data.map(d => d.jahr).Distinct().length} Years (${ this.data.map(d => d.monat).length} Months)`;
   }
 
   openModal(id: string) {
