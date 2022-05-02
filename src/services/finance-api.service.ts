@@ -17,9 +17,9 @@ export const FINANCE_API_BACKEND_BASE_URL = new InjectionToken<string>('FINANCE_
 
 export interface IFinanceApiService {
     /**
-     * Gets a list of Expense items by name
+     * Gets a list of Expense items by name (opt.)
      * @param name (optional) 
-     * @return Returns a Expense item list
+     * @return Returns an Expense item list
      */
     getExpenses(name: string | undefined): Observable<Expense[]>;
     /**
@@ -47,50 +47,64 @@ export interface IFinanceApiService {
      */
     deleteExpense(id: string): Observable<DeleteResult>;
     /**
+     * Gets a list of Insurance items by name (opt.)
      * @param name (optional) 
-     * @return Success
+     * @return Returns an Insurance item list
      */
-    insurancesAll(name: string | undefined): Observable<Insurance[]>;
+    getInsurance(name: string | undefined): Observable<Insurance[]>;
     /**
+     * Creates an Insurance item
      * @param body (optional) 
-     * @return Created
+     * @return Returns the new Insurance item
      */
-    insurancesPOST(body: Insurance | undefined): Observable<void>;
+    createInsurance(body: Insurance | undefined): Observable<Insurance>;
     /**
-     * @return Success
+     * Gets an Insurance item by id
+     * @return Returns an Insurance item
      */
-    insurancesGET(id: string): Observable<Insurance>;
+    getInsuranceById(id: string): Observable<Insurance>;
     /**
+     * Updates an Insurance item
+     * @param id Id of item to update
+     * @param body (optional) New Insurance content
+     * @return Returns the UpdateResult
+     */
+    updateInsurance(id: string, body: Insurance | undefined): Observable<UpdateResult>;
+    /**
+     * Deletes an Insurance item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
+     */
+    deleteInsurance(id: string): Observable<DeleteResult>;
+    /**
+     * Gets a list of Pension items
+     * @return Returns all Pension items
+     */
+    getPensions(): Observable<Pension[]>;
+    /**
+     * Creates a Pension item
      * @param body (optional) 
-     * @return Success
+     * @return Returns the new Pension item
      */
-    insurancesPUT(id: string, body: Insurance | undefined): Observable<void>;
+    createPension(body: Pension | undefined): Observable<Pension>;
     /**
-     * @return Success
+     * Gets a Pension item by id
+     * @return Returns the Pension item
      */
-    insurancesDELETE(id: string): Observable<void>;
+    getPensionById(id: string): Observable<Pension>;
     /**
-     * @return Success
+     * Updates a Pension item
+     * @param id Id of item to update
+     * @param body (optional) New Pension content
+     * @return Returns the UpdateResult
      */
-    pensionsAll(): Observable<Pension[]>;
+    updatePension(id: string, body: Pension | undefined): Observable<UpdateResult>;
     /**
-     * @param body (optional) 
-     * @return Created
+     * Deletes a Pension item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
      */
-    pensionsPOST(body: Pension | undefined): Observable<void>;
-    /**
-     * @return Success
-     */
-    pensionsGET(id: string): Observable<Pension>;
-    /**
-     * @param body (optional) 
-     * @return Success
-     */
-    pensionsPUT(id: string, body: Pension | undefined): Observable<void>;
-    /**
-     * @return Success
-     */
-    pensionsDELETE(id: string): Observable<void>;
+    deletePension(id: string): Observable<DeleteResult>;
     /**
      * Gets a specific Salary item.
      * @return Returns a Salary item
@@ -143,9 +157,9 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * Gets a list of Expense items by name
+     * Gets a list of Expense items by name (opt.)
      * @param name (optional) 
-     * @return Returns a Expense item list
+     * @return Returns an Expense item list
      */
     getExpenses(name: string | undefined): Observable<Expense[]> {
         let url_ = this.baseUrl + "/expenses";
@@ -503,10 +517,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Gets a list of Insurance items by name (opt.)
      * @param name (optional) 
-     * @return Success
+     * @return Returns an Insurance item list
      */
-    insurancesAll(name: string | undefined): Observable<Insurance[]> {
+    getInsurance(name: string | undefined): Observable<Insurance[]> {
         let url_ = this.baseUrl + "/insurances";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -520,11 +535,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processInsurancesAll(response_);
+            return this.processGetInsurance(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processInsurancesAll(response_ as any);
+                    return this.processGetInsurance(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Insurance[]>;
                 }
@@ -533,7 +548,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processInsurancesAll(response: HttpResponseBase): Observable<Insurance[]> {
+    protected processGetInsurance(response: HttpResponseBase): Observable<Insurance[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -559,14 +574,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or an empty name was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -577,10 +592,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Creates an Insurance item
      * @param body (optional) 
-     * @return Created
+     * @return Returns the new Insurance item
      */
-    insurancesPOST(body: Insurance | undefined): Observable<void> {
+    createInsurance(body: Insurance | undefined): Observable<Insurance> {
         let url_ = this.baseUrl + "/insurances";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -592,24 +608,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processInsurancesPOST(response_);
+            return this.processCreateInsurance(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processInsurancesPOST(response_ as any);
+                    return this.processCreateInsurance(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<Insurance>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<Insurance>;
         }));
     }
 
-    protected processInsurancesPOST(response: HttpResponseBase): Observable<void> {
+    protected processCreateInsurance(response: HttpResponseBase): Observable<Insurance> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -618,34 +635,38 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = Insurance.fromJS(resultData201);
+            return _observableOf(result201);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or mandatory properties are empty", status, _responseText, _headers, result400);
             }));
         } else if (status === 409) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result409: any = null;
             let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result409 = ProblemDetails.fromJS(resultData409);
-            return throwException("Conflict", status, _responseText, _headers, result409);
+            return throwException("If the item already exists", status, _responseText, _headers, result409);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<Insurance>(null as any);
     }
 
     /**
-     * @return Success
+     * Gets an Insurance item by id
+     * @return Returns an Insurance item
      */
-    insurancesGET(id: string): Observable<Insurance> {
+    getInsuranceById(id: string): Observable<Insurance> {
         let url_ = this.baseUrl + "/insurances/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -661,11 +682,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processInsurancesGET(response_);
+            return this.processGetInsuranceById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processInsurancesGET(response_ as any);
+                    return this.processGetInsuranceById(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Insurance>;
                 }
@@ -674,7 +695,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processInsurancesGET(response: HttpResponseBase): Observable<Insurance> {
+    protected processGetInsuranceById(response: HttpResponseBase): Observable<Insurance> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -693,14 +714,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or an empty id was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -711,10 +732,12 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * @param body (optional) 
-     * @return Success
+     * Updates an Insurance item
+     * @param id Id of item to update
+     * @param body (optional) New Insurance content
+     * @return Returns the UpdateResult
      */
-    insurancesPUT(id: string, body: Insurance | undefined): Observable<void> {
+    updateInsurance(id: string, body: Insurance | undefined): Observable<UpdateResult> {
         let url_ = this.baseUrl + "/insurances/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -729,24 +752,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processInsurancesPUT(response_);
+            return this.processUpdateInsurance(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processInsurancesPUT(response_ as any);
+                    return this.processUpdateInsurance(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<UpdateResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<UpdateResult>;
         }));
     }
 
-    protected processInsurancesPUT(response: HttpResponseBase): Observable<void> {
+    protected processUpdateInsurance(response: HttpResponseBase): Observable<UpdateResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -755,34 +779,39 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UpdateResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<UpdateResult>(null as any);
     }
 
     /**
-     * @return Success
+     * Deletes an Insurance item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
      */
-    insurancesDELETE(id: string): Observable<void> {
+    deleteInsurance(id: string): Observable<DeleteResult> {
         let url_ = this.baseUrl + "/insurances/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -793,24 +822,25 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processInsurancesDELETE(response_);
+            return this.processDeleteInsurance(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processInsurancesDELETE(response_ as any);
+                    return this.processDeleteInsurance(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<DeleteResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<DeleteResult>;
         }));
     }
 
-    protected processInsurancesDELETE(response: HttpResponseBase): Observable<void> {
+    protected processDeleteInsurance(response: HttpResponseBase): Observable<DeleteResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -819,34 +849,38 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<DeleteResult>(null as any);
     }
 
     /**
-     * @return Success
+     * Gets a list of Pension items
+     * @return Returns all Pension items
      */
-    pensionsAll(): Observable<Pension[]> {
+    getPensions(): Observable<Pension[]> {
         let url_ = this.baseUrl + "/pensions";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -859,11 +893,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processPensionsAll(response_);
+            return this.processGetPensions(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processPensionsAll(response_ as any);
+                    return this.processGetPensions(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Pension[]>;
                 }
@@ -872,7 +906,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processPensionsAll(response: HttpResponseBase): Observable<Pension[]> {
+    protected processGetPensions(response: HttpResponseBase): Observable<Pension[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -898,14 +932,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If there are no items found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -916,10 +950,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Creates a Pension item
      * @param body (optional) 
-     * @return Created
+     * @return Returns the new Pension item
      */
-    pensionsPOST(body: Pension | undefined): Observable<void> {
+    createPension(body: Pension | undefined): Observable<Pension> {
         let url_ = this.baseUrl + "/pensions";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -931,24 +966,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processPensionsPOST(response_);
+            return this.processCreatePension(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processPensionsPOST(response_ as any);
+                    return this.processCreatePension(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<Pension>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<Pension>;
         }));
     }
 
-    protected processPensionsPOST(response: HttpResponseBase): Observable<void> {
+    protected processCreatePension(response: HttpResponseBase): Observable<Pension> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -957,34 +993,38 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = Pension.fromJS(resultData201);
+            return _observableOf(result201);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or mandatory properties are empty", status, _responseText, _headers, result400);
             }));
         } else if (status === 409) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result409: any = null;
             let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result409 = ProblemDetails.fromJS(resultData409);
-            return throwException("Conflict", status, _responseText, _headers, result409);
+            return throwException("If the item already exists", status, _responseText, _headers, result409);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<Pension>(null as any);
     }
 
     /**
-     * @return Success
+     * Gets a Pension item by id
+     * @return Returns the Pension item
      */
-    pensionsGET(id: string): Observable<Pension> {
+    getPensionById(id: string): Observable<Pension> {
         let url_ = this.baseUrl + "/pensions/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1000,11 +1040,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processPensionsGET(response_);
+            return this.processGetPensionById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processPensionsGET(response_ as any);
+                    return this.processGetPensionById(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Pension>;
                 }
@@ -1013,7 +1053,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processPensionsGET(response: HttpResponseBase): Observable<Pension> {
+    protected processGetPensionById(response: HttpResponseBase): Observable<Pension> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1032,14 +1072,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or missing id", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1050,10 +1090,12 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * @param body (optional) 
-     * @return Success
+     * Updates a Pension item
+     * @param id Id of item to update
+     * @param body (optional) New Pension content
+     * @return Returns the UpdateResult
      */
-    pensionsPUT(id: string, body: Pension | undefined): Observable<void> {
+    updatePension(id: string, body: Pension | undefined): Observable<UpdateResult> {
         let url_ = this.baseUrl + "/pensions/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1068,24 +1110,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processPensionsPUT(response_);
+            return this.processUpdatePension(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processPensionsPUT(response_ as any);
+                    return this.processUpdatePension(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<UpdateResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<UpdateResult>;
         }));
     }
 
-    protected processPensionsPUT(response: HttpResponseBase): Observable<void> {
+    protected processUpdatePension(response: HttpResponseBase): Observable<UpdateResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1094,34 +1137,39 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UpdateResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<UpdateResult>(null as any);
     }
 
     /**
-     * @return Success
+     * Deletes a Pension item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
      */
-    pensionsDELETE(id: string): Observable<void> {
+    deletePension(id: string): Observable<DeleteResult> {
         let url_ = this.baseUrl + "/pensions/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -1132,24 +1180,25 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processPensionsDELETE(response_);
+            return this.processDeletePension(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processPensionsDELETE(response_ as any);
+                    return this.processDeletePension(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<DeleteResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<DeleteResult>;
         }));
     }
 
-    protected processPensionsDELETE(response: HttpResponseBase): Observable<void> {
+    protected processDeletePension(response: HttpResponseBase): Observable<DeleteResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -1158,28 +1207,31 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<DeleteResult>(null as any);
     }
 
     /**
