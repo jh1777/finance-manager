@@ -1,20 +1,16 @@
 import { CurrencyPipe } from '@angular/common';
-import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component } from '@angular/core';
 import { getIconWithName } from 'src/app/data/iconFactory';
-import { ApiService } from 'src/app/services/api.service';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { pipe, timer } from 'rxjs';
+import { timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
-import { Button, ITableCell, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell, NumberTableCell } from 'src/app/ui';
+import { Button, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell, NumberTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
 import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
-import { tap } from 'rxjs/operators';
 import { FinanceApiService, Salary } from 'src/services/finance-api.service';
-
-
 
 @Component({
   selector: 'app-salary',
@@ -57,13 +53,12 @@ export class SalaryComponent {
 
   public newSalaryEntry = new Salary({
     arbeitgeber: 'Daimler Truck AG',
-    wochenstunden: 35,
+    wochenstunden: 40,
     jahr: new Date().getFullYear(),
     monat: new Date().getMonth()
   });
 
   constructor(
-    private api: ApiService,
     private navigationService: NavigationService,
     private modalService: ModalService,
     private financeApi: FinanceApiService,
@@ -240,24 +235,6 @@ export class SalaryComponent {
         this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
       }
     );
-    /*
-    this.api.createEntry<Salary>([item]).subscribe(
-        res => {
-          var response = <HttpResponse<Array<Salary>>>res;
-          this.showSalaryResultWithTimer(`POST Salary Eintrag ${item.jahr}/${item.monat}: HTTP Code ${response.status}`);
-
-          if (res.ok) {
-            this.resetNewSalaryItem();
-            this.toggleNewEntryForm();
-            this.updateEntriesV2();
-          }
-        },
-        (err: HttpErrorResponse) => {
-          this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
-        }
-      );
-      */
-
   }
 
   private resetNewSalaryItem() {
@@ -278,19 +255,6 @@ export class SalaryComponent {
           this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
       });
-      /*
-      // Call the API to delete the entry
-      this.api.setService("salaries");
-      this.api.deleteEntryById<Salary>($event.id).subscribe({
-        next: (res) => {
-          this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.jahr}/${$event.monat} Deletion: HTTP Code ${res.status} ${res.statusText}`);
-          this.updateEntriesV2();
-        },
-        error: (err) => {
-          this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
-        }
-      });
-      */
     }
     this.closeModal('delete-confirmation');
   }

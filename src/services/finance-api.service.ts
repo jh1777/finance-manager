@@ -17,28 +17,35 @@ export const FINANCE_API_BACKEND_BASE_URL = new InjectionToken<string>('FINANCE_
 
 export interface IFinanceApiService {
     /**
+     * Gets a list of Expense items by name
      * @param name (optional) 
-     * @return Success
+     * @return Returns a Expense item list
      */
-    expensesAll(name: string | undefined): Observable<Expense[]>;
+    getExpenses(name: string | undefined): Observable<Expense[]>;
     /**
+     * Creates an Expense item
      * @param body (optional) 
-     * @return Created
+     * @return Returns the new Expense item
      */
-    expensesPOST(body: Expense | undefined): Observable<void>;
+    createExpense(body: Expense | undefined): Observable<Expense>;
     /**
-     * @return Success
+     * Gets an Expense item by id
+     * @return Returns an Expense item
      */
-    expensesGET(id: string): Observable<Expense>;
+    getExpenseById(id: string): Observable<Expense>;
     /**
-     * @param body (optional) 
-     * @return Success
+     * Updates an Expense item
+     * @param id Id of item to update
+     * @param body (optional) New Expense content
+     * @return Returns the UpdateResult
      */
-    expensesPUT(id: string, body: Expense | undefined): Observable<void>;
+    updateExpense(id: string, body: Expense | undefined): Observable<UpdateResult>;
     /**
-     * @return Success
+     * Deletes an Expense item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
      */
-    expensesDELETE(id: string): Observable<void>;
+    deleteExpense(id: string): Observable<DeleteResult>;
     /**
      * @param name (optional) 
      * @return Success
@@ -93,13 +100,13 @@ export interface IFinanceApiService {
      * Updates an existing Salary item
      * @param id Id of item to update
      * @param body (optional) New Salary content
-     * @return Success
+     * @return Returns the UpdateResult
      */
     updateSalary(id: string, body: Salary | undefined): Observable<void>;
     /**
-     * Deleted an existing Salary item
+     * Deleted a Salary item
      * @param id Id of item to delete
-     * @return Success
+     * @return Returns the DeleteResult
      */
     deleteSalary(id: string): Observable<DeleteResult>;
     /**
@@ -136,10 +143,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Gets a list of Expense items by name
      * @param name (optional) 
-     * @return Success
+     * @return Returns a Expense item list
      */
-    expensesAll(name: string | undefined): Observable<Expense[]> {
+    getExpenses(name: string | undefined): Observable<Expense[]> {
         let url_ = this.baseUrl + "/expenses";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -153,11 +161,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExpensesAll(response_);
+            return this.processGetExpenses(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExpensesAll(response_ as any);
+                    return this.processGetExpenses(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Expense[]>;
                 }
@@ -166,7 +174,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processExpensesAll(response: HttpResponseBase): Observable<Expense[]> {
+    protected processGetExpenses(response: HttpResponseBase): Observable<Expense[]> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -192,14 +200,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or an empty name was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -210,10 +218,11 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
+     * Creates an Expense item
      * @param body (optional) 
-     * @return Created
+     * @return Returns the new Expense item
      */
-    expensesPOST(body: Expense | undefined): Observable<void> {
+    createExpense(body: Expense | undefined): Observable<Expense> {
         let url_ = this.baseUrl + "/expenses";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -225,24 +234,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExpensesPOST(response_);
+            return this.processCreateExpense(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExpensesPOST(response_ as any);
+                    return this.processCreateExpense(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<Expense>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<Expense>;
         }));
     }
 
-    protected processExpensesPOST(response: HttpResponseBase): Observable<void> {
+    protected processCreateExpense(response: HttpResponseBase): Observable<Expense> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -251,34 +261,38 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 201) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result201: any = null;
+            let resultData201 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result201 = Expense.fromJS(resultData201);
+            return _observableOf(result201);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or mandatory properties are empty", status, _responseText, _headers, result400);
             }));
         } else if (status === 409) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result409: any = null;
             let resultData409 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result409 = ProblemDetails.fromJS(resultData409);
-            return throwException("Conflict", status, _responseText, _headers, result409);
+            return throwException("If the item already exists", status, _responseText, _headers, result409);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<Expense>(null as any);
     }
 
     /**
-     * @return Success
+     * Gets an Expense item by id
+     * @return Returns an Expense item
      */
-    expensesGET(id: string): Observable<Expense> {
+    getExpenseById(id: string): Observable<Expense> {
         let url_ = this.baseUrl + "/expenses/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -294,11 +308,11 @@ export class FinanceApiService implements IFinanceApiService {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExpensesGET(response_);
+            return this.processGetExpenseById(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExpensesGET(response_ as any);
+                    return this.processGetExpenseById(response_ as any);
                 } catch (e) {
                     return _observableThrow(e) as any as Observable<Expense>;
                 }
@@ -307,7 +321,7 @@ export class FinanceApiService implements IFinanceApiService {
         }));
     }
 
-    protected processExpensesGET(response: HttpResponseBase): Observable<Expense> {
+    protected processGetExpenseById(response: HttpResponseBase): Observable<Expense> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -326,14 +340,14 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error or an empty id was specified", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -344,10 +358,12 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * @param body (optional) 
-     * @return Success
+     * Updates an Expense item
+     * @param id Id of item to update
+     * @param body (optional) New Expense content
+     * @return Returns the UpdateResult
      */
-    expensesPUT(id: string, body: Expense | undefined): Observable<void> {
+    updateExpense(id: string, body: Expense | undefined): Observable<UpdateResult> {
         let url_ = this.baseUrl + "/expenses/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -362,24 +378,25 @@ export class FinanceApiService implements IFinanceApiService {
             responseType: "blob",
             headers: new HttpHeaders({
                 "Content-Type": "application/json",
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExpensesPUT(response_);
+            return this.processUpdateExpense(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExpensesPUT(response_ as any);
+                    return this.processUpdateExpense(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<UpdateResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<UpdateResult>;
         }));
     }
 
-    protected processExpensesPUT(response: HttpResponseBase): Observable<void> {
+    protected processUpdateExpense(response: HttpResponseBase): Observable<UpdateResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -388,34 +405,39 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = UpdateResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<UpdateResult>(null as any);
     }
 
     /**
-     * @return Success
+     * Deletes an Expense item
+     * @param id Id of item to delete
+     * @return Returns the DeleteResult
      */
-    expensesDELETE(id: string): Observable<void> {
+    deleteExpense(id: string): Observable<DeleteResult> {
         let url_ = this.baseUrl + "/expenses/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -426,24 +448,25 @@ export class FinanceApiService implements IFinanceApiService {
             observe: "response",
             responseType: "blob",
             headers: new HttpHeaders({
+                "Accept": "text/plain"
             })
         };
 
         return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processExpensesDELETE(response_);
+            return this.processDeleteExpense(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processExpensesDELETE(response_ as any);
+                    return this.processDeleteExpense(response_ as any);
                 } catch (e) {
-                    return _observableThrow(e) as any as Observable<void>;
+                    return _observableThrow(e) as any as Observable<DeleteResult>;
                 }
             } else
-                return _observableThrow(response_) as any as Observable<void>;
+                return _observableThrow(response_) as any as Observable<DeleteResult>;
         }));
     }
 
-    protected processExpensesDELETE(response: HttpResponseBase): Observable<void> {
+    protected processDeleteExpense(response: HttpResponseBase): Observable<DeleteResult> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -452,28 +475,31 @@ export class FinanceApiService implements IFinanceApiService {
         let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DeleteResult.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status === 404) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("Not Found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             let result400: any = null;
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
-            return throwException("Bad Request", status, _responseText, _headers, result400);
+            return throwException("If there was an error", status, _responseText, _headers, result400);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             }));
         }
-        return _observableOf<void>(null as any);
+        return _observableOf<DeleteResult>(null as any);
     }
 
     /**
@@ -1229,7 +1255,7 @@ export class FinanceApiService implements IFinanceApiService {
      * Updates an existing Salary item
      * @param id Id of item to update
      * @param body (optional) New Salary content
-     * @return Success
+     * @return Returns the UpdateResult
      */
     updateSalary(id: string, body: Salary | undefined): Observable<void> {
         let url_ = this.baseUrl + "/salaries/{id}";
@@ -1279,7 +1305,7 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("If the Salary was not found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1287,10 +1313,6 @@ export class FinanceApiService implements IFinanceApiService {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
             return throwException("If there was an error", status, _responseText, _headers, result400);
-            }));
-        } else if (status === 201) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return _observableOf<void>(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1301,9 +1323,9 @@ export class FinanceApiService implements IFinanceApiService {
     }
 
     /**
-     * Deleted an existing Salary item
+     * Deleted a Salary item
      * @param id Id of item to delete
-     * @return Success
+     * @return Returns the DeleteResult
      */
     deleteSalary(id: string): Observable<DeleteResult> {
         let url_ = this.baseUrl + "/salaries/{id}";
@@ -1353,7 +1375,7 @@ export class FinanceApiService implements IFinanceApiService {
             let result404: any = null;
             let resultData404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result404 = ProblemDetails.fromJS(resultData404);
-            return throwException("If the Salary was not found", status, _responseText, _headers, result404);
+            return throwException("If the item was not found", status, _responseText, _headers, result404);
             }));
         } else if (status === 400) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1361,10 +1383,6 @@ export class FinanceApiService implements IFinanceApiService {
             let resultData400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result400 = ProblemDetails.fromJS(resultData400);
             return throwException("If there was an error", status, _responseText, _headers, result400);
-            }));
-        } else if (status === 201) {
-            return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
-            return throwException("Returns the DeleteResult", status, _responseText, _headers);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap(_responseText => {
@@ -1599,6 +1617,3776 @@ export class FinanceApiService implements IFinanceApiService {
     }
 }
 
+export class BsonBinaryData implements IBsonBinaryData {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    bsonType?: BsonType;
+    bytes?: string | undefined;
+    guidRepresentation?: GuidRepresentation;
+    readonly rawValue?: any | undefined;
+    subType?: BsonBinarySubType;
+
+    constructor(data?: IBsonBinaryData) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            this.bsonType = _data["bsonType"];
+            this.bytes = _data["bytes"];
+            this.guidRepresentation = _data["guidRepresentation"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.subType = _data["subType"];
+        }
+    }
+
+    static fromJS(data: any): BsonBinaryData {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonBinaryData();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["bsonType"] = this.bsonType;
+        data["bytes"] = this.bytes;
+        data["guidRepresentation"] = this.guidRepresentation;
+        data["rawValue"] = this.rawValue;
+        data["subType"] = this.subType;
+        return data;
+    }
+}
+
+export interface IBsonBinaryData {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    bsonType?: BsonType;
+    bytes?: string | undefined;
+    guidRepresentation?: GuidRepresentation;
+    rawValue?: any | undefined;
+    subType?: BsonBinarySubType;
+}
+
+export enum BsonBinarySubType {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _128 = 128,
+}
+
+export class BsonDateTime implements IBsonDateTime {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    bsonType?: BsonType;
+    readonly isValidDateTime?: boolean;
+    readonly millisecondsSinceEpoch?: number;
+    readonly rawValue?: any | undefined;
+    value?: Date;
+
+    constructor(data?: IBsonDateTime) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            this.bsonType = _data["bsonType"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).millisecondsSinceEpoch = _data["millisecondsSinceEpoch"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.value = _data["value"] ? new Date(_data["value"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BsonDateTime {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonDateTime();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["bsonType"] = this.bsonType;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["millisecondsSinceEpoch"] = this.millisecondsSinceEpoch;
+        data["rawValue"] = this.rawValue;
+        data["value"] = this.value ? this.value.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBsonDateTime {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    bsonType?: BsonType;
+    isValidDateTime?: boolean;
+    millisecondsSinceEpoch?: number;
+    rawValue?: any | undefined;
+    value?: Date;
+}
+
+export class BsonElement implements IBsonElement {
+    name?: string | undefined;
+    value?: BsonValue;
+
+    constructor(data?: IBsonElement) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.name = _data["name"];
+            this.value = _data["value"] ? BsonValue.fromJS(_data["value"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BsonElement {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonElement();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["name"] = this.name;
+        data["value"] = this.value ? this.value.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IBsonElement {
+    name?: string | undefined;
+    value?: BsonValue;
+}
+
+export class BsonJavaScript implements IBsonJavaScript {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+    code?: string | undefined;
+
+    constructor(data?: IBsonJavaScript) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+            this.code = _data["code"];
+        }
+    }
+
+    static fromJS(data: any): BsonJavaScript {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonJavaScript();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        data["code"] = this.code;
+        return data;
+    }
+}
+
+export interface IBsonJavaScript {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+    code?: string | undefined;
+}
+
+export class BsonJavaScriptWithScope implements IBsonJavaScriptWithScope {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    code?: string | undefined;
+    bsonType?: BsonType;
+    scope?: BsonElement[] | undefined;
+
+    constructor(data?: IBsonJavaScriptWithScope) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.code = _data["code"];
+            this.bsonType = _data["bsonType"];
+            if (Array.isArray(_data["scope"])) {
+                this.scope = [] as any;
+                for (let item of _data["scope"])
+                    this.scope!.push(BsonElement.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): BsonJavaScriptWithScope {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonJavaScriptWithScope();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["code"] = this.code;
+        data["bsonType"] = this.bsonType;
+        if (Array.isArray(this.scope)) {
+            data["scope"] = [];
+            for (let item of this.scope)
+                data["scope"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IBsonJavaScriptWithScope {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    code?: string | undefined;
+    bsonType?: BsonType;
+    scope?: BsonElement[] | undefined;
+}
+
+export class BsonMaxKey implements IBsonMaxKey {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+
+    constructor(data?: IBsonMaxKey) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+        }
+    }
+
+    static fromJS(data: any): BsonMaxKey {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonMaxKey();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        return data;
+    }
+}
+
+export interface IBsonMaxKey {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+}
+
+export class BsonMinKey implements IBsonMinKey {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+
+    constructor(data?: IBsonMinKey) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+        }
+    }
+
+    static fromJS(data: any): BsonMinKey {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonMinKey();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        return data;
+    }
+}
+
+export interface IBsonMinKey {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+}
+
+export class BsonNull implements IBsonNull {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+
+    constructor(data?: IBsonNull) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+        }
+    }
+
+    static fromJS(data: any): BsonNull {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonNull();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        return data;
+    }
+}
+
+export interface IBsonNull {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+}
+
+export class BsonRegularExpression implements IBsonRegularExpression {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+    pattern?: string | undefined;
+    readonly options?: string | undefined;
+
+    constructor(data?: IBsonRegularExpression) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+            this.pattern = _data["pattern"];
+            (<any>this).options = _data["options"];
+        }
+    }
+
+    static fromJS(data: any): BsonRegularExpression {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonRegularExpression();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        data["pattern"] = this.pattern;
+        data["options"] = this.options;
+        return data;
+    }
+}
+
+export interface IBsonRegularExpression {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+    pattern?: string | undefined;
+    options?: string | undefined;
+}
+
+export class BsonSymbol implements IBsonSymbol {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+    readonly name?: string | undefined;
+
+    constructor(data?: IBsonSymbol) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+            (<any>this).name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): BsonSymbol {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonSymbol();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IBsonSymbol {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+    name?: string | undefined;
+}
+
+export class BsonTimestamp implements IBsonTimestamp {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+    value?: number;
+    readonly increment?: number;
+    readonly timestamp?: number;
+
+    constructor(data?: IBsonTimestamp) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+            this.value = _data["value"];
+            (<any>this).increment = _data["increment"];
+            (<any>this).timestamp = _data["timestamp"];
+        }
+    }
+
+    static fromJS(data: any): BsonTimestamp {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonTimestamp();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        data["value"] = this.value;
+        data["increment"] = this.increment;
+        data["timestamp"] = this.timestamp;
+        return data;
+    }
+}
+
+export interface IBsonTimestamp {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+    value?: number;
+    increment?: number;
+    timestamp?: number;
+}
+
+export enum BsonType {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+    _5 = 5,
+    _6 = 6,
+    _7 = 7,
+    _8 = 8,
+    _9 = 9,
+    _10 = 10,
+    _11 = 11,
+    _13 = 13,
+    _14 = 14,
+    _15 = 15,
+    _16 = 16,
+    _17 = 17,
+    _18 = 18,
+    _19 = 19,
+    _127 = 127,
+    _255 = 255,
+}
+
+export class BsonUndefined implements IBsonUndefined {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+    bsonType?: BsonType;
+
+    constructor(data?: IBsonUndefined) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+            this.bsonType = _data["bsonType"];
+        }
+    }
+
+    static fromJS(data: any): BsonUndefined {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonUndefined();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        data["bsonType"] = this.bsonType;
+        return data;
+    }
+}
+
+export interface IBsonUndefined {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+    bsonType?: BsonType;
+}
+
+export class BsonValue implements IBsonValue {
+    readonly asBoolean?: boolean;
+    readonly asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    readonly asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    readonly asByteArray?: string | undefined;
+    readonly asDateTime?: Date;
+    readonly asDecimal?: number;
+    asDecimal128?: Decimal128;
+    readonly asDouble?: number;
+    readonly asGuid?: string;
+    readonly asInt32?: number;
+    readonly asLocalTime?: Date;
+    readonly asInt64?: number;
+    readonly asNullableBoolean?: boolean | undefined;
+    readonly asNullableDateTime?: Date | undefined;
+    readonly asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    readonly asNullableDouble?: number | undefined;
+    readonly asNullableGuid?: string | undefined;
+    readonly asNullableInt32?: number | undefined;
+    readonly asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    readonly asString?: string | undefined;
+    readonly asUniversalTime?: Date;
+    bsonType?: BsonType;
+    readonly isBoolean?: boolean;
+    readonly isBsonArray?: boolean;
+    readonly isBsonBinaryData?: boolean;
+    readonly isBsonDateTime?: boolean;
+    readonly isBsonDocument?: boolean;
+    readonly isBsonJavaScript?: boolean;
+    readonly isBsonJavaScriptWithScope?: boolean;
+    readonly isBsonMaxKey?: boolean;
+    readonly isBsonMinKey?: boolean;
+    readonly isBsonNull?: boolean;
+    readonly isBsonRegularExpression?: boolean;
+    readonly isBsonSymbol?: boolean;
+    readonly isBsonTimestamp?: boolean;
+    readonly isBsonUndefined?: boolean;
+    readonly isDateTime?: boolean;
+    readonly isDecimal128?: boolean;
+    readonly isDouble?: boolean;
+    readonly isGuid?: boolean;
+    readonly isInt32?: boolean;
+    readonly isInt64?: boolean;
+    readonly isNumeric?: boolean;
+    readonly isObjectId?: boolean;
+    readonly isString?: boolean;
+    readonly isValidDateTime?: boolean;
+    readonly rawValue?: any | undefined;
+
+    constructor(data?: IBsonValue) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).asBoolean = _data["asBoolean"];
+            if (Array.isArray(_data["asBsonArray"])) {
+                (<any>this).asBsonArray = [] as any;
+                for (let item of _data["asBsonArray"])
+                    (<any>this).asBsonArray!.push(BsonValue.fromJS(item));
+            }
+            this.asBsonBinaryData = _data["asBsonBinaryData"] ? BsonBinaryData.fromJS(_data["asBsonBinaryData"]) : <any>undefined;
+            this.asBsonDateTime = _data["asBsonDateTime"] ? BsonDateTime.fromJS(_data["asBsonDateTime"]) : <any>undefined;
+            if (Array.isArray(_data["asBsonDocument"])) {
+                (<any>this).asBsonDocument = [] as any;
+                for (let item of _data["asBsonDocument"])
+                    (<any>this).asBsonDocument!.push(BsonElement.fromJS(item));
+            }
+            this.asBsonJavaScript = _data["asBsonJavaScript"] ? BsonJavaScript.fromJS(_data["asBsonJavaScript"]) : <any>undefined;
+            this.asBsonJavaScriptWithScope = _data["asBsonJavaScriptWithScope"] ? BsonJavaScriptWithScope.fromJS(_data["asBsonJavaScriptWithScope"]) : <any>undefined;
+            this.asBsonMaxKey = _data["asBsonMaxKey"] ? BsonMaxKey.fromJS(_data["asBsonMaxKey"]) : <any>undefined;
+            this.asBsonMinKey = _data["asBsonMinKey"] ? BsonMinKey.fromJS(_data["asBsonMinKey"]) : <any>undefined;
+            this.asBsonNull = _data["asBsonNull"] ? BsonNull.fromJS(_data["asBsonNull"]) : <any>undefined;
+            this.asBsonRegularExpression = _data["asBsonRegularExpression"] ? BsonRegularExpression.fromJS(_data["asBsonRegularExpression"]) : <any>undefined;
+            this.asBsonSymbol = _data["asBsonSymbol"] ? BsonSymbol.fromJS(_data["asBsonSymbol"]) : <any>undefined;
+            this.asBsonTimestamp = _data["asBsonTimestamp"] ? BsonTimestamp.fromJS(_data["asBsonTimestamp"]) : <any>undefined;
+            this.asBsonUndefined = _data["asBsonUndefined"] ? BsonUndefined.fromJS(_data["asBsonUndefined"]) : <any>undefined;
+            this.asBsonValue = _data["asBsonValue"] ? BsonValue.fromJS(_data["asBsonValue"]) : <any>undefined;
+            (<any>this).asByteArray = _data["asByteArray"];
+            (<any>this).asDateTime = _data["asDateTime"] ? new Date(_data["asDateTime"].toString()) : <any>undefined;
+            (<any>this).asDecimal = _data["asDecimal"];
+            this.asDecimal128 = _data["asDecimal128"] ? Decimal128.fromJS(_data["asDecimal128"]) : <any>undefined;
+            (<any>this).asDouble = _data["asDouble"];
+            (<any>this).asGuid = _data["asGuid"];
+            (<any>this).asInt32 = _data["asInt32"];
+            (<any>this).asLocalTime = _data["asLocalTime"] ? new Date(_data["asLocalTime"].toString()) : <any>undefined;
+            (<any>this).asInt64 = _data["asInt64"];
+            (<any>this).asNullableBoolean = _data["asNullableBoolean"];
+            (<any>this).asNullableDateTime = _data["asNullableDateTime"] ? new Date(_data["asNullableDateTime"].toString()) : <any>undefined;
+            (<any>this).asNullableDecimal = _data["asNullableDecimal"];
+            this.asNullableDecimal128 = _data["asNullableDecimal128"] ? Decimal128.fromJS(_data["asNullableDecimal128"]) : <any>undefined;
+            (<any>this).asNullableDouble = _data["asNullableDouble"];
+            (<any>this).asNullableGuid = _data["asNullableGuid"];
+            (<any>this).asNullableInt32 = _data["asNullableInt32"];
+            (<any>this).asNullableInt64 = _data["asNullableInt64"];
+            this.asNullableObjectId = _data["asNullableObjectId"] ? ObjectId.fromJS(_data["asNullableObjectId"]) : <any>undefined;
+            this.asObjectId = _data["asObjectId"] ? ObjectId.fromJS(_data["asObjectId"]) : <any>undefined;
+            this.asRegex = _data["asRegex"] ? Regex.fromJS(_data["asRegex"]) : <any>undefined;
+            (<any>this).asString = _data["asString"];
+            (<any>this).asUniversalTime = _data["asUniversalTime"] ? new Date(_data["asUniversalTime"].toString()) : <any>undefined;
+            this.bsonType = _data["bsonType"];
+            (<any>this).isBoolean = _data["isBoolean"];
+            (<any>this).isBsonArray = _data["isBsonArray"];
+            (<any>this).isBsonBinaryData = _data["isBsonBinaryData"];
+            (<any>this).isBsonDateTime = _data["isBsonDateTime"];
+            (<any>this).isBsonDocument = _data["isBsonDocument"];
+            (<any>this).isBsonJavaScript = _data["isBsonJavaScript"];
+            (<any>this).isBsonJavaScriptWithScope = _data["isBsonJavaScriptWithScope"];
+            (<any>this).isBsonMaxKey = _data["isBsonMaxKey"];
+            (<any>this).isBsonMinKey = _data["isBsonMinKey"];
+            (<any>this).isBsonNull = _data["isBsonNull"];
+            (<any>this).isBsonRegularExpression = _data["isBsonRegularExpression"];
+            (<any>this).isBsonSymbol = _data["isBsonSymbol"];
+            (<any>this).isBsonTimestamp = _data["isBsonTimestamp"];
+            (<any>this).isBsonUndefined = _data["isBsonUndefined"];
+            (<any>this).isDateTime = _data["isDateTime"];
+            (<any>this).isDecimal128 = _data["isDecimal128"];
+            (<any>this).isDouble = _data["isDouble"];
+            (<any>this).isGuid = _data["isGuid"];
+            (<any>this).isInt32 = _data["isInt32"];
+            (<any>this).isInt64 = _data["isInt64"];
+            (<any>this).isNumeric = _data["isNumeric"];
+            (<any>this).isObjectId = _data["isObjectId"];
+            (<any>this).isString = _data["isString"];
+            (<any>this).isValidDateTime = _data["isValidDateTime"];
+            (<any>this).rawValue = _data["rawValue"];
+        }
+    }
+
+    static fromJS(data: any): BsonValue {
+        data = typeof data === 'object' ? data : {};
+        let result = new BsonValue();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["asBoolean"] = this.asBoolean;
+        if (Array.isArray(this.asBsonArray)) {
+            data["asBsonArray"] = [];
+            for (let item of this.asBsonArray)
+                data["asBsonArray"].push(item.toJSON());
+        }
+        data["asBsonBinaryData"] = this.asBsonBinaryData ? this.asBsonBinaryData.toJSON() : <any>undefined;
+        data["asBsonDateTime"] = this.asBsonDateTime ? this.asBsonDateTime.toJSON() : <any>undefined;
+        if (Array.isArray(this.asBsonDocument)) {
+            data["asBsonDocument"] = [];
+            for (let item of this.asBsonDocument)
+                data["asBsonDocument"].push(item.toJSON());
+        }
+        data["asBsonJavaScript"] = this.asBsonJavaScript ? this.asBsonJavaScript.toJSON() : <any>undefined;
+        data["asBsonJavaScriptWithScope"] = this.asBsonJavaScriptWithScope ? this.asBsonJavaScriptWithScope.toJSON() : <any>undefined;
+        data["asBsonMaxKey"] = this.asBsonMaxKey ? this.asBsonMaxKey.toJSON() : <any>undefined;
+        data["asBsonMinKey"] = this.asBsonMinKey ? this.asBsonMinKey.toJSON() : <any>undefined;
+        data["asBsonNull"] = this.asBsonNull ? this.asBsonNull.toJSON() : <any>undefined;
+        data["asBsonRegularExpression"] = this.asBsonRegularExpression ? this.asBsonRegularExpression.toJSON() : <any>undefined;
+        data["asBsonSymbol"] = this.asBsonSymbol ? this.asBsonSymbol.toJSON() : <any>undefined;
+        data["asBsonTimestamp"] = this.asBsonTimestamp ? this.asBsonTimestamp.toJSON() : <any>undefined;
+        data["asBsonUndefined"] = this.asBsonUndefined ? this.asBsonUndefined.toJSON() : <any>undefined;
+        data["asBsonValue"] = this.asBsonValue ? this.asBsonValue.toJSON() : <any>undefined;
+        data["asByteArray"] = this.asByteArray;
+        data["asDateTime"] = this.asDateTime ? this.asDateTime.toISOString() : <any>undefined;
+        data["asDecimal"] = this.asDecimal;
+        data["asDecimal128"] = this.asDecimal128 ? this.asDecimal128.toJSON() : <any>undefined;
+        data["asDouble"] = this.asDouble;
+        data["asGuid"] = this.asGuid;
+        data["asInt32"] = this.asInt32;
+        data["asLocalTime"] = this.asLocalTime ? this.asLocalTime.toISOString() : <any>undefined;
+        data["asInt64"] = this.asInt64;
+        data["asNullableBoolean"] = this.asNullableBoolean;
+        data["asNullableDateTime"] = this.asNullableDateTime ? this.asNullableDateTime.toISOString() : <any>undefined;
+        data["asNullableDecimal"] = this.asNullableDecimal;
+        data["asNullableDecimal128"] = this.asNullableDecimal128 ? this.asNullableDecimal128.toJSON() : <any>undefined;
+        data["asNullableDouble"] = this.asNullableDouble;
+        data["asNullableGuid"] = this.asNullableGuid;
+        data["asNullableInt32"] = this.asNullableInt32;
+        data["asNullableInt64"] = this.asNullableInt64;
+        data["asNullableObjectId"] = this.asNullableObjectId ? this.asNullableObjectId.toJSON() : <any>undefined;
+        data["asObjectId"] = this.asObjectId ? this.asObjectId.toJSON() : <any>undefined;
+        data["asRegex"] = this.asRegex ? this.asRegex.toJSON() : <any>undefined;
+        data["asString"] = this.asString;
+        data["asUniversalTime"] = this.asUniversalTime ? this.asUniversalTime.toISOString() : <any>undefined;
+        data["bsonType"] = this.bsonType;
+        data["isBoolean"] = this.isBoolean;
+        data["isBsonArray"] = this.isBsonArray;
+        data["isBsonBinaryData"] = this.isBsonBinaryData;
+        data["isBsonDateTime"] = this.isBsonDateTime;
+        data["isBsonDocument"] = this.isBsonDocument;
+        data["isBsonJavaScript"] = this.isBsonJavaScript;
+        data["isBsonJavaScriptWithScope"] = this.isBsonJavaScriptWithScope;
+        data["isBsonMaxKey"] = this.isBsonMaxKey;
+        data["isBsonMinKey"] = this.isBsonMinKey;
+        data["isBsonNull"] = this.isBsonNull;
+        data["isBsonRegularExpression"] = this.isBsonRegularExpression;
+        data["isBsonSymbol"] = this.isBsonSymbol;
+        data["isBsonTimestamp"] = this.isBsonTimestamp;
+        data["isBsonUndefined"] = this.isBsonUndefined;
+        data["isDateTime"] = this.isDateTime;
+        data["isDecimal128"] = this.isDecimal128;
+        data["isDouble"] = this.isDouble;
+        data["isGuid"] = this.isGuid;
+        data["isInt32"] = this.isInt32;
+        data["isInt64"] = this.isInt64;
+        data["isNumeric"] = this.isNumeric;
+        data["isObjectId"] = this.isObjectId;
+        data["isString"] = this.isString;
+        data["isValidDateTime"] = this.isValidDateTime;
+        data["rawValue"] = this.rawValue;
+        return data;
+    }
+}
+
+export interface IBsonValue {
+    asBoolean?: boolean;
+    asBsonArray?: BsonValue[] | undefined;
+    asBsonBinaryData?: BsonBinaryData;
+    asBsonDateTime?: BsonDateTime;
+    asBsonDocument?: BsonElement[] | undefined;
+    asBsonJavaScript?: BsonJavaScript;
+    asBsonJavaScriptWithScope?: BsonJavaScriptWithScope;
+    asBsonMaxKey?: BsonMaxKey;
+    asBsonMinKey?: BsonMinKey;
+    asBsonNull?: BsonNull;
+    asBsonRegularExpression?: BsonRegularExpression;
+    asBsonSymbol?: BsonSymbol;
+    asBsonTimestamp?: BsonTimestamp;
+    asBsonUndefined?: BsonUndefined;
+    asBsonValue?: BsonValue;
+    asByteArray?: string | undefined;
+    asDateTime?: Date;
+    asDecimal?: number;
+    asDecimal128?: Decimal128;
+    asDouble?: number;
+    asGuid?: string;
+    asInt32?: number;
+    asLocalTime?: Date;
+    asInt64?: number;
+    asNullableBoolean?: boolean | undefined;
+    asNullableDateTime?: Date | undefined;
+    asNullableDecimal?: number | undefined;
+    asNullableDecimal128?: Decimal128;
+    asNullableDouble?: number | undefined;
+    asNullableGuid?: string | undefined;
+    asNullableInt32?: number | undefined;
+    asNullableInt64?: number | undefined;
+    asNullableObjectId?: ObjectId;
+    asObjectId?: ObjectId;
+    asRegex?: Regex;
+    asString?: string | undefined;
+    asUniversalTime?: Date;
+    bsonType?: BsonType;
+    isBoolean?: boolean;
+    isBsonArray?: boolean;
+    isBsonBinaryData?: boolean;
+    isBsonDateTime?: boolean;
+    isBsonDocument?: boolean;
+    isBsonJavaScript?: boolean;
+    isBsonJavaScriptWithScope?: boolean;
+    isBsonMaxKey?: boolean;
+    isBsonMinKey?: boolean;
+    isBsonNull?: boolean;
+    isBsonRegularExpression?: boolean;
+    isBsonSymbol?: boolean;
+    isBsonTimestamp?: boolean;
+    isBsonUndefined?: boolean;
+    isDateTime?: boolean;
+    isDecimal128?: boolean;
+    isDouble?: boolean;
+    isGuid?: boolean;
+    isInt32?: boolean;
+    isInt64?: boolean;
+    isNumeric?: boolean;
+    isObjectId?: boolean;
+    isString?: boolean;
+    isValidDateTime?: boolean;
+    rawValue?: any | undefined;
+}
+
+export class Decimal128 implements IDecimal128 {
+
+    constructor(data?: IDecimal128) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+    }
+
+    static fromJS(data: any): Decimal128 {
+        data = typeof data === 'object' ? data : {};
+        let result = new Decimal128();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        return data;
+    }
+}
+
+export interface IDecimal128 {
+}
+
 export class DeleteResult implements IDeleteResult {
     readonly deletedCount?: number;
     readonly isAcknowledged?: boolean;
@@ -1723,6 +5511,14 @@ export interface IExpense {
     ende?: Date | undefined;
 }
 
+export enum GuidRepresentation {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+}
+
 export class Insurance implements IInsurance {
     id?: string | undefined;
     legacyId?: number | undefined;
@@ -1785,6 +5581,58 @@ export interface IInsurance {
     rueckkaufswert?: number | undefined;
     ausgabenId?: number | undefined;
     datum?: Date | undefined;
+}
+
+export class ObjectId implements IObjectId {
+    readonly timestamp?: number;
+    readonly machine?: number;
+    readonly pid?: number;
+    readonly increment?: number;
+    readonly creationTime?: Date;
+
+    constructor(data?: IObjectId) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).timestamp = _data["timestamp"];
+            (<any>this).machine = _data["machine"];
+            (<any>this).pid = _data["pid"];
+            (<any>this).increment = _data["increment"];
+            (<any>this).creationTime = _data["creationTime"] ? new Date(_data["creationTime"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): ObjectId {
+        data = typeof data === 'object' ? data : {};
+        let result = new ObjectId();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["timestamp"] = this.timestamp;
+        data["machine"] = this.machine;
+        data["pid"] = this.pid;
+        data["increment"] = this.increment;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IObjectId {
+    timestamp?: number;
+    machine?: number;
+    pid?: number;
+    increment?: number;
+    creationTime?: Date;
 }
 
 export class Pension implements IPension {
@@ -1927,6 +5775,63 @@ export interface IProblemDetails {
     instance?: string | undefined;
 }
 
+export class Regex implements IRegex {
+    options?: RegexOptions;
+    readonly rightToLeft?: boolean;
+    matchTimeout?: TimeSpan;
+
+    constructor(data?: IRegex) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.options = _data["options"];
+            (<any>this).rightToLeft = _data["rightToLeft"];
+            this.matchTimeout = _data["matchTimeout"] ? TimeSpan.fromJS(_data["matchTimeout"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): Regex {
+        data = typeof data === 'object' ? data : {};
+        let result = new Regex();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["options"] = this.options;
+        data["rightToLeft"] = this.rightToLeft;
+        data["matchTimeout"] = this.matchTimeout ? this.matchTimeout.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IRegex {
+    options?: RegexOptions;
+    rightToLeft?: boolean;
+    matchTimeout?: TimeSpan;
+}
+
+export enum RegexOptions {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _4 = 4,
+    _8 = 8,
+    _16 = 16,
+    _32 = 32,
+    _64 = 64,
+    _256 = 256,
+    _512 = 512,
+}
+
 export class Salary implements ISalary {
     id?: string | undefined;
     legacyId?: number | undefined;
@@ -2005,6 +5910,134 @@ export interface ISalary {
     kantine?: number | undefined;
     arbeitgeber?: string | undefined;
     wochenstunden?: number | undefined;
+}
+
+export class TimeSpan implements ITimeSpan {
+    ticks?: number;
+    readonly days?: number;
+    readonly hours?: number;
+    readonly milliseconds?: number;
+    readonly minutes?: number;
+    readonly seconds?: number;
+    readonly totalDays?: number;
+    readonly totalHours?: number;
+    readonly totalMilliseconds?: number;
+    readonly totalMinutes?: number;
+    readonly totalSeconds?: number;
+
+    constructor(data?: ITimeSpan) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.ticks = _data["ticks"];
+            (<any>this).days = _data["days"];
+            (<any>this).hours = _data["hours"];
+            (<any>this).milliseconds = _data["milliseconds"];
+            (<any>this).minutes = _data["minutes"];
+            (<any>this).seconds = _data["seconds"];
+            (<any>this).totalDays = _data["totalDays"];
+            (<any>this).totalHours = _data["totalHours"];
+            (<any>this).totalMilliseconds = _data["totalMilliseconds"];
+            (<any>this).totalMinutes = _data["totalMinutes"];
+            (<any>this).totalSeconds = _data["totalSeconds"];
+        }
+    }
+
+    static fromJS(data: any): TimeSpan {
+        data = typeof data === 'object' ? data : {};
+        let result = new TimeSpan();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["ticks"] = this.ticks;
+        data["days"] = this.days;
+        data["hours"] = this.hours;
+        data["milliseconds"] = this.milliseconds;
+        data["minutes"] = this.minutes;
+        data["seconds"] = this.seconds;
+        data["totalDays"] = this.totalDays;
+        data["totalHours"] = this.totalHours;
+        data["totalMilliseconds"] = this.totalMilliseconds;
+        data["totalMinutes"] = this.totalMinutes;
+        data["totalSeconds"] = this.totalSeconds;
+        return data;
+    }
+}
+
+export interface ITimeSpan {
+    ticks?: number;
+    days?: number;
+    hours?: number;
+    milliseconds?: number;
+    minutes?: number;
+    seconds?: number;
+    totalDays?: number;
+    totalHours?: number;
+    totalMilliseconds?: number;
+    totalMinutes?: number;
+    totalSeconds?: number;
+}
+
+export class UpdateResult implements IUpdateResult {
+    readonly isAcknowledged?: boolean;
+    readonly isModifiedCountAvailable?: boolean;
+    readonly matchedCount?: number;
+    readonly modifiedCount?: number;
+    upsertedId?: BsonValue;
+
+    constructor(data?: IUpdateResult) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            (<any>this).isAcknowledged = _data["isAcknowledged"];
+            (<any>this).isModifiedCountAvailable = _data["isModifiedCountAvailable"];
+            (<any>this).matchedCount = _data["matchedCount"];
+            (<any>this).modifiedCount = _data["modifiedCount"];
+            this.upsertedId = _data["upsertedId"] ? BsonValue.fromJS(_data["upsertedId"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UpdateResult {
+        data = typeof data === 'object' ? data : {};
+        let result = new UpdateResult();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["isAcknowledged"] = this.isAcknowledged;
+        data["isModifiedCountAvailable"] = this.isModifiedCountAvailable;
+        data["matchedCount"] = this.matchedCount;
+        data["modifiedCount"] = this.modifiedCount;
+        data["upsertedId"] = this.upsertedId ? this.upsertedId.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IUpdateResult {
+    isAcknowledged?: boolean;
+    isModifiedCountAvailable?: boolean;
+    matchedCount?: number;
+    modifiedCount?: number;
+    upsertedId?: BsonValue;
 }
 
 export class ApiException extends Error {
