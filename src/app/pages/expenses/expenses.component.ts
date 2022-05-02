@@ -205,18 +205,6 @@ export class ExpensesComponent {
           this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
       });
-      /*
-      this.api.setService("expenses");
-      this.api.deleteEntryById<Expense>($event.id).subscribe({
-        next: (res) => {
-          this.showResultWithTimer(`Item ${$event.id}: ${$event.name}/${$event.created} Deletion: HTTP Code ${res.status} ${res.statusText}`);
-          this.loadData();
-        },
-        error: (err) => {
-          this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
-        }
-      });
-      */
     }
     this.closeModal('delete-confirmation');
   }
