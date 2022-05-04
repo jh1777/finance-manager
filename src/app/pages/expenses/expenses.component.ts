@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { timer } from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription, timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 import { NavigationService } from 'src/app/services/navigation.service';
@@ -17,7 +17,7 @@ import '../../util/dateExtensions';
   templateUrl: './expenses.component.html',
   styleUrls: ['./expenses.component.scss']
 })
-export class ExpensesComponent {
+export class ExpensesComponent implements OnDestroy {
   public pageTitle = "Expenses";
   private data: Array<Expense> = [];
   public categories: Array<string> = ['Telefon', 'Streaming', 'Versicherung', 'Wohnung', 'Freizeit', 'KFZ', 'Kinder', 'Sparen', 'Bahn'];
@@ -48,6 +48,7 @@ export class ExpensesComponent {
   });
 
   public changeEntry: Expense = new Expense();
+  private subscription = new Subscription();
 
   constructor(
     private currencyPipe: CurrencyPipe,
@@ -58,15 +59,15 @@ export class ExpensesComponent {
 
   ) {
     this.navigationService.activeMenu.next(4);
-
-    //this.api.setService("expenses");
     this.loadData();
-
+  }
+  
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   private loadData() {
-
-    this.financeApi.getExpenses(null).subscribe({
+    this.subscription.add(this.financeApi.getExpenses(null).subscribe({
       next: (result) => {
         if (this.currentSortEntry != null) {
           if (this.currentSortEntry.direction == 'asc') {
@@ -85,12 +86,12 @@ export class ExpensesComponent {
       error: (err) => {
         console.log("Error loading expenses!", err);
       }
-    });
+    }));
   }
 
   public newExpenseEntry() {
     this.changeEntry = new Expense();
-    this.changeEntry.start = new Date(); // this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+    this.changeEntry.start = new Date();
     this.changeEntry.person = this.currentPerson;
     this.openModal('change-entry');
   }
@@ -111,7 +112,7 @@ export class ExpensesComponent {
       action.icon = getIconWithName("pencil-line");
       action.action = (id: string) => {
         this.changeEntry = entry;
-        this.changeEntry.start = new Date(); // this.datePipe.transform(this.changeEntry.start, 'yyyy-MM-dd');
+        this.changeEntry.start = new Date();
         this.openModal('change-entry');
       };
       row.actions.push(action); 
@@ -137,7 +138,7 @@ export class ExpensesComponent {
       let cell = new NumberTableCell({ id: entry.id, label: this.currencyPipe.transform(entry.betrag), numericValue: entry.betrag });
       cell.action = () => {
         this.changeEntry = entry;
-        this.changeEntry.start = new Date(); //this.datePipe.transform(new Date(), 'yyyy-MM-dd');
+        this.changeEntry.start = new Date();
         this.openModal('change-value');
       };
       cell.actionIcon = getIconWithName("slider-line");
@@ -186,7 +187,7 @@ export class ExpensesComponent {
   private showResultWithTimer(message: string) {
     this.lastResult = message;
     const resultTimer = timer(10000);
-    resultTimer.subscribe(v => this.lastResult = '');
+    this.subscription.add(resultTimer.subscribe(v => this.lastResult = ''));
   }
 
   /**
@@ -196,7 +197,7 @@ export class ExpensesComponent {
   public deleteEntry($event: Expense) {
     if ($event) {
       // Call the API to delete the entry
-      this.financeApi.deleteExpense($event.id).subscribe({
+      this.subscription.add(this.financeApi.deleteExpense($event.id).subscribe({
         next: (res) => {
           this.showResultWithTimer(`Item ${$event.id}: ${$event.name}/${$event.created} Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
           this.loadData();
@@ -204,7 +205,7 @@ export class ExpensesComponent {
         error: (err) => {
           this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
-      });
+      }));
     }
     this.closeModal('delete-confirmation');
   }
@@ -261,7 +262,7 @@ export class ExpensesComponent {
    */
   private changeItem(id: string, item: Partial<Expense>, reload: boolean = false) {
 
-    this.financeApi.updateExpense(id, item as Expense).subscribe(
+    this.subscription.add(this.financeApi.updateExpense(id, item as Expense).subscribe(
       res => {
         this.showResultWithTimer(`PUT Expense item: ${item.name}/${item.betrag}: Acknowledged=${res.isAcknowledged} ModifiedCount=${res.modifiedCount}`);
         if (reload) {
@@ -272,7 +273,7 @@ export class ExpensesComponent {
         this.showResultWithTimer(`Error changing the expense entry!: ${err}`);
         console.error(`Error changing the expense entry!: ${err}`);
       }
-    );
+    ));
   }
 
   /**
@@ -287,7 +288,8 @@ export class ExpensesComponent {
     if (item.ende) {
       item.ende = new Date(item.ende);
     }
-    this.financeApi.createExpense(item).subscribe(
+
+    this.subscription.add(this.financeApi.createExpense(item).subscribe(
       res => {
         this.showResultWithTimer(`POST Expense item: ${item.name}/${item.betrag}: Result=${JSON.stringify(res)}`);
         this.loadData();
@@ -295,7 +297,7 @@ export class ExpensesComponent {
       (err: HttpErrorResponse) => {
         this.showResultWithTimer(`Error creating the expense entry!: ${err}`);
       }
-    );
+    ));
   }
 
   public changeOrCreateEntry() {

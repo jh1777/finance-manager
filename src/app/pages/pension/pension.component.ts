@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
-import { timer } from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
+import { Subscription, timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
@@ -15,7 +15,7 @@ import { FinanceApiService, Pension } from 'src/services/finance-api.service';
   templateUrl: './pension.component.html',
   styleUrls: ['./pension.component.scss']
 })
-export class PensionComponent {
+export class PensionComponent implements OnDestroy {
   public pageTitle = "Pension";
   public lastResult: string = '';
 
@@ -53,6 +53,8 @@ export class PensionComponent {
   });
   //
 
+  private subscription = new Subscription();
+
   public types: Array<string> = ['Rente', 'Berufsunfähigkeit', 'Todesfallsumme', 'Invalidität'];
 
   constructor(
@@ -68,41 +70,31 @@ export class PensionComponent {
     this.loadData();
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   private showResultWithTimer(message: string) {
     this.lastResult = message;
     const resultTimer = timer(10000);
-    resultTimer.subscribe(v => this.lastResult = '');
+    this.subscription.add(resultTimer.subscribe(v => this.lastResult = ''));
   }
 
   private loadData() {
-    this.financeApi.getPensions().subscribe({
-      next: (result) => {
+    this.subscription.add(this.financeApi.getPensions().subscribe({
+        next: (result) => {
 
-        this.data = result.SortAscending('name');
-        // Person filter
-        this.data = this.data.filter(d => d.person == this.currentPerson);
-        //  Mapping
-        this.mapDataToTableModel();
-      },
-      error: (err) => {
-        console.log("Error loading pensions!", err);
-      }
-    });
-    /*
-    this.api.getEntries<Pension>().subscribe({
-      next: (result) => {
-
-        this.data = result.SortAscending('Name');
-        // Person filter
-        this.data = this.data.filter(d => d.Person == this.currentPerson);
-        //  Mapping
-        this.mapDataToTableModel();
-      },
-      error: (err) => {
-        console.log("Error loading pensions!", err);
-      }
-    })
-    */
+          this.data = result.SortAscending('name');
+          // Person filter
+          this.data = this.data.filter(d => d.person == this.currentPerson);
+          //  Mapping
+          this.mapDataToTableModel();
+        },
+        error: (err) => {
+          console.log("Error loading pensions!", err);
+        }
+      })
+    );
   }
 
   private createHeader() {
@@ -226,7 +218,7 @@ export class PensionComponent {
   public deleteEntry($event: Pension) {
     if ($event) {
       // Call the API to delete the entry
-      this.financeApi.deletePension($event.id).subscribe({
+      this.subscription.add(this.financeApi.deletePension($event.id).subscribe({
         next: (res) => {
           this.showResultWithTimer(`Item ${$event.id}: ${$event.name} Deletion: Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
           this.loadData();
@@ -234,7 +226,7 @@ export class PensionComponent {
         error: (err) => {
           this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
-      });
+      }));
     }
     this.closeModal('delete-confirmation');
   }
@@ -260,7 +252,7 @@ export class PensionComponent {
    * @param item Partial<Ausgabe>
    */
   private changeItem(id: string, item: Partial<Pension>, reload: boolean = false) {
-    this.financeApi.updatePension(id, item as Pension).subscribe(
+    this.subscription.add(this.financeApi.updatePension(id, item as Pension).subscribe(
       res => {
         this.showResultWithTimer(`PUT Pension item: ${this.changeEntry.name}/${this.changeEntry.id}: Acknowledged=${res.isAcknowledged} ModifiedCount=${res.modifiedCount}`);
         if (reload) {
@@ -271,7 +263,7 @@ export class PensionComponent {
         this.showResultWithTimer(`Error changing the pension entry!: ${err}`);
         console.error(`Error changing the pension entry!: ${err}`);
       }
-    );
+    ));
   }
   // -----
 
@@ -291,7 +283,7 @@ export class PensionComponent {
      }
 
     item.person = this.currentPerson;
-    this.financeApi.createPension(item).subscribe(
+    this.subscription.add(this.financeApi.createPension(item).subscribe(
       res => {
         this.showResultWithTimer(`POST Pension item: ${item.name}: Result=${JSON.stringify(res)}`);
         this.loadData();
@@ -299,7 +291,7 @@ export class PensionComponent {
       (err: HttpErrorResponse) => {
         this.showResultWithTimer(`Error creating the pension entry!: ${err}`);
       }
-    );
+    ));
   }
 
   public changeOrCreateEntry() {

@@ -1,7 +1,7 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { timer } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription, timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 /* import * as dayjs from 'dayjs';
@@ -19,7 +19,7 @@ import { FinanceApiService, Insurance } from 'src/services/finance-api.service';
   templateUrl: './insurance.component.html',
   styleUrls: ['./insurance.component.scss']
 })
-export class InsuranceComponent implements OnInit {
+export class InsuranceComponent implements OnInit, OnDestroy {
 
   public pageTitle: string = "Insurance";
 
@@ -39,6 +39,8 @@ export class InsuranceComponent implements OnInit {
   public newInsuranceEntry = new Insurance();
   public createEntryLastResult: string = '';
  
+  private subscription = new Subscription();
+
   constructor(
     private navigationService: NavigationService,
     private modalService: ModalService,
@@ -47,7 +49,10 @@ export class InsuranceComponent implements OnInit {
     private datePipe: DatePipe
   ) { 
     this.navigationService.activeMenu.next(3);
-    // no loonger used: dayjs.extend(relativeTime);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   ngOnInit(): void {
@@ -60,7 +65,7 @@ export class InsuranceComponent implements OnInit {
 
 
   private getData() {
-    this.financeApi.getInsurance(null).subscribe({
+    this.subscription.add(this.financeApi.getInsurance(null).subscribe({
       next: (result) => {
         this.data = result.SortDescending('datum');
         if (environment.mockData) {
@@ -71,7 +76,7 @@ export class InsuranceComponent implements OnInit {
       error: (e) => {
         console.error("Error getting Versicherungen!", e);
       }
-    })
+    }));
   }
 
   private mapDataToTableModel() {
@@ -162,7 +167,7 @@ export class InsuranceComponent implements OnInit {
     if (item.datum) {
       item.datum = new Date(item.datum);
     }
-    this.financeApi.createInsurance(item).subscribe(
+    this.subscription.add(this.financeApi.createInsurance(item).subscribe(
       res => {
         this.showResultWithTimer(`POST Insurance item: ${item.name}/${item.datum}: Result=${JSON.stringify(res)}`);
         this.resetNewInsuranceItem();
@@ -172,7 +177,7 @@ export class InsuranceComponent implements OnInit {
       (err: HttpErrorResponse) => {
         this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);
       }
-    );
+    ));
   }
 
   private resetNewInsuranceItem() {
@@ -184,13 +189,13 @@ export class InsuranceComponent implements OnInit {
   private showResultWithTimer(message: string) {
     this.createEntryLastResult = message;
     const salaryLastResultTimer = timer(10000);
-    salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');
+    this.subscription.add(salaryLastResultTimer.subscribe(v => this.createEntryLastResult = ''));
   }
 
   public deleteEntry($event: Insurance) {
     if ($event) {
       // Call the API to delete the entry
-      this.financeApi.deleteInsurance($event.id).subscribe({
+      this.subscription.add(this.financeApi.deleteInsurance($event.id).subscribe({
         next: (res) => {
           this.showResultWithTimer(`Item ${$event.id}: ${$event.name}/${$event.datum} Deletion: Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
           this.getData();
@@ -198,7 +203,7 @@ export class InsuranceComponent implements OnInit {
         error: (err) => {
           this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
-      });
+      }));
     }
     this.closeModal('delete-confirmation');
   }

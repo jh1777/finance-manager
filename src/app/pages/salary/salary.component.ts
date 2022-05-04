@@ -1,9 +1,9 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { NavigationService } from 'src/app/services/navigation.service';
-import { timer } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import { ModalService } from 'src/app/modalModule';
 import { Button, TableRow, TableRowAction, TableHeader, TableSize, TextTableCell, NumberTableCell } from 'src/app/ui';
 import '../../util/arrayExtensions';
@@ -17,17 +17,13 @@ import { FinanceApiService, Salary } from 'src/services/finance-api.service';
   templateUrl: './salary.component.html',
   styleUrls: ['./salary.component.scss']
 })
-export class SalaryComponent {
+export class SalaryComponent implements OnDestroy {
   public pageTitle = "Payments";
 
   private data: Array<Salary>;
-
   public tableSizeEnum = TableSize;
-  public hideToast: boolean = true;
-
   public rows: Array<TableRow> = [];
   public header: Array<TableHeader> = [];
-  //public groupCell: ITableCell;
   public groupCellIndex: number;
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
@@ -51,6 +47,8 @@ export class SalaryComponent {
   public yearButtons: Array<Button> = [];
   public yearFilterMulti: boolean = true;
 
+  private subscription = new Subscription();
+
   public newSalaryEntry = new Salary({
     arbeitgeber: 'Daimler Truck AG',
     wochenstunden: 40,
@@ -69,13 +67,17 @@ export class SalaryComponent {
     this.updateEntriesV2();
   }
 
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
   public setSize(size: TableSize) {
     this.tableSize = size;
   }
 
   private updateEntriesV2() {
 
-    this.financeApi.getSalary(null, null).subscribe(
+    this.subscription.add(this.financeApi.getSalary(null, null).subscribe(
       result => {
         this.data = result.SortDescending('jahr');
         
@@ -87,13 +89,11 @@ export class SalaryComponent {
         if (this.monthFilterBy) {
           this.data = this.data.filter(d => d.monat == this.monthFilterBy);
         }
-        //this.data = this.data.SortDescending('_sortKey');
 
         // Map to generic table model
         this.rows = this.mapToTableModel(this.data);
       }
-    );
-    
+    ));
   }
 
 
@@ -202,7 +202,6 @@ export class SalaryComponent {
     if (!this.monthFilterBy) {
       this.groupCellIndex = 1;
     }
-    
   }
 
   public toggleNewEntryForm() {
@@ -219,11 +218,11 @@ export class SalaryComponent {
   private showSalaryResultWithTimer(message: string) {
     this.createSalaryLastResult = message;
     const salaryLastResultTimer = timer(10000);
-    salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = '');
+    this.subscription.add(salaryLastResultTimer.subscribe(v => this.createSalaryLastResult = ''));
   }
 
   public createSalary(item: Salary) {
-    this.financeApi.createSalary(item).subscribe(
+    this.subscription.add(this.financeApi.createSalary(item).subscribe(
       res => {
         this.showSalaryResultWithTimer(`POST Salary Eintrag ${item.jahr}/${item.monat}: Result=${JSON.stringify(res)}`);
         this.resetNewSalaryItem();
@@ -234,7 +233,7 @@ export class SalaryComponent {
       (err: HttpErrorResponse) => {
         this.showSalaryResultWithTimer(`Error creating the salary entry!: ${err}`);
       }
-    );
+    ));
   }
 
   private resetNewSalaryItem() {
@@ -246,7 +245,7 @@ export class SalaryComponent {
 
   public deleteSalaryEntry($event: Salary) {
     if ($event) {
-      this.financeApi.deleteSalary($event.id).subscribe({
+      this.subscription.add(this.financeApi.deleteSalary($event.id).subscribe({
         next: (res) => {
           this.showSalaryResultWithTimer(`Item ${$event.id}: ${$event.jahr}/${$event.monat}: Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
           this.updateEntriesV2();
@@ -254,13 +253,13 @@ export class SalaryComponent {
         error: (err) => {
           this.showSalaryResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
-      });
+      }));
     }
     this.closeModal('delete-confirmation');
   }
 
   private createFooter() {
-    this.footerText = `${this.data.map(d => d.jahr).Distinct().length} Years (${ this.data.map(d => d.monat).length} Months)`;
+    this.footerText = `${this.data.map(d => d.jahr).Distinct().length} years / ${ this.data.map(d => d.monat).length} months`;
   }
 
   openModal(id: string) {
