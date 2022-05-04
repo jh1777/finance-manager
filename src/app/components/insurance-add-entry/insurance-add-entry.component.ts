@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Versicherung } from 'src/app/services/models/versicherung';
+import { Insurance } from 'src/services/finance-api.service';
 
 @Component({
   selector: 'app-insurance-add-entry',
@@ -9,10 +9,10 @@ import { Versicherung } from 'src/app/services/models/versicherung';
 export class InsuranceAddEntryComponent implements OnInit {
 
   @Input()
-  model: Versicherung;
+  model: Insurance;
 
   @Output()
-  newEntry = new EventEmitter<Versicherung>();
+  newEntry = new EventEmitter<Insurance>();
 
   constructor() { }
 

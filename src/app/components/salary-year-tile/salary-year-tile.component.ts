@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-
-import { Gehalt } from 'src/app/services/models/gehalt';
+import { Salary } from 'src/services/finance-api.service';
 
 @Component({
   selector: 'app-salary-year-tile',
@@ -13,13 +12,13 @@ export class SalaryYearTileComponent implements OnInit {
   year: number = 0;
 
   @Input()
-  data: Array<Gehalt> = [];
+  data: Array<Salary> = [];
 
   @Input()
   percent: number;
 
   @Output()
-  details = new EventEmitter<Array<Gehalt>>();
+  details = new EventEmitter<Array<Salary>>();
 
   constructor() { }
 

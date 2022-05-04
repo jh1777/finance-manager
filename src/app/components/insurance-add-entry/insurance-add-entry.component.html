@@ -3,7 +3,7 @@
 
       <div class="form-group col-md-3">
         <label for="datum"><strong>Datum</strong></label>
-        <input type="date" class="form-control" id="datum" required [(ngModel)]="model.Datum" name="Datum"
+        <input type="date" class="form-control" id="datum" required [(ngModel)]="model.datum" name="Datum"
             #datum="ngModel">
         <div [hidden]="datum.valid || datum.pristine" class="alert alert-danger">
             Datum is required date</div>
@@ -11,13 +11,13 @@
 
       <div class="form-group col-md-3">
           <label for="name">Name</label>
-          <input type="string" class="form-control" id="name" [(ngModel)]="model.Name" name="Name"
+          <input type="string" class="form-control" id="name" [(ngModel)]="model.name" name="Name"
               #name="ngModel">
       </div>
 
       <div class="form-group col-md-3">
         <label for="rueckkaufswert"><strong>Rueckkaufswert</strong></label>
-        <input type="number" class="form-control" id="rueckkaufswert" required [(ngModel)]="model.Rueckkaufswert" name="Rueckkaufswert"
+        <input type="number" class="form-control" id="rueckkaufswert" required [(ngModel)]="model.rueckkaufswert" name="Rueckkaufswert"
             #rueckkaufswert="ngModel">
         <div [hidden]="rueckkaufswert.valid || rueckkaufswert.pristine" class="alert alert-danger">
           Rueckkaufswert is required number</div>

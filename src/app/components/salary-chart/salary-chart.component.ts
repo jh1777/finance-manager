@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
@@ -9,22 +9,13 @@ import { Label } from 'ng2-charts';
   styleUrls: ['./salary-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SalaryChartComponent implements OnInit {
+export class SalaryChartComponent {
 
   @Input()
   x: Array<string>;
 
   @Input()
   y: Array<ChartDataSets>;
-  //y: Array<number>;
-
-/*   @Input()
-  yLabel: string; */
-
-
-  constructor() { 
-    
-  }
 
   public barChartOptions: ChartOptions = {
     responsive: true,
@@ -67,20 +58,13 @@ export class SalaryChartComponent implements OnInit {
       pointBorderColor: '#fff',
       pointHoverBackgroundColor: '#fff',
       pointHoverBorderColor: 'rgba(225,10,24,0.2)'
-    }];
-
-  ngOnInit() {
-    
-  }
+    }
+  ];
 
   ngOnChanges() {
     if (this.x && this.y) {
       this.barChartLabels = this.x;
       this.barChartData = this.y;
-      /* this.barChartData = new Array<ChartDataSets>({
-        data: this.y,
-        label: this.yLabel ?? ''
-      }); */
     }
   }
 
