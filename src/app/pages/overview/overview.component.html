@@ -12,14 +12,20 @@
                 <button type="button" class="btn" [ngClass]="showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">All Years</button>
             </div>
 
-            <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openAllYearsChart('Brutto');"></app-menu-button>
+            <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openAllYearsChart('brutto');"></app-menu-button>
         </div>
 
     </app-page-header>
 
 
     <div class="row row-cols-1 row-cols-md-3">
-        <app-salary-year-tile *ngFor="let year of years" [year]="year" [data]="data[year]" [percent]="diffs[year]" (details)="openSalaryChart($event)"></app-salary-year-tile>
+        <app-salary-year-tile 
+            *ngFor="let year of years" 
+            [year]="year" 
+            [data]="data[year]" 
+            [percent]="diffs[year]" 
+            (details)="openSalaryChart($event)"
+        ></app-salary-year-tile>
     </div>
 
 </div>

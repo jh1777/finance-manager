@@ -3,8 +3,7 @@ import { IName } from './interfaces/IName';
 export class Absicherung implements IName {
     Name: string;
     id?: number;
-    Erstellt: string;
-    Bearbeitet: string;
+    _id?: string;
     Person: string;
     Versicherung: string;
     Versicherungsnummer: string;
@@ -12,8 +11,11 @@ export class Absicherung implements IName {
     Todesfallsumme?: number;
     Monatsbetrag?: number;
     Einmalzahlung?: number;
-    Faelligkeit: string;
+    Faelligkeit: Date;
     Kommentar: string;
+
+    _created?: Date;
+    _modified?: Date;
 
     constructor(init?: Partial<Absicherung>) {
         Object.assign(this, init);

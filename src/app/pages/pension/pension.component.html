@@ -29,7 +29,7 @@
 
 <jw-modal id="change-value" class="small-modal">
     <h4>Change value</h4>
-    <p>{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+    <p>{{ changeEntry.name }} (id: {{ changeEntry.id }})</p>
 
     <table style="width: 100%;">
         <tr>
@@ -38,7 +38,7 @@
             </td>
             <td>
                 <input type="number" id="value-monthly" name="Monatsbetrag" required
-                    [(ngModel)]="changeEntry.Monatsbetrag" />
+                    [(ngModel)]="changeEntry.monatsbetrag" />
             </td>
         </tr>
         <tr>
@@ -47,7 +47,7 @@
             </td>
             <td>
                 <input type="number" id="value-onetime" name="Einmalzahlung" required
-                    [(ngModel)]="changeEntry.Einmalzahlung" />
+                    [(ngModel)]="changeEntry.einmalzahlung" />
             </td>
         </tr>
         <tr>
@@ -56,7 +56,7 @@
             </td>
             <td>
                 <input type="number" id="value-d" name="Todesfallsumme" required
-                    [(ngModel)]="changeEntry.Todesfallsumme" />
+                    [(ngModel)]="changeEntry.todesfallsumme" />
             </td>
         </tr>
     </table>
@@ -70,13 +70,13 @@
 <jw-modal id="change-entry" class="small-modal">
     <h4>{{ changeEntry.id ? 'Change' :'Create'}} pension record</h4>
     <br/>
-    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} (id: {{ changeEntry.id }})</p>
+    <p *ngIf="changeEntry.id">{{ changeEntry.name }} (id: {{ changeEntry.id }})</p>
 
     <form (ngSubmit)="changeOrCreateEntry()" #absicherungForm="ngForm">
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="name"><strong>Name/Bezeichnung</strong></label>
-                <input type="text" class="form-control" id="name" required [(ngModel)]="changeEntry.Name" name="Name"
+                <input type="text" class="form-control" id="name" required [(ngModel)]="changeEntry.name" name="Name"
                     #name="ngModel">
                 <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
                     Name is required</div>
@@ -84,43 +84,43 @@
 
             <div class="form-group col-md-6">
                 <label for="versicherung">Versicherung</label>
-                <input type="text" class="form-control" id="versicherung" [(ngModel)]="changeEntry.Versicherung" name="Versicherung"
+                <input type="text" class="form-control" id="versicherung" [(ngModel)]="changeEntry.versicherung" name="Versicherung"
                     #versicherung="ngModel">
             </div>
 
             <div class="form-group col-md-6">
                 <label for="versicherungsnummer">Versicherungsnummer</label>
-                <input type="text" class="form-control" id="versicherungsnummer" [(ngModel)]="changeEntry.Versicherungsnummer" name="Versicherungsnummer"
+                <input type="text" class="form-control" id="versicherungsnummer" [(ngModel)]="changeEntry.versicherungsnummer" name="Versicherungsnummer"
                     #versicherungsnummer="ngModel">
             </div>
 
             <div class="form-group col-md-6">
                 <label for="monatsbetrag">Monatsbetrag</label>
                 <input type="number" class="form-control" id="monatsbetrag"
-                    [(ngModel)]="changeEntry.Monatsbetrag" name="Monatsbetrag" #monatsbetrag="ngModel">
+                    [(ngModel)]="changeEntry.monatsbetrag" name="Monatsbetrag" #monatsbetrag="ngModel">
             </div>
 
             <div class="form-group col-md-6">
                 <label for="einmalzahlung">Einmalzahlung</label>
                 <input type="number" class="form-control" id="einmalzahlung"
-                    [(ngModel)]="changeEntry.Einmalzahlung" name="Einmalzahlung" #einmalzahlung="ngModel">
+                    [(ngModel)]="changeEntry.einmalzahlung" name="Einmalzahlung" #einmalzahlung="ngModel">
             </div>
 
             <div class="form-group col-md-6">
                 <label for="todesfallsumme">Todesfallsumme</label>
                 <input type="number" class="form-control" id="todesfallsumme"
-                    [(ngModel)]="changeEntry.Todesfallsumme" name="Todesfallsumme" #todesfallsumme="ngModel">
+                    [(ngModel)]="changeEntry.todesfallsumme" name="Todesfallsumme" #todesfallsumme="ngModel">
             </div>
 
             <div class="form-group col-md-6">
                 <label for="faelligkeit">Fälligkeit</label>
-                <input type="date" class="form-control" id="faelligkeit" [(ngModel)]="changeEntry.Faelligkeit" name="Faelligkeit" 
+                <input type="date" class="form-control" id="faelligkeit" [(ngModel)]="changeEntry.faelligkeit" name="Faelligkeit" 
                     #faelligkeit="ngModel">
             </div>
 
             <div class="form-group col-md-12">
                 <label for="kommentar">Kommentar</label>
-                <input type="text" class="form-control" id="kommentar" [(ngModel)]="changeEntry.Kommentar"
+                <input type="text" class="form-control" id="kommentar" [(ngModel)]="changeEntry.kommentar"
                     name="Kommentar" #beschreibung="ngModel">
             </div>
 

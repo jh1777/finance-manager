@@ -36,7 +36,7 @@
 
 <jw-modal id="change-value" class="small-modal">
     <h4>Change expense value</h4>
-    <p>{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <p>{{ changeEntry.name }} pro {{ changeEntry.intervall }} (id: {{ changeEntry.id }})</p>
 
     <table style="width: 100%;">
         <tr>
@@ -44,7 +44,7 @@
                 <strong>New Value:</strong>
             </td>
             <td>
-                <input type="number" id="value" name="Betrag" required [(ngModel)]="changeEntry.Betrag"/>
+                <input type="number" id="value" name="Betrag" required [(ngModel)]="changeEntry.betrag"/>
             </td>
         </tr>
         <tr>&nbsp;</tr>
@@ -53,7 +53,7 @@
                 <strong>Start Date:</strong>
             </td>
             <td>
-                <input type="date" id="datum" required [(ngModel)]="changeEntry.Start" name="Datum">
+                <input type="date" id="datum" required [(ngModel)]="changeEntry.start" name="Datum">
             </td>
         </tr>
     </table>
@@ -67,13 +67,13 @@
 
 <jw-modal id="change-entry" class="small-modal">
     <h4>{{ changeEntry.id ? 'Change' :'Create'}} expense record</h4>
-    <p *ngIf="changeEntry.id">{{ changeEntry.Name }} pro {{ changeEntry.Intervall }} (id: {{ changeEntry.id }})</p>
+    <p *ngIf="changeEntry.id">{{ changeEntry.name }} pro {{ changeEntry.intervall }} (id: {{ changeEntry.id }})</p>
 
     <form (ngSubmit)="changeOrCreateEntry()" #ausgabeForm="ngForm">
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="name"><strong>Name</strong></label>
-            <input type="text" class="form-control" id="name" required [(ngModel)]="changeEntry.Name" name="Name"
+            <input type="text" class="form-control" id="name" required [(ngModel)]="changeEntry.name" name="Name"
                 #name="ngModel">
             <div [hidden]="name.valid || name.pristine" class="alert alert-danger">
                 Name is required</div>
@@ -81,7 +81,7 @@
     
           <div class="form-group col-md-6">
             <label for="kategorie"><strong>Kategorie</strong></label>
-            <select class="form-control" id="kategorie" required [(ngModel)]="changeEntry.Kategorie" name="Kategorie" #kategorie="ngModel">
+            <select class="form-control" id="kategorie" required [(ngModel)]="changeEntry.kategorie" name="Kategorie" #kategorie="ngModel">
                 <option *ngFor="let c of categories"> {{ c }}</option>
             </select>
             <div [hidden]="kategorie.valid || kategorie.pristine" class="alert alert-danger">
@@ -90,7 +90,7 @@
 
           <div class="form-group col-md-6">
             <label for="intervall"><strong>Intervall</strong></label>
-            <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.Intervall" name="Intervall" #intervall="ngModel">
+            <select class="form-control" id="intervall" required [(ngModel)]="changeEntry.intervall" name="Intervall" #intervall="ngModel">
                 <option>Monat</option>
                 <option>Quartal</option>
                 <option>Jahr</option>
@@ -101,7 +101,7 @@
 
           <div class="form-group col-md-6">
             <label for="betrag"><strong>Betrag</strong></label>
-            <input type="number" class="form-control" id="betrag" required [(ngModel)]="changeEntry.Betrag" name="Betrag"
+            <input type="number" class="form-control" id="betrag" required [(ngModel)]="changeEntry.betrag" name="Betrag"
                 #betrag="ngModel">
             <div [hidden]="betrag.valid || betrag.pristine" class="alert alert-danger">
                 Betrag is required number</div>
@@ -109,19 +109,19 @@
 
         <div class="form-group col-md-6">
             <label for="beschreibung"><strong>Beschreibung</strong></label>
-            <input type="text" class="form-control" id="beschreibung" [(ngModel)]="changeEntry.Beschreibung" name="Beschreibung" 
+            <input type="text" class="form-control" id="beschreibung" [(ngModel)]="changeEntry.beschreibung" name="Beschreibung" 
                 #beschreibung="ngModel">
         </div>
 
         <div class="form-group col-md-6">
             <label for="start"><strong>Start</strong></label>
-            <input type="date" class="form-control" id="start" [(ngModel)]="changeEntry.Start" name="Start" 
+            <input type="date" class="form-control" id="start" [(ngModel)]="changeEntry.start" name="Start" 
                 #start="ngModel">
         </div>
 
         <div class="form-group col-md-6">
             <label for="ende"><strong>Ende</strong></label>
-            <input type="date" class="form-control" id="ende" [(ngModel)]="changeEntry.Ende" name="Ende" 
+            <input type="date" class="form-control" id="ende" [(ngModel)]="changeEntry.ende" name="Ende" 
                 #ende="ngModel">
         </div>
     

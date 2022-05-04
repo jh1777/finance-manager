@@ -4,7 +4,8 @@
 
 export const environment = {
   production: false,
-  apiUrl: "http://192.168.178.129:4100/api",
+  apiUrl: "http://192.168.178.129:4678",
+  //apiUrl: "http://192.168.178.129:4568/api",
   mockData: false
 };
 

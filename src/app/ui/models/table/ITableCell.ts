@@ -1,6 +1,6 @@
 export interface ITableCell {
     label: string;
-    id?: number;
+    id?: string;
     numericValue?: number;
     actionIcon?: string;
     action?: () => void;

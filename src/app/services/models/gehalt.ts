@@ -1,5 +1,6 @@
 export class Gehalt {
   id: number;
+  _id?: string;
   Monat: number;
   Jahr: number;
   Brutto: number;
@@ -11,6 +12,10 @@ export class Gehalt {
   Arbeitgeber: string;
   Wochenstunden: number;
 
+  _created?: Date;
+  _modified?: Date;
+  _sortKey: number;
+  
   constructor(init?: Partial<Gehalt>) {
     Object.assign(this, init);
   }

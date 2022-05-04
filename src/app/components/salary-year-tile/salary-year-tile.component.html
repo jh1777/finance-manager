@@ -7,12 +7,12 @@
         <div class="card-body">
             <h5 class="card-title">
                 <div class="kpi-label">BRUTTO</div>
-                {{ summarize("Brutto") | currency }} 
+                {{ summarize("brutto") | currency }} 
                 <app-badge *ngIf="percent" filled=true style="float: right;" [customClass]="percent > 0 ? 'green' : 'red'" [label]="percent/100 | percent: '1.2-2'"></app-badge>
             </h5>
             <h5 class="card-title">
                 <div class="kpi-label">NETTO</div>
-                {{ summarize("Netto") | currency }} 
+                {{ summarize("netto") | currency }} 
             </h5>
             <p class="card-text"><span class="card-link" (click)="showDetails()">Chart</span></p>
         </div>

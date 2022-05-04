@@ -175,7 +175,7 @@ export class TableComponent implements OnInit, OnChanges {
     return this.rows.some(r => r.actions.length > 0);
   }
 
-  public callback(id: number, $event: TableRowAction) {
+  public callback(id: string, $event: TableRowAction) {
     $event.action(id);
   }
 

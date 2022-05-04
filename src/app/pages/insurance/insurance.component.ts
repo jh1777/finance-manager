@@ -1,25 +1,25 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
-import { timer } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription, timer } from 'rxjs';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 /* import * as dayjs from 'dayjs';
 import * as relativeTime from 'dayjs/plugin/relativeTime'; */
 
 import { ApiService } from 'src/app/services/api.service';
-import { Versicherung } from 'src/app/services/models/versicherung';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { ITableCell, TableHeader, TableRow, TableRowAction, TableSize, TextTableCell } from 'src/app/ui';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { environment } from 'src/environments/environment';
+import { FinanceApiService, Insurance } from 'src/services/finance-api.service';
 
 @Component({
   selector: 'app-insurance',
   templateUrl: './insurance.component.html',
   styleUrls: ['./insurance.component.scss']
 })
-export class InsuranceComponent implements OnInit {
+export class InsuranceComponent implements OnInit, OnDestroy {
 
   public pageTitle: string = "Insurance";
 
@@ -29,27 +29,30 @@ export class InsuranceComponent implements OnInit {
   public tableSize: TableSize = TableSize.Medium;
   public footerText: string;
 
-  public data: Array<Versicherung>;
-  public deletionEntry: Versicherung;
+  public data: Array<Insurance>;
+  public deletionEntry: Insurance;
   public deleteConfirmMessage: string;
 
   public showAddEntry: boolean = false;
   public addEntryLabel: string = "Add Insurance";
   public addEntryIcon: string = getIconWithName('plus-circle-line');
-  public newInsuranceEntry = new Versicherung({
-    Erstellt: this.datePipe.transform(new Date(), 'yyyy-MM-dd')
-  });
+  public newInsuranceEntry = new Insurance();
   public createEntryLastResult: string = '';
  
+  private subscription = new Subscription();
+
   constructor(
     private navigationService: NavigationService,
     private modalService: ModalService,
+    private financeApi: FinanceApiService,
     private currencyPipe: CurrencyPipe,
-    private datePipe: DatePipe,
-    private api: ApiService
+    private datePipe: DatePipe
   ) { 
     this.navigationService.activeMenu.next(3);
-    // no loonger used: dayjs.extend(relativeTime);
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
   }
 
   ngOnInit(): void {
@@ -62,19 +65,18 @@ export class InsuranceComponent implements OnInit {
 
 
   private getData() {
-    this.api.setService("versicherungen");
-    this.api.getAllEntries<Versicherung>().subscribe({
+    this.subscription.add(this.financeApi.getInsurance(null).subscribe({
       next: (result) => {
-        this.data = result.body.SortDescending('Datum');
+        this.data = result.SortDescending('datum');
         if (environment.mockData) {
-          this.data.map(d => d.Rueckkaufswert = d.Rueckkaufswert * 45 * Math.random());
+          this.data.map(d => d.rueckkaufswert = d.rueckkaufswert * 45 * Math.random());
         }
         this.mapDataToTableModel();
       },
       error: (e) => {
         console.error("Error getting Versicherungen!", e);
       }
-    })
+    }));
   }
 
   private mapDataToTableModel() {
@@ -89,33 +91,33 @@ export class InsuranceComponent implements OnInit {
       let action = new TableRowAction();
       action.tooltip = "Delete";
       action.icon = getIconWithName("trash-line");
-      action.action = (id: number) => {
+      action.action = (id: string) => {
         this.deletionEntry = entry;
-        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.Name}/${entry.Datum}?`;
+        this.deleteConfirmMessage = `Confirm Entry deletion: Id=${entry.id}: ${entry.name}/${entry.datum}?`;
         this.openModal('delete-confirmation');
       };
       row.actions.push(action); 
       
       
       let prev = this.getPreviousEntry(entry);
-      let diff = prev == null ? 0 : entry.Rueckkaufswert - prev.Rueckkaufswert;
+      let diff = prev == null ? 0 : entry.rueckkaufswert - prev.rueckkaufswert;
       // Cells
       let cell = new TextTableCell({ id: entry.id, label: entry.id ? `${entry.id}` : "n/a"});
       row.cells.push(cell);
       
-      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.Name}`, style:{ 'font-weight': '500' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${entry.name}`, style:{ 'font-weight': '500' } });
       row.cells.push(cell);
 
-      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.Rueckkaufswert) }`});
+      cell = new TextTableCell({ id: entry.id, label:`${ this.currencyPipe.transform(entry.rueckkaufswert) }`});
       row.cells.push(cell);
 
       cell = new StyledTextTableCell({ id: entry.id, label:`${ diff != 0 ? this.currencyPipe.transform(diff) : '' }`, style: diff > 0 ? { 'color': 'green' } : { 'color': 'red'} });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.datum, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
-      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.Erstellt, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
+      cell = new StyledTextTableCell({ id: entry.id, label:`${ this.datePipe.transform(entry.created, 'dd.MM.yyyy') }`, style:{ 'color': '#909090' } });
       row.cells.push(cell);
 
       result.push(row);
@@ -124,8 +126,8 @@ export class InsuranceComponent implements OnInit {
     this.rows = result;
   }
 
-  private getPreviousEntry(entry: Versicherung): Versicherung {
-    let filteredData = this.data.filter(d => d.Name == entry.Name);
+  private getPreviousEntry(entry: Insurance): Insurance {
+    let filteredData = this.data.filter(d => d.name == entry.name);
     let index = filteredData.indexOf(entry);
     if (index == filteredData.length - 1) {
       return null;
@@ -134,7 +136,7 @@ export class InsuranceComponent implements OnInit {
   }
 
   private createFooter() {
-    this.footerText = `${this.data.map(d => d.Name).Distinct().length} Categories`;
+    this.footerText = `${this.data.map(d => d.name).Distinct().length} Categories`;
   }
 
   private createHeader() {
@@ -161,52 +163,47 @@ export class InsuranceComponent implements OnInit {
     }
   }
 
-  public createInsurance(item: Versicherung) {
-
-    console.log("Create Item: Versicherung: ", item);
-    this.api.setService("versicherungen");
-    this.api.createEntry<Versicherung>(item).subscribe(
-        res => {
-          var response = <HttpResponse<Versicherung>>res;
-          this.showResultWithTimer(`POST Versicherung item: ${item.Name}/${item.Datum}: HTTP Code ${response.status}`);
-
-          if (res.ok) {
-            this.resetNewInsuranceItem();
-            this.toggleNewEntryForm();
-            this.getData();
-          }
-        },
-        (err: HttpErrorResponse) => {
-          this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);
-        }
-      );
+  public createInsurance(item: Insurance) {
+    if (item.datum) {
+      item.datum = new Date(item.datum);
+    }
+    this.subscription.add(this.financeApi.createInsurance(item).subscribe(
+      res => {
+        this.showResultWithTimer(`POST Insurance item: ${item.name}/${item.datum}: Result=${JSON.stringify(res)}`);
+        this.resetNewInsuranceItem();
+        this.toggleNewEntryForm();
+        this.getData();
+      },
+      (err: HttpErrorResponse) => {
+        this.showResultWithTimer(`Error creating the insurance entry!: ${err}`);
+      }
+    ));
   }
 
   private resetNewInsuranceItem() {
-    this.newInsuranceEntry.Name = null;
-    this.newInsuranceEntry.Rueckkaufswert = null;
-    this.newInsuranceEntry.Datum = null;
+    this.newInsuranceEntry.name = null;
+    this.newInsuranceEntry.rueckkaufswert = null;
+    this.newInsuranceEntry.datum = null;
   }
 
   private showResultWithTimer(message: string) {
     this.createEntryLastResult = message;
     const salaryLastResultTimer = timer(10000);
-    salaryLastResultTimer.subscribe(v => this.createEntryLastResult = '');
+    this.subscription.add(salaryLastResultTimer.subscribe(v => this.createEntryLastResult = ''));
   }
 
-  public deleteEntry($event: Versicherung) {
+  public deleteEntry($event: Insurance) {
     if ($event) {
       // Call the API to delete the entry
-      this.api.setService("versicherungen");
-      this.api.deleteEntryById<Versicherung>($event.id).subscribe({
+      this.subscription.add(this.financeApi.deleteInsurance($event.id).subscribe({
         next: (res) => {
-          this.showResultWithTimer(`Item ${$event.id}: ${$event.Name}/${$event.Datum} Deletion: HTTP Code ${res.status} ${res.statusText}`);
+          this.showResultWithTimer(`Item ${$event.id}: ${$event.name}/${$event.datum} Deletion: Acknowledged=${res.isAcknowledged} DeletedCount=${res.deletedCount}`);
           this.getData();
         },
         error: (err) => {
           this.showResultWithTimer(`Item ${$event.id} Deletion Failed: ${err}`);
         }
-      });
+      }));
     }
     this.closeModal('delete-confirmation');
   }

@@ -1,13 +1,13 @@
 declare global {
     export interface Array<T> {
-        SortDescending(prop: string): Array<T>;
-        SortAscending(prop: string): Array<T>;
+        SortDescending(prop: string | number): Array<T>;
+        SortAscending(prop: string| number): Array<T>;
         First(): T;
         Distinct(): Array<T>;
     }
 }
 
-Array.prototype.SortDescending = function (prop: string) {
+Array.prototype.SortDescending = function (prop: string | number) {
     return this.sort((n1, n2) => {
         if (n1[prop] > n2[prop]) { return -1; }
         if (n1[prop] < n2[prop]) { return 1; }
@@ -15,7 +15,7 @@ Array.prototype.SortDescending = function (prop: string) {
       });
 }
 
-Array.prototype.SortAscending = function (prop: string) {
+Array.prototype.SortAscending = function (prop: string| number) {
     return this.sort((n1, n2) => {
         if (n1[prop] < n2[prop]) { return -1; }
         if (n1[prop] > n2[prop]) { return 1; }

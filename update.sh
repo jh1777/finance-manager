@@ -14,6 +14,4 @@ ng build --prod
 
 echo "<<< Build new docker image >>>" 
 docker build -t finance-manager .
-
-echo "<<< Run the new docker image as finance-manager-container >>>" 
-docker run --name finance-manager-container -d -p 4567:80 finance-manager
+docker run --name finance-manager-container --restart=on-failure:10 -d -p 4567:80 finance-manager
