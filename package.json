@@ -34,15 +34,10 @@
     "zone.js": "~0.11.3"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^14.0.0",
-    "@angular/cli": "~13.3.7",
+    "@angular-devkit/build-angular": "~13.3.7",
+    "@angular/cli": "~13.3.7", 
     "@angular/compiler-cli": "~13.3.11",
     "@babel/core": "^7.14.0",
-    "@compodoc/compodoc": "^1.1.11",
-    "@storybook/addon-actions": "^6.2.9",
-    "@storybook/addon-essentials": "^6.2.9",
-    "@storybook/addon-links": "^6.2.9",
-    "@storybook/angular": "^6.2.9",
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
     "babel-loader": "^8.2.2",
