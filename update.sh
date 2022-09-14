@@ -10,7 +10,7 @@ echo "<<< Pull latest chnages from Git Repo >>>"
 git pull
 
 echo "<<< Build the Angular Application >>>" 
-ng build --prod
+ng build --configuration production
 
 echo "<<< Build new docker image >>>" 
 docker build -t finance-manager .
