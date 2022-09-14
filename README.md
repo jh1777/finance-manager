@@ -1,26 +1,32 @@
 # Finance Manager
 
 Angular UI to locally document your finances like salary, insurances or regular expenses.
+Depends on FinanceApi project to serve the apis.
 
 ## Versions  
 
-- Angular: 11.2.7
-- Bootstrap: 4.6.0
-- Chart.js: 2.9.4
-- Storybook: 6.2.9
+- Angular: 14
+- Bootstrap:
+- Chart.js
 
 ## Run
 
 ### Docker
 
 ```bash
-ng build --prod
+ng build --configuration production
 docker build -t finance-manager .
 docker run --name finance-manager-container -d -p 4567:80 finance-manager
 ```
 
-### Angular CLI
+### Server Git - Selfhosted
 
-App: `npm run start`  
+Create a new docker image using `docker build` and run it via `docker-compose`.
 
-Storybook: `npm run storybook`  
+```bash
+ng build --configuration production
+docker build -t finance-manager .
+cd
+cd Server/finance-app
+docker-compose up -d
+```
