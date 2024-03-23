@@ -1,22 +1,15 @@
 <div class="page">
-
     <app-page-header>
         <div class="left">{{ pageTitle }}
-
         </div>
         <div class="right">
-            
             <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
             <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Years">
                 <button type="button" class="btn" [ngClass]="!showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">Last 6 Years</button>
                 <button type="button" class="btn" [ngClass]="showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">All Years</button>
             </div>
-
-            <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openAllYearsChart('brutto');"></app-menu-button>
         </div>
-
     </app-page-header>
-
 
     <div class="row row-cols-1 row-cols-md-3">
         <app-salary-year-tile 
@@ -27,14 +20,4 @@
             (details)="openSalaryChart($event)"
         ></app-salary-year-tile>
     </div>
-
 </div>
-
-<jw-modal id="year-chart" class="big-modal">
-    <h3>Chart</h3>
-    <app-salary-chart [x]="x" [y]="y"></app-salary-chart>
-    <br/>
-    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('year-chart');">
-        Close
-    </button>
-</jw-modal>

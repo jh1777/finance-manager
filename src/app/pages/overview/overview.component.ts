@@ -1,14 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Route } from '@angular/router';
-import { ChartDataSets } from 'chart.js';
+import { Component } from '@angular/core';
 import { GehaltTransformer } from 'src/app/data/gehaltTransformer';
 import { getIconWithName } from 'src/app/data/iconFactory';
 import { ModalService } from 'src/app/modalModule';
 import { ApiService } from 'src/app/services/api.service';
-import { SalaryCalc } from 'src/app/services/models/salaryCalc';
 import { NavigationService } from 'src/app/services/navigation.service';
 import { Dictionary } from 'src/app/util/dictionary';
-import { getNYears } from 'src/app/util/getNYears';
 import { environment } from 'src/environments/environment';
 import { FinanceApiService, Salary } from 'src/services/finance-api.service';
 import '../../util/arrayExtensions';
@@ -33,11 +29,6 @@ export class OverviewComponent  {
   public years: Array<number> = [];
   public diffs: Dictionary<number> = {};
   //------
-
-  // CHart
-  public x: Array<string>;
-  public y: Array<ChartDataSets>;
-  public chartButtonIcon = getIconWithName('bar-chart-line');
   
   constructor(
     private navigationService: NavigationService,
@@ -107,6 +98,7 @@ export class OverviewComponent  {
     }
   }
 
+  /*
   public openAllYearsChart(property: string) {
 
     this.x = new Array<string>();
@@ -139,7 +131,8 @@ export class OverviewComponent  {
     //this.yLabel = 'Brutto';
     this.openModal('year-chart');
   }
-  
+  */
+ 
   openModal(id: string) {
     this.modalService.open(id);
   }
