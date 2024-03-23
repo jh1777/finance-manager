@@ -22,6 +22,7 @@ import { PensionComponent } from './pages/pension/pension.component';
 registerLocaleData(localeDe);
 import { FinanceApiService, FINANCE_API_BACKEND_BASE_URL } from 'src/services/finance-api.service';
 import { environment } from 'src/environments/environment';
+import { AgChartsAngular } from 'ag-charts-angular';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { environment } from 'src/environments/environment';
     HttpClientModule,
     FormsModule,
     UiModule,
-    ModalModule
+    ModalModule,
+    AgChartsAngular
   ],
   providers: [
     CurrencyPipe,
