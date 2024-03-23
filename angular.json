@@ -70,18 +70,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "finance-manager:build"
+            "buildTarget": "finance-manager:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "finance-manager:build:production"
+              "buildTarget": "finance-manager:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "finance-manager:build"
+            "buildTarget": "finance-manager:build"
           }
         },
         "test": {
