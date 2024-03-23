@@ -82,6 +82,9 @@
             "buildTarget": "finance-manager:build"
           },
           "configurations": {
+            "development": {
+              "buildTarget": "finance-manager:build:development"
+            },
             "production": {
               "buildTarget": "finance-manager:build:production"
             }

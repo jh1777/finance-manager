@@ -9,6 +9,8 @@ import { environment } from 'src/environments/environment';
 import { FinanceApiService, Salary } from 'src/services/finance-api.service';
 import '../../util/arrayExtensions';
 import '../../util/numberExtensions';
+import { ChartDataFactory } from './prepareCharts';
+import { AgChartOptions } from 'ag-charts-community';
 
 @Component({
   selector: 'app-overview',
@@ -17,7 +19,8 @@ import '../../util/numberExtensions';
 })
 export class OverviewComponent  {
   public chartButtonIcon = getIconWithName('bar-chart-line');
-  public chartData: any;
+  public agChartData: AgChartOptions;
+
   public chartX = "jahr";
   public chartY: Array<any> = ["brutto", "netto", "akp", "kantine"];
   public chartYNames: Array<any> = ["Brutto", "Netto", "AKP", "Kantine"];
@@ -33,6 +36,7 @@ export class OverviewComponent  {
   public years: Array<number> = [];
   public diffs: Dictionary<number> = {};
   //------
+  private rawData: Salary[];
   
   constructor(
     private navigationService: NavigationService,
@@ -45,49 +49,25 @@ export class OverviewComponent  {
     this.loadDataV2();
   }
 
-  private summarizeForChart(daten: any) {
-    const jahresSummen: { jahr: number, netto: number, brutto: number, kantine: number, akp: number }[] = [];
-    daten.forEach((datensatz) => {
-      const existingYearIndex = jahresSummen.findIndex((yearData) => yearData.jahr === datensatz.jahr);
   
-      if (existingYearIndex === -1) {
-          // Wenn das Jahr noch nicht in jahresSummen existiert, füge es hinzu
-          jahresSummen.push({
-              jahr: datensatz.jahr,
-              netto: datensatz.netto,
-              brutto: datensatz.brutto,
-              akp: datensatz.akp,
-              kantine: datensatz.kantine
-          });
-      } else {
-          // Wenn das Jahr bereits in jahresSummen existiert, aktualisiere die Summen
-          jahresSummen[existingYearIndex].netto += datensatz.netto;
-          jahresSummen[existingYearIndex].brutto += datensatz.brutto;
-          jahresSummen[existingYearIndex].akp += datensatz.akp;
-          jahresSummen[existingYearIndex].kantine += datensatz.kantine;
-      }
-    });
-    return jahresSummen;
-  }
 
   private loadDataV2() {
     //let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
     this.financeApi.getSalaryLastNYears(this._numberOfYears + 1).subscribe(
       result => {
-        let data = result;
-        this.chartData = this.summarizeForChart(result);
+        this.rawData = result;
         if (environment.mockData) {
-          data.map(d => d.netto = d.netto * 63 * Math.random());
-          data.map(d => d.brutto  = d.brutto * 24 * Math.random());
+          this.rawData.map(d => d.netto = d.netto * 63 * Math.random());
+          this.rawData.map(d => d.brutto  = d.brutto * 24 * Math.random());
         }
-        this.years = data.map(d => d.jahr).Distinct().sort((n1, n2) => {
+        this.years = this.rawData.map(d => d.jahr).Distinct().sort((n1, n2) => {
           if (n1 > n2) { return -1; }
           if (n1 < n2) { return 1; }
           return 0;
         });
         //let diffedData = GehaltTransformer.calculateYearDiffs(data);
-        this.diffs = GehaltTransformer.calculateYearDiffs(data, 'brutto');
-        this.data = GehaltTransformer.groupByJahr(data);
+        this.diffs = GehaltTransformer.calculateYearDiffs(this.rawData, 'brutto');
+        this.data = GehaltTransformer.groupByJahr(this.rawData);
         this.years.pop();
       }
     );
@@ -105,6 +85,7 @@ export class OverviewComponent  {
 
   
   public openAllYearsChart(property: string) {
+    this.agChartData = ChartDataFactory.yearsSummarized(this.rawData); // this.summarizeForChart(result);
 
     /*
     this.x = new Array<string>();
