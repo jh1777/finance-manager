@@ -104,6 +104,11 @@ export class OverviewComponent  {
     this.openModal('year-chart');
   }
 
+  public showMonthsAndYears(type: string) {
+    this.agChartData = ChartDataFactory.monthsByYears(this.rawData, type, 4);
+    this.openModal('year-chart');
+  }
+
   public openSalaryChart(data: Array<Salary>) {
     /*
     this.x = data.map(d => `${ d.jahr }/${ d.monat.PadWithZero() }`);

@@ -30,6 +30,14 @@
         [chartData]="agChartData"
     ></app-salary-chart>
     <br/>
+    <button type="button" class="btn btn-secondary" style="float: left;" (click)="showMonthsAndYears('netto');">
+        Show Months (Netto)
+    </button>
+
+    <button type="button" class="btn btn-secondary" style="float: left; margin-left: .5rem;" (click)="showMonthsAndYears('brutto');">
+        Show Months (Brutto)
+    </button>
+
     <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('year-chart');">
         Close
     </button>
