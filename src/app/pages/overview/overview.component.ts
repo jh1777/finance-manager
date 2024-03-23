@@ -20,15 +20,16 @@ import { AgChartOptions } from 'ag-charts-community';
 export class OverviewComponent  {
   public chartButtonIcon = getIconWithName('bar-chart-line');
   public agChartData: AgChartOptions;
+  public chartShowsOneYearOnly: boolean = false;
 
   public chartX = "jahr";
   public chartY: Array<any> = ["brutto", "netto", "akp", "kantine"];
   public chartYNames: Array<any> = ["Brutto", "Netto", "AKP", "Kantine"];
   //----
-  public showAllYears: boolean = false;
+  //UNUSED public showAllYears: boolean = false;
 
   // Config
-  private _numberOfYears: number = 5;
+  public numberOfYears: number = 6;
   public pageTitle: string = "Overview";
 
   // Cards
@@ -49,11 +50,14 @@ export class OverviewComponent  {
     this.loadDataV2();
   }
 
-  
+  public showYears(years: number) {
+    this.numberOfYears = years; 
+    this.loadDataV2();
+  }
 
   private loadDataV2() {
     //let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
-    this.financeApi.getSalaryLastNYears(this._numberOfYears + 1).subscribe(
+    this.financeApi.getSalaryLastNYears(this.numberOfYears).subscribe(
       result => {
         this.rawData = result;
         if (environment.mockData) {
@@ -68,11 +72,12 @@ export class OverviewComponent  {
         //let diffedData = GehaltTransformer.calculateYearDiffs(data);
         this.diffs = GehaltTransformer.calculateYearDiffs(this.rawData, 'brutto');
         this.data = GehaltTransformer.groupByJahr(this.rawData);
-        this.years.pop();
+        //this.years.pop();
       }
     );
   }
 
+  /*
   public toggleShowAllYears() {
     if (this.showAllYears) {
       this.showAllYears = false;
@@ -82,34 +87,21 @@ export class OverviewComponent  {
       this.loadDataV2();
     }
   }
-
+  */
   
-  public openAllYearsChart(property: string) {
-    this.agChartData = ChartDataFactory.yearsSummarized(this.rawData); // this.summarizeForChart(result);
-
-    /*
-    this.x = new Array<string>();
-    for(var i = 1; i < 13; i++) {
-      this.x.push(i.PadWithZero());
-    }
-    this.y = new Array<ChartDataSets>();    
-    this.years.forEach(y => {
-      this.y.push({
-        data: this.data[y].map(d => d[property]),
-        label: y.toString()
-      });
-    });
-    */
-
+  public openAllYearsChart() {
+    this.agChartData = ChartDataFactory.yearsSummarized(this.rawData); 
+    this.chartShowsOneYearOnly = false;
     this.openModal('year-chart');
   }
 
   public showMonthsAndYears(type: string) {
     this.agChartData = ChartDataFactory.monthsByYears(this.rawData, type, 4);
+    this.chartShowsOneYearOnly = false;
     this.openModal('year-chart');
   }
 
-  public openSalaryChart(data: Array<Salary>) {
+  public openSalaryChart(year: number) {
     /*
     this.x = data.map(d => `${ d.jahr }/${ d.monat.PadWithZero() }`);
     let yearDataBrutto = data.map(d => d.brutto);
@@ -125,6 +117,8 @@ export class OverviewComponent  {
     );
     //this.yLabel = 'Brutto';
     */
+    this.chartShowsOneYearOnly = true;
+    this.agChartData = ChartDataFactory.oneYear(this.rawData, year);
     this.openModal('year-chart');
   }
   

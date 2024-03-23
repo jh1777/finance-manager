@@ -5,6 +5,53 @@ import { getNYears } from "src/app/util/getNYears";
 export class ChartDataFactory {
 
 
+    public static oneYear(rawData: Array<Salary>, year: number): AgChartOptions {
+       
+        const chartOptions: AgChartOptions = {
+            title: { text: `Salary (over months, ${year})`, fontFamily: 'Roboto' },
+            data: ChartDataFactory.summarizeOneYear(rawData, year),
+            series: [
+                { type: "bar", xKey: "monat", yKey: 'brutto', yName: "Brutto", cornerRadius: 5 },
+                { type: "bar", xKey: "monat", yKey: 'netto', yName: "Netto", cornerRadius: 5 },
+                { type: "bar", xKey: "monat", yKey: 'akp', yName: "Aktien", cornerRadius: 5 },
+                { type: "bar", xKey: "monat", yKey: 'kantine', yName: "Kantine", cornerRadius: 5 }
+            ],
+            axes: [
+                { type: 'category', position: 'bottom' },
+                { 
+                    type: 'number', 
+                    position: 'left',
+                    label: {
+                        format: "€~s",
+                        formatter: (params) =>
+                        params.formatter!(params.value)
+                            .replace("k", "K")
+                            .replace("G", "B"),
+                    },
+                }
+            ]
+        }
+        return chartOptions;
+    }
+
+    private static summarizeOneYear(rawData: Array<Salary>, year: number) 
+        : { monat: string, netto: number, brutto: number, akp: number, kantine: number }[] {
+        const monthNamesShort: string[] = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+        const result: { monat: string, netto: number, brutto: number, akp: number, kantine: number }[] = [];
+        rawData.filter(d => d.jahr == year).forEach(d => {
+            result.push({
+                akp: d.akp,
+                brutto: d.brutto,
+                netto: d.netto,
+                kantine: d.kantine,
+                monat: monthNamesShort[d.monat - 1]
+            });
+
+        });
+        return result;
+    }
+
+
     public static monthsByYears(rawData: Array<Salary>, kpi: string = "netto", numberOfYears: number = 4): AgChartOptions {
 
         const lastNYears = getNYears(numberOfYears).sort();
@@ -42,7 +89,6 @@ export class ChartDataFactory {
         const currentYear = new Date().getFullYear();
         const lastNYears = getNYears(numberOfYears).sort();
    
-
         rawData.filter(value => value.jahr > currentYear - numberOfYears).forEach(item => {
             const jahr = `${monthNamesShort[item.monat - 1]} ${item.jahr}`;
             const existingYearIndex = result.findIndex(x => x.monat === monthNamesShort[item.monat - 1]);
