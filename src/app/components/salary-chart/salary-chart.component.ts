@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges } from '@angular/core';
 import { AgChartOptions } from 'ag-charts-community';
 
 @Component({
@@ -7,11 +7,26 @@ import { AgChartOptions } from 'ag-charts-community';
   styleUrls: ['./salary-chart.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SalaryChartComponent {
+export class SalaryChartComponent implements OnChanges {
 
   // Chart Options
   public chartOptions: AgChartOptions;
 
+  @Input()
+  chartData: any;
+
+  @Input()
+  xAxesKey: string;
+
+  @Input()
+  yAxesKeys: Array<any>;
+
+  @Input()
+  yAxesNames: Array<string>;
+
+  @Input()
+  title: string = "";
+  
   /*
 
   @Input()
@@ -72,8 +87,41 @@ export class SalaryChartComponent {
   }
   */
 
-  constructor() {
+  ngOnChanges() {
+    var series: Array<any> = [];
+
+    for (let index = 0; index < this.yAxesKeys.length; index++) {
+      const element = this.yAxesKeys[index];
+      series.push({ type: 'bar', xKey: this.xAxesKey, yKey: element, yName: this.yAxesNames[index] })
+    }
+    /*
+    this.yAxesKeys?.forEach(item => {
+      series.push({ type: 'bar', xKey: this.xAxesKey, yKey: item, yName: this.yAxesNames[] })
+    });
+    */
     this.chartOptions = {
+      data: this.chartData,
+      title: { text: this.title ?? 'Salary' },
+      series: series,
+      // [
+        //{ type: 'bar', xKey: this.xAxesKey, yKey: this.yAxesKey, yName: this.yAxesName }
+      //],
+      axes: [
+        { type: 'category', position: 'bottom' },
+        {
+          type: 'number',
+          position: 'left',
+        },
+      ]
+    }
+  }
+
+  constructor() {
+
+    /*
+    this.chartOptions = {
+      title: { text: 'Ice Cream Sales' },
+      subtitle: { text: 'Data from 2022' },
       // Data: Data to be displayed in the chart
       data: [
         { month: 'Jan', avgTemp: 2.3, iceCreamSales: 162000 },
@@ -84,8 +132,18 @@ export class SalaryChartComponent {
         { month: 'Nov', avgTemp: 8.9, iceCreamSales: 200000 },
       ],
       // Series: Defines which chart type and data to use
-      series: [{ type: 'bar', xKey: 'month', yKey: 'iceCreamSales' }]
+      series: [
+        { type: 'bar', xKey: 'month', yKey: 'iceCreamSales' },
+        { type: 'line', xKey: 'month', yKey: 'avgTemp' }
+      ],
+      axes: [
+        { type: 'category', position: 'bottom' },
+        { type: 'number', position: 'left', keys: ['iceCreamSales'] },
+        { type: 'number', position: 'right', keys: ['avgTemp'] },
+    ],
     };
+    */
   }
+  
 
 }

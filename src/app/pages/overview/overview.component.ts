@@ -16,7 +16,11 @@ import '../../util/numberExtensions';
   styleUrls: ['./overview.component.scss']
 })
 export class OverviewComponent  {
-
+  public chartButtonIcon = getIconWithName('bar-chart-line');
+  public chartData: any;
+  public chartX = "jahr";
+  public chartY: Array<any> = ["brutto", "netto", "akp", "kantine"];
+  public chartYNames: Array<any> = ["Brutto", "Netto", "AKP", "Kantine"];
   //----
   public showAllYears: boolean = false;
 
@@ -41,11 +45,37 @@ export class OverviewComponent  {
     this.loadDataV2();
   }
 
+  private summarizeForChart(daten: any) {
+    const jahresSummen: { jahr: number, netto: number, brutto: number, kantine: number, akp: number }[] = [];
+    daten.forEach((datensatz) => {
+      const existingYearIndex = jahresSummen.findIndex((yearData) => yearData.jahr === datensatz.jahr);
+  
+      if (existingYearIndex === -1) {
+          // Wenn das Jahr noch nicht in jahresSummen existiert, füge es hinzu
+          jahresSummen.push({
+              jahr: datensatz.jahr,
+              netto: datensatz.netto,
+              brutto: datensatz.brutto,
+              akp: datensatz.akp,
+              kantine: datensatz.kantine
+          });
+      } else {
+          // Wenn das Jahr bereits in jahresSummen existiert, aktualisiere die Summen
+          jahresSummen[existingYearIndex].netto += datensatz.netto;
+          jahresSummen[existingYearIndex].brutto += datensatz.brutto;
+          jahresSummen[existingYearIndex].akp += datensatz.akp;
+          jahresSummen[existingYearIndex].kantine += datensatz.kantine;
+      }
+    });
+    return jahresSummen;
+  }
+
   private loadDataV2() {
     //let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
     this.financeApi.getSalaryLastNYears(this._numberOfYears + 1).subscribe(
       result => {
         let data = result;
+        this.chartData = this.summarizeForChart(result);
         if (environment.mockData) {
           data.map(d => d.netto = d.netto * 63 * Math.random());
           data.map(d => d.brutto  = d.brutto * 24 * Math.random());
@@ -63,31 +93,6 @@ export class OverviewComponent  {
     );
   }
 
-  /*
-  private loadData() {
-    let years = getNYears(this.showAllYears ? 99 : this._numberOfYears);
-    // Get Data from API
-    this.api.setService("salary");
-    this.api.getAllEntries<Salary>().subscribe(
-      result => {
-        let data = result.body;
-        if (environment.mockData) {
-          data.map(d => d.Netto = d.Netto * 63 * Math.random());
-          data.map(d => d.Brutto  = d.Brutto * 24 * Math.random());
-        }
-        this.years = data.map(d => d.Jahr).Distinct().filter(y => years.includes(y)).sort((n1, n2) => {
-          if (n1 > n2) { return -1; }
-          if (n1 < n2) { return 1; }
-          return 0;
-        });
-        //let diffedData = GehaltTransformer.calculateYearDiffs(data);
-        this.diffs = GehaltTransformer.calculateYearDiffs(data, 'Brutto');
-        this.data = GehaltTransformer.groupByJahr(data);
-      }
-    );
-  }
-  */
-
   public toggleShowAllYears() {
     if (this.showAllYears) {
       this.showAllYears = false;
@@ -98,9 +103,10 @@ export class OverviewComponent  {
     }
   }
 
-  /*
+  
   public openAllYearsChart(property: string) {
 
+    /*
     this.x = new Array<string>();
     for(var i = 1; i < 13; i++) {
       this.x.push(i.PadWithZero());
@@ -112,10 +118,13 @@ export class OverviewComponent  {
         label: y.toString()
       });
     });
+    */
+
     this.openModal('year-chart');
   }
 
   public openSalaryChart(data: Array<Salary>) {
+    /*
     this.x = data.map(d => `${ d.jahr }/${ d.monat.PadWithZero() }`);
     let yearDataBrutto = data.map(d => d.brutto);
     let yearDataNetto = data.map(d => d.netto);
@@ -129,9 +138,10 @@ export class OverviewComponent  {
     }
     );
     //this.yLabel = 'Brutto';
+    */
     this.openModal('year-chart');
   }
-  */
+  
  
   openModal(id: string) {
     this.modalService.open(id);
