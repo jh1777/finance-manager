@@ -71,9 +71,10 @@ export class TableComponent implements OnInit, OnChanges {
   }
 
   private createGroups() {
+
     if (this.groupColumnIndex) {
 
-      let colIndex = this.groupColumnIndex; // this.header.indexOf(this.groupColumn);
+      let colIndex = this.groupColumnIndex;
       if (colIndex != -1) {
 
         // Get all non-Group Rows
@@ -91,18 +92,17 @@ export class TableComponent implements OnInit, OnChanges {
         // Create each Group and add its data
         let result = new Array<TableRow>();
         labels.forEach(group => {
-          let isCollapsed = this.excludeGroupsInTable.includes(group);
+          const isCollapsed = this.excludeGroupsInTable.includes(group);
           // Get Data Rows for current group
-          let groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
+          const groupData = filterableRows.filter(r => r.cells[colIndex].label == group);
           // Create GroupRow
-          let groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });
+          const groupRow = new GroupRow({ groupLabel: group, itemCount: groupData.length, isCollapsed: isCollapsed });
 
           //---sum
           for (var i = 0; i < this.header.length ; i++) {
             if (this.header[i].summarizeWhenGrouped && i != colIndex) {
-              let numberCells = groupData.map(g => g.cells[i]).filter(c => c instanceof NumberTableCell);
-              var sum = 0;
-              numberCells.forEach(c => c.numericValue ?  sum += c.numericValue : c );
+              const numberCells = groupData.map(g => g.cells[i]).filter(c => c instanceof NumberTableCell);
+              const sum = numberCells.reduce((acc, value) => acc + value.numericValue ?? 0, 0)
               groupRow.summarizedData.push(sum);
             } else {
               groupRow.summarizedData.push(null);
