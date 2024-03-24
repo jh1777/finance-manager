@@ -38,6 +38,15 @@
             ]
           },
           "configurations": {
+            "development":{
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -70,18 +79,21 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "finance-manager:build"
+            "buildTarget": "finance-manager:build"
           },
           "configurations": {
+            "development": {
+              "buildTarget": "finance-manager:build:development"
+            },
             "production": {
-              "browserTarget": "finance-manager:build:production"
+              "buildTarget": "finance-manager:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "finance-manager:build"
+            "buildTarget": "finance-manager:build"
           }
         },
         "test": {

@@ -1,22 +1,20 @@
 <div class="page">
-
     <app-page-header>
         <div class="left">{{ pageTitle }}
-
         </div>
         <div class="right">
-            
             <!-- Source: https://getbootstrap.com/docs/5.0/components/button-group/ -->
             <div class="btn-group btn-group-sm" style="float: right; margin-bottom: .5em;" role="group" aria-label="Years">
-                <button type="button" class="btn" [ngClass]="!showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">Last 6 Years</button>
-                <button type="button" class="btn" [ngClass]="showAllYears ? 'btn-secondary' : 'btn-outline-secondary'" (click)="toggleShowAllYears()">All Years</button>
+                <button type="button" class="btn" [ngClass]="numberOfYears == 2 ? 'btn-secondary' : 'btn-outline-secondary'" (click)="showYears(2)">3 Years</button>
+                <button type="button" class="btn" [ngClass]="numberOfYears == 4 ? 'btn-secondary' : 'btn-outline-secondary'" (click)="showYears(4)">5 Years</button>
+                <button type="button" class="btn" [ngClass]="numberOfYears == 6 ? 'btn-secondary' : 'btn-outline-secondary'" (click)="showYears(6)">7 Years</button>
+                <button type="button" class="btn" [ngClass]="numberOfYears == 8 ? 'btn-secondary' : 'btn-outline-secondary'" (click)="showYears(8)">9 Years</button>
             </div>
-
-            <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openAllYearsChart('brutto');"></app-menu-button>
+            
+            <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openAllYearsChart();"></app-menu-button>
         </div>
-
+        
     </app-page-header>
-
 
     <div class="row row-cols-1 row-cols-md-3">
         <app-salary-year-tile 
@@ -24,16 +22,25 @@
             [year]="year" 
             [data]="data[year]" 
             [percent]="diffs[year]" 
-            (details)="openSalaryChart($event)"
+            (details)="openSalaryChart(year)"
         ></app-salary-year-tile>
     </div>
-
 </div>
 
 <jw-modal id="year-chart" class="big-modal">
     <h3>Chart</h3>
-    <app-salary-chart [x]="x" [y]="y"></app-salary-chart>
+    <app-salary-chart
+        [chartData]="agChartData"
+    ></app-salary-chart>
     <br/>
+    <button *ngIf="!chartShowsOneYearOnly" type="button" class="btn btn-secondary" style="float: left;" (click)="showMonthsAndYears('netto');">
+        Show Months (Netto)
+    </button>
+
+    <button *ngIf="!chartShowsOneYearOnly" type="button" class="btn btn-secondary" style="float: left; margin-left: .5rem;" (click)="showMonthsAndYears('brutto');">
+        Show Months (Brutto)
+    </button>
+
     <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('year-chart');">
         Close
     </button>
