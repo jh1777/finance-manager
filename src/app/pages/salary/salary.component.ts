@@ -100,11 +100,12 @@ export class SalaryComponent implements OnDestroy {
   public rowClicked(row: TableRow) {
 /*  Maybe future use ... conflicts with icon on-click 
     let id = row.cells.map(r => r.id)[0];
-    this.api.getEntry<Salary>(id).subscribe(
+    this.financeApi.getSalaryById(id).subscribe(
       result => {
-        this.showEntryAsJson(result.filter(r => r.id == id).First());
+        this.showEntryAsJson(result);
       }
-    ); */
+    ); 
+    */
   }
 
   private showEntryAsJson(entry: Salary) {
