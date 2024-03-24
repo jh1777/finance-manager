@@ -11,6 +11,8 @@ import '../../util/numberExtensions';
 import { environment } from 'src/environments/environment';
 import { StyledTextTableCell } from 'src/app/ui/models/table/styledTextTableCell';
 import { FinanceApiService, Salary } from 'src/services/finance-api.service';
+import { SalaryChartDataFactory } from './prepareSalaryCharts';
+import { AgChartOptions } from 'ag-charts-community';
 
 @Component({
   selector: 'app-salary',
@@ -19,6 +21,10 @@ import { FinanceApiService, Salary } from 'src/services/finance-api.service';
 })
 export class SalaryComponent implements OnDestroy {
   public pageTitle = "Payments";
+  public addEntryLabel: string = "Add Salary";
+  public chartButtonIcon = getIconWithName('bar-chart-line');
+  public addEntryIcon: string = getIconWithName('plus-circle-line');
+  public agChartData: AgChartOptions;
 
   private data: Array<Salary>;
   public tableSizeEnum = TableSize;
@@ -29,8 +35,7 @@ export class SalaryComponent implements OnDestroy {
   public footerText: string;
 
   public showAddEntry: boolean = false;
-  public addEntryLabel: string = "Add Salary";
-  public addEntryIcon: string = getIconWithName('plus-circle-line');
+
   public createSalaryLastResult: string = '';
 
   // Month filter
@@ -42,10 +47,6 @@ export class SalaryComponent implements OnDestroy {
   // Delete Confirm
   public deleteConfirmMessage: string;
   public deletionEntry: Salary;
-
-  // Butttons
-  public yearButtons: Array<Button> = [];
-  public yearFilterMulti: boolean = true;
 
   private subscription = new Subscription();
 
@@ -73,6 +74,11 @@ export class SalaryComponent implements OnDestroy {
 
   public setSize(size: TableSize) {
     this.tableSize = size;
+  }
+
+  public openChart() {
+    this.agChartData = SalaryChartDataFactory.oneMonthAllYears(this.data, this.monthFilterBy);
+    this.openModal('years-chart');
   }
 
   private updateEntriesV2() {

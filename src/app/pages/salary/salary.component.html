@@ -10,13 +10,20 @@
                 <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Medium ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Medium)">M</button>
                 <button type="button" class="btn" [ngClass]="tableSize == tableSizeEnum.Large ? 'btn-secondary' : 'btn-outline-secondary'" (click)="setSize(tableSizeEnum.Large)">L</button>
             </div>
+            @if(monthFilterBy != null) {
+                <app-menu-button label="Show Chart" [icon]="chartButtonIcon" iconSize=18 (clickEvent)="openChart();"></app-menu-button>
+            }
+
         </div>
     </app-page-header>
     
-    <app-salary-add-entry
-         *ngIf="showAddEntry" 
-         [model]="newSalaryEntry" 
-         (newEntry)="createSalary($event)"></app-salary-add-entry>
+    @if(showAddEntry) {
+        <app-salary-add-entry
+            [model]="newSalaryEntry" 
+            (newEntry)="createSalary($event)">
+        </app-salary-add-entry>
+    }
+
     <p></p>
     <app-table 
         [header]="header" 
@@ -45,6 +52,17 @@
     </button>
     &nbsp;
     <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('delete-confirmation');">
+        Close
+    </button>
+</jw-modal>
+
+<jw-modal id="years-chart" class="big-modal">
+    <h3>Chart</h3>
+    <app-salary-chart
+        [chartData]="agChartData"
+    ></app-salary-chart>
+    <br/>
+    <button type="button" class="btn btn-primary" style="float: right;" (click)="closeModal('years-chart');">
         Close
     </button>
 </jw-modal>
